@@ -15,6 +15,10 @@ HISTFILESIZE=20000
 HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend checkwinsize
 
+command -v fzf >/dev/null && eval "$(fzf --bash)"
+command -v zoxide >/dev/null && eval "$(zoxide init bash)"
+command -v bat >/dev/null && export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
 for f in /nix/var/nix/profiles/nixlab/share/bash-completion/bash_completion \
          /nix/var/nix/profiles/nixlab/etc/profile.d/bash_completion.sh; do
     [[ -r $f ]] && . "$f" && break

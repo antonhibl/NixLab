@@ -137,14 +137,15 @@
      (go         . t)
      (awk        . t)
      (sed        . t)
-     (lisp       . t)))
+     (lisp       . t)
+     (sqlite     . t)))
   (setq org-babel-lisp-eval-fn #'slime-eval
         org-babel-python-command "python3"
         org-confirm-babel-evaluate
         (lambda (lang _body)
           (not (member lang '("bash" "sh" "shell" "emacs-lisp" "elisp"
                               "python" "perl" "C" "cpp" "C++" "go"
-                              "awk" "sed" "lisp"))))))
+                              "awk" "sed" "lisp" "sqlite"))))))
 (defun nixlab-ensure-slime (&rest _)
   (require 'slime)
   (unless (slime-connected-p)

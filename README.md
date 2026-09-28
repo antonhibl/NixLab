@@ -71,24 +71,35 @@ teaches you enough of both editors to do everything else.
 
 ## The workbook
 
-`workbook.org` is an Org file of 109 exercises. Code blocks run in place
+`workbook.org` is an Org file of 193 exercises. Code blocks run in place
 (`SPC c c` in Emacs), and every exercise has a folded hint and solution.
 
 | Track | Topic |
 |---|---|
 | 0 | Emacs & Vim fundamentals: Evil, Org, Babel, help, SLIME, structural editing |
-| 0b | tmux: sessions that survive, windows, panes, copy mode, scripting a workspace |
-| 1 | grep & egrep |
-| 2 | sed |
-| 3 | awk |
-| 4 | bash scripting |
-| 5 | perl |
-| 6 | python |
-| 7 | C: warnings, valgrind, sanitizers, make, cmake, clangd |
-| 8 | Emacs & Elisp |
-| 9 | Nix |
-| 10 | Common Lisp |
-| 11 | Debuggers: gdb, pdb, Delve, Edebug, the SLIME debugger |
+| 1 | tmux: sessions that survive, windows, panes, copy mode, scripting a workspace |
+| 2 | Shell & filesystem: navigation, links, globbing, quoting, redirection, jobs, history, man |
+| 3 | Users & permissions: chmod, chown, umask, sudo, setuid, sticky bit, ACLs, capabilities |
+| 4 | Processes & signals: ps, top, kill, nice, /proc, lsof, strace |
+| 5 | Finding files & the text toolbox: find, xargs, sort, uniq, cut, join, comm, diff, patch, jq |
+| 6 | grep & egrep |
+| 7 | sed |
+| 8 | awk |
+| 9 | bash scripting |
+| 10 | Git: branches, merge vs rebase, blame, stash, reflog, bisect, remotes |
+| 11 | Archives & integrity: tar, gzip, xz, zstd, zip, sha256sum |
+| 12 | Networking & SSH: ip, dig, curl, ss, nc, SSH keys, tunnels, rsync, tcpdump |
+| 13 | The modern command line: fzf, ripgrep, fd, bat, eza, zoxide, yazi, lazygit |
+| 14 | Observability & performance: time, free, df, du, vmstat, iostat, hyperfine, perf |
+| 15 | Auditing with auditd: auditctl, file watches, syscall rules, ausearch, aureport |
+| 16 | SQLite: importing CSV and logs, GROUP BY, JOIN, indexes, JSON, Python |
+| 17 | perl |
+| 18 | python |
+| 19 | C: warnings, valgrind, sanitizers, make, cmake, clangd |
+| 20 | Emacs & Elisp |
+| 21 | Nix |
+| 22 | Common Lisp |
+| 23 | Debuggers: gdb, pdb, Delve, Edebug, the SLIME debugger |
 | Capstone | One question answered with every tool |
 
 Practice data lives in `/root/corpus` (books, CSV, logs, JSON). Exercise inputs
@@ -122,13 +133,26 @@ Settings, as environment variables:
 
 ## What's in a lab
 
-**Languages and tools:** bash, gawk, sed, grep, ripgrep, fd, jq, git, lazygit,
-yazi, tmux, Python 3.13, Perl, Go, C (gcc, clang tools, make, cmake, gdb,
-valgrind), SBCL. The full list is in `toolchain.nix`.
+**Languages and tools:** bash, coreutils, findutils, gawk, sed, grep, ripgrep,
+fd, fzf, bat, eza, zoxide, jq, SQLite, git, lazygit, yazi, tmux, Python 3.13,
+Perl, Go, C (gcc, clang tools, make, cmake, gdb, valgrind), SBCL. System tools:
+strace, ltrace, lsof, htop, sysstat, perf, hyperfine, auditd, and networking
+with OpenSSH, iproute2, dig, curl, netcat, socat, rsync and tcpdump. The full
+list is in `toolchain.nix`.
+
+**Users and services:** you work as `root`. Two ordinary users, `alice` (in
+`wheel`, may use `sudo`) and `bob`, exist for the permissions track. Every lab
+runs an SSH server, so two labs can log in to each other for the networking
+track. `auditd` is configured but not started until track 15 asks for it.
+
+**Capabilities:** labs are created with `--cap-add ALL`, which `strace`,
+`perf`, `auditctl`, `tcpdump` and setuid programs need. That's safe here
+because every lab is its own virtual machine, not a container sharing your
+Mac's kernel.
 
 **Emacs** (`init.el`): Evil with `SPC` as the leader key, Ivy/Counsel,
 helpful (`SPC h` for help), Company, Org Babel for shell, Python, Perl, C, Go,
-awk, sed, Elisp and Common Lisp, SLIME with paredit, Dirvish, and a lab
+awk, sed, SQLite, Elisp and Common Lisp, SLIME with paredit, Dirvish, and a lab
 dashboard. Dracula theme, with tardis-theme installed. Built for `emacs -nw`
 and never binds `C-h` or `C-l`.
 

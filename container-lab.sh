@@ -34,9 +34,17 @@ name() { echo "${PREFIX}-$1"; }
 labs() { container ls -aq 2>/dev/null | grep "^${PREFIX}-" || true; }
 exists() { labs | grep -qx "$(name "$1")"; }
 running() { container ls -q 2>/dev/null | grep -qx "$(name "$1")"; }
+ready() {
+    for _ in $(seq 1 60); do
+        container exec "$(name "$1")" test -e /run/nixlab-ready 2>/dev/null && return 0
+        sleep 0.5
+    done
+    echo "lab $1 is still starting; opening a shell anyway" >&2
+}
 shell() {
     local n=$1
     shift
+    ready "$n"
     [ $# -gt 0 ] || set -- bash -l
     container exec -it -e HOME=/root -e TERM=xterm-256color -e COLORTERM=truecolor -e LANG=C.UTF-8 -w /root \
         "$(name "$n")" "$@"
@@ -66,7 +74,7 @@ new)
         echo "$c already exists — use enter/start"
         exit 1
     }
-    container run -d --name "$c" -c "$CPUS" -m "$MEM" --cap-add SYS_PTRACE ${dns_args[@]+"${dns_args[@]}"} \
+    container run -d --name "$c" -c "$CPUS" -m "$MEM" --cap-add ALL ${dns_args[@]+"${dns_args[@]}"} \
         -v "${c}-home:/root" "$IMAGE" sleep infinity >/dev/null
     echo "created $c"
     shell "$n"

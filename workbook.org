@@ -16,6 +16,9 @@ guess) *is* the exercise. Only after trying should you open the folded /Hint/
 and /Solution/ under each task.
 
 Never used Emacs or Vim? Start with track 0. Everything below assumes it.
+New to the command line? Track 2 starts from zero. The tracks run from the
+editor and the shell, through the system itself (users, processes, git,
+networking, auditing), to programming languages and their debuggers.
 
 The bare minimum to read this file right now:
 - =j= / =k= move down / up a line. =TAB= on a heading opens or closes it.
@@ -45,8 +48,9 @@ you when the lab starts (see *Setup*).
 Every time the lab starts, =/opt/nixlab/workbook-setup.sh= runs automatically.
 It checks the corpus and builds the extra inputs a few exercises need: practice
 files for track 0, a deliberately messy directory for the bash quoting lesson,
-some intentionally broken C for the debugging lessons, and buggy programs in
-five languages for the debugger track. It only does this
+some intentionally broken C for the debugging lessons, buggy programs in five
+languages for the debugger track, and practice data for the shell,
+permissions, processes, toolbox, git, archives and SQLite tracks. It only does this
 once, so your edits survive restarts.
 
 Made a mess of the practice files? Run this block (=SPC c c=) to restore every
@@ -161,7 +165,7 @@ line, ending with =j= so the cursor is on the next line. =@a= replays, =3@a=
 replays three times.
 *** Solution
 On "apples": =qa0i- ESCjq=, then =3@a=. Macros are how you do a repetitive edit
-awk would be overkill for — track 8 comes back to them.
+awk would be overkill for — track 20 comes back to them.
 
 ** TODO E0.7 — Search and replace
 In edit-me.txt, replace every =the= with =THE=, confirming each one.
@@ -171,7 +175,7 @@ You'll meet: Ex commands (=:=), =:%s=, the =c= flag, =:w=.
 whole file; add =c= (=/gc=) to be asked at each match (=y= / =n=). =:w= saves.
 *** Solution
 =:%s/the/THE/gc RET=, answer =y= or =n=, then =:w RET= (or =SPC f s=). Emacs
-regex syntax differs from grep's for anything fancy — track 8 (E8.3) explores
+regex syntax differs from grep's for anything fancy — track 20 (E20.3) explores
 that. For plain words it just works.
 
 ** TODO E0.8 — Files, buffers, and windows
@@ -303,7 +307,7 @@ type again. =SPC l h= describes a symbol, =SPC l .= jumps to its definition,
 (note it answers =5/2= — an exact ratio, not 2.5). Then =(broken)=: the
 debugger opens listing /restarts/. Press the number next to =ABORT= (or =q=) to
 get back. In the debugger, =v= shows the source of a frame and =t= expands it.
-That debugger is a feature, not a crash — track 10 uses it deliberately.
+That debugger is a feature, not a crash — track 22 uses it deliberately.
 
 ** TODO E0.15 — Structural editing: slurp, barf, wrap, raise
 Work through [[file:/root/workbook-data/practice/parens.lisp][parens.lisp]]: all seven transformations, using only the
@@ -343,7 +347,7 @@ for removing parens.
 | =SPC k w W r j J=     | wrap, unwrap, raise, join, split              |
 | =SPC q q=             | quit Emacs                                    |
 
-* 0b. tmux
+* 1. tmux
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -356,11 +360,11 @@ editor, a shell, and a =tail -f= can sit side by side for the tracks ahead.
 
 Every tmux command starts with the /prefix/ =C-b= (hold Ctrl, press b, let go),
 then a key. So =C-b d= means "Ctrl-b, then d". The lab ships a =~/.tmux.conf=
-that adds a few friendlier keys; E0b.7 walks through it. From your Mac,
+that adds a few friendlier keys; E1.7 walks through it. From your Mac,
 =./container-lab.sh attach NAME= enters a lab straight into a tmux session
 called =main=, creating it if needed.
 
-** TODO E0b.1 — Sessions that survive
+** TODO E1.1 — Sessions that survive
 Start a session called =work=, run =top= in it, detach, and list sessions.
 Then leave the lab entirely (=exit=), come back in with
 =./container-lab.sh enter NAME=, and reattach: =top= should still be running.
@@ -377,7 +381,7 @@ keeps running without you. =tmux ls= lists sessions, =tmux attach -t work=
 session. =./container-lab.sh attach NAME= does the new-or-attach step for you
 every time.
 
-** TODO E0b.2 — Windows: tabs for your terminal
+** TODO E1.2 — Windows: tabs for your terminal
 In one session, make three windows named =edit=, =shell= and =logs=, jump
 between them by number and by name, then close one.
 You'll meet: =C-b c=, =C-b ,=, =C-b n= / =C-b p=, =C-b 1=…=9=, =C-b w=,
@@ -393,7 +397,7 @@ asks first); so does exiting its last shell.
 =shell=, =C-b w= lets you choose visually. Typing =exit= in a window's only
 shell closes it; the remaining windows renumber themselves.
 
-** TODO E0b.3 — Panes: several shells on one screen
+** TODO E1.3 — Panes: several shells on one screen
 Build this layout in one window: an editor on the left, a shell top-right, and
 =tail -f /root/corpus/access.log= bottom-right. Then zoom the editor to full
 screen and back, and make the left pane wider.
@@ -412,7 +416,7 @@ pane, then =tail -f /root/corpus/access.log= in the bottom one. =C-b h= back to
 the editor, =C-b z= twice, =C-b L L L= to widen it. =C-b SPC= cycles through
 the preset layouts if you want to compare.
 
-** TODO E0b.4 — Copy mode: scroll, search, copy, paste
+** TODO E1.4 — Copy mode: scroll, search, copy, paste
 Run =grep -n Watson /root/corpus/sherlock.txt=, scroll back through the output
 without the mouse, search it for a line number, copy that line, and paste it at
 a fresh prompt.
@@ -428,7 +432,7 @@ scrolls back.
 =$=, =y=, then =C-b ]= at the prompt. tmux keeps its own list of copies:
 =C-b == picks an older one.
 
-** TODO E0b.5 — Talk to other panes
+** TODO E1.5 — Talk to other panes
 Split a window in two. Turn on synchronized panes and type one command that
 runs in both. Turn it off, start =python3= in the right pane, and send it
 =print(6*7)= from the left pane using a tmux command.
@@ -446,10 +450,10 @@ prints where you are.
 #+begin_example
 tmux send-keys -t 2 'print(6*7)' Enter
 #+end_example
-The right pane prints =42=. This is how scripts drive REPLs, and how E0b.6
+The right pane prints =42=. This is how scripts drive REPLs, and how E1.6
 builds a whole workspace.
 
-** TODO E0b.6 — Script your workspace
+** TODO E1.6 — Script your workspace
 Write a script that builds, in one command, a session called =workspace= with a
 =lab= window (a shell on the left; a shell and =tail -f access.log= on the
 right, both in the corpus) and a =repl= window running =python3=. Run it, then
@@ -480,7 +484,7 @@ tmux list-panes -t "$s:lab" -F '  pane #{pane_index}: #{pane_current_command} in
 Then =tmux attach -t workspace=. Save it as =~/bin/workspace=, =chmod +x= it,
 and your whole setup is one word away after every restart.
 
-** TODO E0b.7 — Make it yours
+** TODO E1.7 — Make it yours
 Read =~/.tmux.conf=, find out what the prefix, =C-b r= and =C-b |= are bound
 to, change the colour of the current window in the status bar, and reload
 without restarting tmux.
@@ -502,7 +506,809 @@ mode, windows and panes numbered from 1, splits that open in the current
 directory, =h j k l= / =H J K L= for panes, =C-b r= to reload, and Dracula
 colours. The stock tmux keys all still work.
 
-* 1. grep & egrep
+* 2. Shell & filesystem fundamentals
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Living in the shell. Before any of the text tools make sense you need to move
+around the filesystem without thinking, know where things live, bend the
+shell's quoting and wildcards to your will, wire programs together with pipes
+and redirection, and ask the system for help. Everything here happens at a
+plain =bash= prompt; the practice tree is =/root/workbook-data/shell/playground=.
+
+** TODO E2.1 — Where am I, and what's here?
+Go to the playground. List everything in it, including hidden files, with
+sizes and permissions. Find the hidden treasure and read it. Then jump back to
+where you started in one command.
+You'll meet: =pwd=, =cd=, =cd -=, =cd ~=, =ls -la=, =tree -a=, absolute vs
+relative paths, =.= and =..=.
+*** Hint
+=ls= hides names starting with a dot; =-a= shows them. =-l= is the long
+listing, =-h= makes sizes human-readable. =cd -= returns to the previous
+directory, plain =cd= goes home. A path starting with =/= is absolute;
+anything else is relative to =pwd=.
+*** Solution
+#+begin_src bash :results output
+cd /root/workbook-data/shell/playground
+pwd
+ls -la
+cat .hidden-treasure
+tree -a -L 2 .
+#+end_src
+=cd -= (in your own shell) jumps back to where you were. =..= is always the
+parent directory, =.= the current one: =cd ../..= climbs two levels.
+
+** TODO E2.2 — A map of the filesystem
+Answer from the filesystem alone: which OS is this lab based on, which kernel
+is running, what is the full command line of your current shell, and where does
+the =bash= you are running actually live? Why is =/usr/bin= almost empty?
+You'll meet: =/etc=, =/proc=, =/usr=, =/var=, =/tmp=, =/home=, =/opt=,
+=/nix/store=, =man hier=, =readlink -f=.
+*** Hint
+=/etc= holds configuration (=os-release=), =/proc= is a live window into the
+kernel and every process (=/proc/version=, =/proc/$$/cmdline=, where =$$= is
+your shell's PID), =/var= holds changing data (logs, caches), =/home= and
+=/root= hold users' files. =man hier= describes the traditional layout. On Nix,
+software lives in =/nix/store= and is reached through links.
+*** Solution
+#+begin_src bash :results output
+cat /etc/os-release 2>/dev/null | head -3 || echo "no /etc/os-release in this image"
+cat /proc/version
+tr '\0' ' ' < /proc/$$/cmdline; echo
+command -v bash
+readlink -f "$(command -v bash)"
+ls /usr/bin | wc -l
+#+end_src
+On a traditional distribution, =/usr/bin= holds thousands of programs. Nix keeps
+every package in its own directory under =/nix/store= and builds your =PATH=
+from links, which is why several versions can coexist without conflict.
+
+** TODO E2.3 — Make, copy, move, delete
+Inside =/tmp/sandbox=, create =project/src/lib=, =project/src/bin= and
+=project/docs= in one command. Create three empty files at once, copy =docs=
+recursively to =docs-backup= preserving timestamps, rename =docs-backup= to
+=old-docs=, then delete =old-docs= safely.
+You'll meet: =mkdir -p=, brace expansion ={a,b}=, =touch=, =cp -a=, =mv=,
+=rm -i=, =rm -r=, =rmdir=.
+*** Hint
+=mkdir -p= makes parents as needed and doesn't complain if they exist.
+=project/src/{lib,bin}= expands to two words before =mkdir= ever runs.
+=cp -a= copies recursively and keeps modes and times. =mv= renames. =rm -r=
+deletes a directory tree with no undo, so =rm -ri= asks first.
+*** Solution
+#+begin_src bash :results output
+rm -rf /tmp/sandbox && mkdir -p /tmp/sandbox && cd /tmp/sandbox
+mkdir -p project/{src/{lib,bin},docs}
+touch project/docs/{intro,usage,faq}.md
+cp -a project/docs project/docs-backup
+mv project/docs-backup project/old-docs
+rm -r project/old-docs
+find project | sort
+#+end_src
+Brace expansion is pure text generation: =echo file{1..3}.txt= shows what it
+produces without doing anything.
+
+** TODO E2.4 — Hard links and symbolic links
+In =/tmp/links=, make a file, a hard link to it and a symbolic link to it.
+Compare their inode numbers. Delete the original: which link still works, and
+why? Then find where =playground/current= points.
+You'll meet: =ln=, =ln -s=, =ls -li=, =stat=, =readlink=, dangling links.
+*** Hint
+A /hard link/ is a second name for the same inode (the file's data), so the
+data survives until the last name is gone. A /symbolic link/ is a small file
+containing a path; if that path disappears, the link dangles. =ls -i= shows
+inode numbers, =stat= shows the link count.
+*** Solution
+#+begin_src bash :results output
+rm -rf /tmp/links && mkdir /tmp/links && cd /tmp/links
+echo "original data" > original.txt
+ln original.txt hard.txt
+ln -s original.txt soft.txt
+ls -li
+rm original.txt
+cat hard.txt
+cat soft.txt 2>&1
+readlink -f /root/workbook-data/shell/playground/current
+#+end_src
+The hard link still reads "original data"; the symlink now points at nothing.
+Hard links can't cross filesystems or point at directories; symlinks can.
+
+** TODO E2.5 — Wildcards and quoting
+In =playground/notes=: list only the 2024 monthly CSV reports, count them, list
+reports for March through June of either year, and print the file with spaces
+in its name. Then explain why =echo '$HOME'=, =echo "$HOME"= and =echo \$HOME=
+differ. Finally, deal with the file called =-i= without letting it become an
+option.
+You'll meet: =*=, =?=, =[...]=, ={a,b}= vs globs, single vs double quotes,
+backslash escapes, =--= to end options.
+*** Hint
+=*= matches any run of characters, =?= exactly one, =[3-6]= one character from
+a set. The shell expands globs /before/ the command runs; quote them to stop
+that. Single quotes are literal; double quotes still expand =$VAR= and =$(cmd)=.
+A file named =-i= looks like an option to most commands; =--= means "no more
+options", and =./-i= also works.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/shell/playground/notes :results output
+ls report-2024-[0-9][0-9].csv | wc -l
+ls report-202[45]-0[3-6].csv
+cat "meeting notes (final).txt" && echo "(empty file, but found it)"
+echo '$HOME' "$HOME" \$HOME
+ls -l -- -i
+#+end_src
+=report-2024-*.csv= would also match a stray =report-2024-draft.csv=; the
+=[0-9][0-9]= keeps the pattern exact. Try =rm *= in a copy of
+this directory: the file =-i= gets expanded first and turns into an option.
+
+** TODO E2.6 — Redirection, pipes and exit codes
+Run =ls /etc/hostname /nope= so that normal output goes to =ok.txt= and errors
+to =err.txt=. Then send both to one file, then throw the errors away. Show the
+exit code of each attempt, use =&&= and =||= to react to success or failure,
+and find out which command in a pipeline failed.
+You'll meet: =>=, =>>=, =2>=, =2>&1=, =&>=, =<=, =<<<=, =/dev/null=, =|=,
+=tee=, =$?=, =&&=, =||=, =PIPESTATUS=, =set -o pipefail=.
+*** Hint
+Every program has three streams: stdin (0), stdout (1), stderr (2). =2>= sends
+stderr somewhere, =2>&1= points it wherever stdout currently goes (order
+matters), =&>= does both. =$?= holds the last exit code: 0 means success.
+=PIPESTATUS= is an array of every exit code in the last pipeline.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+ls /etc/hostname /nope > ok.txt 2> err.txt; echo "exit: $?"
+echo "ok.txt: $(cat ok.txt)"; echo "err.txt: $(cat err.txt)"
+ls /etc/hostname /nope > both.txt 2>&1; wc -l < both.txt
+ls /etc/hostname /nope 2>/dev/null
+grep -q root /etc/passwd && echo "found root" || echo "no root"
+false | true; echo "pipeline exit: $?  each: ${PIPESTATUS[*]}"
+set -o pipefail; false | true; echo "with pipefail: $?"
+wc -w <<< "three little words"
+#+end_src
+=cmd > f 2>&1= and =cmd 2>&1 > f= are different: redirections are applied left
+to right, so in the second one stderr is pointed at the terminal before stdout
+moves.
+
+** TODO E2.7 — Environment variables and PATH
+Show your =PATH= one directory per line. Find out what =ls=, =ll=, =cd= and
+=vim= are to the shell. Put a script called =hello= in =~/bin=, make it
+runnable by name from anywhere, and give one command a variable that no other
+command sees.
+You'll meet: =env=, =export=, =VAR=value cmd=, =PATH=, =type=, =command -v=,
+=which=, =hash -r=.
+*** Hint
+=PATH= is a colon-separated list searched in order. =type= tells you whether a
+name is an alias, function, builtin or file (=which= only knows about files).
+=export= makes a variable visible to child processes; =VAR=x cmd= sets it for
+that one command only.
+*** Solution
+#+begin_src bash :results output
+echo "$PATH" | tr ':' '\n'
+type ls cd vim 2>&1 | head -3
+mkdir -p ~/bin && printf '#!/usr/bin/env bash\necho "hello, $(id -un), from $0"\n' > ~/bin/hello && chmod +x ~/bin/hello
+PATH="$HOME/bin:$PATH" hello
+GREETING=hi bash -c 'echo "child sees: $GREETING"'
+bash -c 'echo "another child sees: ${GREETING:-nothing}"'
+#+end_src
+To make =~/bin= permanent, add =export PATH="$HOME/bin:$PATH"= to =~/.bashrc=.
+After adding a new program, =hash -r= makes bash forget cached locations.
+
+** TODO E2.8 — Job control
+Start three =sleep 300= commands in the background, list them, bring the second
+to the foreground, suspend it, resume it in the background, then kill all three.
+Start one more that survives closing your shell.
+You'll meet: =&=, =jobs=, =fg %n=, =C-z=, =bg=, =kill %n=, =wait=, =nohup=,
+=disown=.
+*** Hint
+=cmd &= runs in the background and prints a job number and PID. =jobs -l=
+lists jobs. =fg %2= brings job 2 forward, =C-z= suspends the foreground job,
+=bg= resumes it in the background. =kill %1= signals a job by number. Jobs die
+with their shell unless started with =nohup= or =disown=-ed. (tmux, track 1, is
+the more comfortable answer to "keep it running".)
+*** Solution
+#+begin_example
+$ sleep 300 & sleep 300 & sleep 300 &
+$ jobs -l
+$ fg %2          # then press C-z
+$ bg %2
+$ kill %1 %2 %3
+$ nohup sleep 600 > /dev/null 2>&1 &
+$ disown
+#+end_example
+Interactive by nature, so no runnable block here: job control needs a terminal.
+
+** TODO E2.9 — History and the command line
+Re-run the last command, reuse its last argument, find a command you ran long
+ago by typing part of it, fix a typo in the previous command, and edit a long
+command in your editor before running it.
+You'll meet: =C-r=, =!!=, =!$=, =!n=, =^old^new=, =history=, =C-a=, =C-e=,
+=C-w=, =C-u=, =C-k=, =M-b= / =M-f=, =C-x C-e=, =fc=.
+*** Hint
+=C-r= searches history backwards as you type; press it again for older matches.
+(In this lab fzf makes =C-r= a fuzzy, full-screen search.) =!!= is the previous
+command, =!$= its last argument, =^teh^the= reruns it with a substitution.
+=C-a= / =C-e= jump to the start / end of the line, =C-w= deletes a word back,
+=C-u= / =C-k= delete to the start / end. =C-x C-e= opens the line in =$EDITOR=.
+*** Solution
+#+begin_example
+$ mkdir -p /tmp/a/very/long/path
+$ cd !$              # reuses /tmp/a/very/long/path
+$ echo teh end
+$ ^teh^the           # runs: echo the end
+$ sudo !!            # rerun the previous command with sudo
+$ history | tail
+$ !123               # rerun history entry 123
+#+end_example
+These are readline keys and work in almost every interactive CLI: python,
+sqlite3, psql, gdb.
+
+** TODO E2.10 — Getting help
+Find the manual page for the /format/ of =/etc/passwd= (not the =passwd=
+command), the C library function =printf= (not the shell command), and a
+command that can "convert tabs to spaces" without knowing its name. Then get
+help for the =cd= builtin.
+You'll meet: =man N page=, manual sections, =man -k= / =apropos=, =--help=,
+=help=, =whatis=.
+*** Hint
+The manual is split into sections: 1 commands, 2 system calls, 3 library
+functions, 5 file formats, 7 overviews, 8 admin commands. =man 5 passwd= picks
+section 5. =apropos tabs= searches page descriptions. Builtins like =cd= have no
+man page of their own; =help cd= documents them.
+*** Solution
+#+begin_src bash :results output
+man -w 5 passwd 2>/dev/null || echo "man 5 passwd"
+man -w 3 printf 2>/dev/null || echo "man 3 printf"
+apropos 'tabs' 2>/dev/null | head -5 || echo "try: apropos tabs"
+help cd | head -3
+#+end_src
+The answer to the third is =expand= (and =unexpand= for the reverse). In the
+editor, the same pages open with =SPC SPC man= in Emacs or =:Man 5 passwd= in
+Neovim.
+
+* 3. Users & permissions
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Who may do what. Every file has an owner, a group and nine permission bits;
+every process runs as some user. Until now you've been =root=, who ignores
+almost all of it. The lab also has two ordinary users: =alice= (in the =wheel=
+and =devs= groups, allowed to use =sudo=) and =bob= (only in =devs=). The
+practice area is =/srv/lab/perms=, outside root's home so they can reach it.
+
+Run commands as them with =sudo -u alice CMD=, or become them with
+=sudo -iu alice= (and =exit= to come back).
+
+** TODO E3.1 — Who is who
+Find your user and group IDs, then alice's and bob's. Find each one's home
+directory and login shell, and the group that lets alice use =sudo=. Where are
+passwords actually stored, and who can read that file?
+You'll meet: =id=, =whoami=, =groups=, =getent=, =/etc/passwd=, =/etc/group=,
+=/etc/shadow=.
+*** Hint
+=/etc/passwd= has one line per user: =name:x:UID:GID:comment:home:shell=.
+=/etc/group= lists group members. The =x= means the password hash lives in
+=/etc/shadow=, which only root can read. =getent passwd alice= asks the system
+the same question programs do.
+*** Solution
+#+begin_src bash :results output
+id
+id alice; id bob
+getent passwd alice bob
+getent group wheel devs
+ls -l /etc/passwd /etc/shadow
+#+end_src
+
+** TODO E3.2 — Reading permissions
+For each directory under =/srv/lab/perms=, predict what bob can do, then test
+it: list it, enter it, and read the file inside. Explain the difference between
+=listonly= and =enteronly=.
+You'll meet: =ls -l=, =stat -c=, =r= / =w= / =x= on files vs directories,
+"Permission denied".
+*** Hint
+The ten characters in =ls -l= are: type, then =rwx= for the owner, the group,
+and everyone else. On a /file/, =r= reads, =w= writes, =x= runs it. On a
+/directory/, =r= lists the names, =w= creates or deletes entries, and =x=
+lets you enter it and use the names inside. =stat -c '%A %a %U:%G %n'= shows
+modes in both forms.
+*** Solution
+#+begin_src bash :dir /srv/lab/perms :results output
+stat -c '%A %a %U:%G %n' private listonly enteronly
+for d in private listonly enteronly; do
+  echo "== $d"
+  sudo -u bob ls "$d" 2>&1 | head -2
+  sudo -u bob cat "$d"/* 2>&1 | head -1
+done
+sudo -u bob cat enteronly/known-name.txt
+#+end_src
+=listonly= (=r--= for others) lets bob see names but not open anything;
+=enteronly= (=--x=) lets him open a file whose name he already knows, but not
+list the directory.
+
+** TODO E3.3 — chmod and chown
+Make =report.txt= readable by the =devs= group so bob can read it, but still
+not writable by him. Make a script executable only by its owner. Use both
+symbolic (=g+r=) and octal (=640=) forms.
+You'll meet: =chmod= symbolic and octal, =chown user:group=, =chgrp=.
+*** Hint
+Octal digits add up: read 4, write 2, execute 1, so =6= is =rw-= and =5= is
+=r-x=. =chmod 640 f= sets all three groups at once; =chmod g+r,o-rwx f= changes
+just those bits. Only root can give a file away with =chown=.
+*** Solution
+#+begin_src bash :dir /srv/lab/perms :results output
+chgrp devs report.txt && chmod 640 report.txt
+stat -c '%A %U:%G %n' report.txt
+sudo -u bob cat report.txt
+sudo -u bob sh -c 'echo x >> report.txt' 2>&1
+printf '#!/bin/sh\necho ran\n' > tool.sh && chown alice:alice tool.sh && chmod u+x,go-rwx tool.sh
+stat -c '%A %U %n' tool.sh
+sudo -u alice ./tool.sh; sudo -u bob ./tool.sh 2>&1
+#+end_src
+
+** TODO E3.4 — sudo, and becoming someone else
+As alice, read the private secret with =sudo=. As bob, try the same. Read the
+rules that allowed one and refused the other, and check that the rule file is
+valid.
+You'll meet: =sudo=, =sudo -u=, =sudo -iu=, =sudo -l=, =/etc/sudoers=,
+=visudo -c=.
+*** Hint
+=sudo CMD= runs one command as root if =/etc/sudoers= allows it. =%wheel= in
+that file means "members of group wheel". =sudo -l= lists what you may run.
+Never edit =/etc/sudoers= directly: =visudo= checks the syntax before saving,
+because a broken file locks everyone out of =sudo=.
+*** Solution
+#+begin_src bash :results output
+sudo -u alice sudo -n cat /srv/lab/perms/private/secret.txt
+sudo -u bob sudo -n cat /srv/lab/perms/private/secret.txt 2>&1 | head -1
+grep -v '^#' /etc/sudoers | grep .
+visudo -c 2>&1 | tail -1
+#+end_src
+In the lab, alice's rule says =NOPASSWD= so no password is asked. On a real
+machine =sudo= asks for /your/ password, not root's, and logs every use.
+
+** TODO E3.5 — umask
+Find your umask. Create a file and a directory and predict their modes from it.
+Change the umask to =077=, create them again, and compare.
+You'll meet: =umask=, =umask -S=, default modes 666 and 777.
+*** Hint
+New files start from 666 and directories from 777; the umask's bits are then
+switched off. With umask =022=, files get =644= and directories =755=.
+The umask is per-process and inherited, so set it in =~/.bashrc= to make it
+stick.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+umask; umask -S
+rm -rf um && mkdir um && cd um
+touch f1 && mkdir d1
+(umask 077 && touch f2 && mkdir d2)
+stat -c '%a %n' f1 d1 f2 d2
+#+end_src
+
+** TODO E3.6 — Shared directories: groups, setgid and the sticky bit
+Turn =shared= into a team folder for =devs=: both alice and bob can create
+files there, and every new file automatically belongs to =devs=. Then look at
+=sticky=: bob can write there but can't delete alice's file. Why?
+You'll meet: =chgrp=, =chmod 2770= (setgid on a directory), the sticky bit
+=1777=, =/tmp=.
+*** Hint
+The setgid bit (=g+s=, shown as =s= in the group =x= slot) on a directory makes
+new files inherit the directory's group. The sticky bit (=+t=, shown as =t=)
+on a world-writable directory means only a file's owner can delete or rename
+it. =/tmp= uses exactly this.
+*** Solution
+#+begin_src bash :dir /srv/lab/perms :results output
+chgrp devs shared && chmod 2770 shared
+sudo -u alice touch shared/from-alice
+sudo -u bob touch shared/from-bob
+ls -l shared
+ls -ld sticky /tmp
+sudo -u bob rm -f sticky/alice.txt 2>&1
+#+end_src
+
+** TODO E3.7 — setuid: how sudo itself works
+Compile =whoami.c= and run it as alice. Then make it owned by root with the
+setuid bit and run it as alice again: what changed? Find every setuid program
+on the system and explain why each is a security risk.
+You'll meet: =chmod u+s= / =4755=, real vs effective UID, =find -perm -4000=,
+=NoNewPrivs=.
+*** Hint
+A setuid program runs with its /owner's/ privileges, whoever starts it: that is
+how =sudo= and =passwd= get root. The kernel keeps the real UID (who you are)
+and the effective UID (what you may do) separately. A process with
+=NoNewPrivs: 1= in =/proc/self/status= ignores setuid bits entirely.
+*** Solution
+#+begin_src bash :dir /srv/lab/perms :results output
+gcc -o whoami whoami.c && chmod 755 whoami
+sudo -u alice ./whoami
+chown root:root whoami && chmod 4755 whoami
+ls -l whoami
+sudo -u alice ./whoami
+grep NoNewPrivs /proc/self/status
+find / -xdev -perm -4000 -type f 2>/dev/null
+#+end_src
+Any bug in a setuid-root program is a bug running as root. That is why the list
+should be short, and why =sudo= is audited so heavily.
+
+** TODO E3.8 — ACLs and capabilities
+Give bob read access to alice's =report.txt= /without/ changing its group or
+mode bits. Then look at the capabilities your shell holds, the fine-grained
+pieces root's power is split into.
+You'll meet: =setfacl=, =getfacl=, the =+= in =ls -l=, =capsh --print=,
+=getpcaps=.
+*** Hint
+An access control list adds extra per-user or per-group entries to a file:
+=setfacl -m u:bob:r FILE=. =ls -l= shows a =+= when a file has one. Root's
+power is really about 40 separate /capabilities/ (=cap_chown=,
+=cap_net_bind_service=, ...), which can be granted individually.
+*** Solution
+#+begin_src bash :dir /srv/lab/perms :results output
+chgrp alice report.txt && chmod 640 report.txt
+sudo -u bob cat report.txt 2>&1
+setfacl -m u:bob:r report.txt
+ls -l report.txt
+getfacl -p report.txt
+sudo -u bob cat report.txt
+capsh --print 2>/dev/null | head -3 || getpcaps $$
+#+end_src
+
+* 4. Processes & signals
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Every running program is a process with a PID, a parent, an owner, open files,
+and a state. You'll learn to see them, rank them, signal them, deprioritise
+them, look inside them through =/proc=, and, with =strace=, watch every request
+a program makes to the kernel. That last one answers "why is this program doing
+that?" when nothing else will. Helpers live in =/root/workbook-data/procs=.
+
+** TODO E4.1 — What's running?
+List every process with its owner, PID, parent PID, CPU and memory. Find PID 1
+and what it is. Show your own shell's ancestry up to PID 1.
+You'll meet: =ps aux=, =ps -ef=, =ps -o=, =ps --forest=, =pstree=, =$$=,
+=$PPID=.
+*** Hint
+=ps aux= (BSD style) and =ps -ef= (System V style) both list everything.
+=ps -o pid,ppid,user,stat,cmd= chooses columns. =pstree -p= draws the tree.
+PID 1 is the first process the kernel starts; here it's whatever the lab's
+entrypoint left running.
+*** Solution
+#+begin_src bash :results output
+ps -o pid,ppid,user,stat,cmd -p 1
+ps -eo pid,ppid,user,%cpu,%mem,cmd --sort=-%mem | head -6
+pstree -ps $$
+#+end_src
+The =STAT= column: =R= running, =S= sleeping, =D= waiting on I/O, =T= stopped,
+=Z= zombie (finished but not yet collected by its parent).
+
+** TODO E4.2 — top and htop
+Start =hog.sh= in the background, then find it in =top= and in =htop=: sort by
+CPU, then by memory, kill it from inside =htop=.
+You'll meet: =top= (=P=, =M=, =k=, =q=), =htop= (=F6= sort, =F9= kill, =F5=
+tree, =/= search), =top -b=.
+*** Hint
+=top= updates every few seconds; inside it =P= sorts by CPU, =M= by memory,
+=k= kills a PID, =q= quits. =htop= is friendlier: arrows select, =F9= sends a
+signal, =F5= shows the tree. =top -b -n 1= prints one snapshot for scripts.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+./hog.sh & pid=$!
+sleep 2
+top -b -n 1 -o %CPU | sed -n '7,9p'
+kill "$pid"
+#+end_src
+A process at ~100% CPU is using one whole core; on 4 vCPUs the maximum is 400%.
+
+** TODO E4.3 — Signals
+Run =sleeper.sh= and send it =INT=, =HUP=, =USR1=, =STOP=, =CONT= and finally
+=TERM=, predicting each reaction. Then start it again and try =KILL=: what's
+different?
+You'll meet: =kill -l=, =kill -SIGNAL PID=, =pkill=, =killall=, =trap=,
+TERM vs KILL, =C-c= = INT, =C-z= = TSTP.
+*** Hint
+=kill= sends a signal, not necessarily death. =TERM= (the default) politely
+asks a process to exit and can be caught; =KILL= (9) and =STOP= can never be
+caught, blocked or ignored. =HUP= traditionally means "reload your config".
+=sleeper.sh= uses =trap= to react to the catchable ones.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+env --default-signal=INT ./sleeper.sh > sleeper.log & pid=$!
+sleep 1
+for sig in INT HUP USR1; do kill -$sig $pid; sleep 1.2; done
+kill -STOP $pid; ps -o pid,stat,cmd -p $pid
+kill -CONT $pid; kill -TERM $pid; sleep 1.2
+cat sleeper.log
+./sleeper.sh > /dev/null & pid=$!; sleep 0.5; kill -KILL $pid; sleep 0.2
+ps -p $pid > /dev/null || echo "gone, with no chance to clean up"
+#+end_src
+(=env --default-signal=INT= is only needed here because a non-interactive
+shell starts background jobs with =INT= ignored; from your own prompt, plain
+=./sleeper.sh &= works.) Always try =TERM= first and give the process a moment: =KILL= skips its cleanup
+(temp files, flushing data, releasing locks).
+
+** TODO E4.4 — nice: sharing the CPU fairly
+Pin two copies of =hog.sh= to the same CPU core, one at normal priority and one
+at =nice 15=. After a few seconds, compare their CPU share. Then =renice= the
+nice one back.
+You'll meet: =nice -n=, =renice=, the =NI= column, =taskset -c=.
+*** Hint
+Niceness runs from -20 (greedy) to 19 (generous); only root may go below 0.
+It only matters when processes compete, so =taskset -c 0= forces both onto
+core 0. =ps -o pid,ni,pcpu= shows the result.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+taskset -c 0 ./hog.sh & a=$!
+taskset -c 0 nice -n 15 ./hog.sh & b=$!
+sleep 5
+ps -o pid,ni,pcpu,cmd -p $a,$b
+renice -n 0 -p $b
+kill $a $b
+#+end_src
+
+** TODO E4.5 — Inside /proc
+Start =tail -f /root/corpus/access.log= in the background. Using only =/proc=,
+find its full command line, its working directory, the files it has open, its
+environment, its memory use, and its limits.
+You'll meet: =/proc/PID/cmdline=, =cwd=, =fd/=, =environ=, =status=,
+=limits=, =/proc/loadavg=, =/proc/meminfo=.
+*** Hint
+Each process has a directory =/proc/PID=. =cmdline= and =environ= are
+NUL-separated, so pipe them through =tr '\0' ' '=. =cwd= is a symlink, =fd/=
+holds one symlink per open file descriptor, =status= has human-readable
+fields such as =VmRSS=.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+tail -f /root/corpus/access.log > /dev/null & pid=$!
+sleep 0.5
+tr '\0' ' ' < /proc/$pid/cmdline; echo
+readlink /proc/$pid/cwd
+ls -l /proc/$pid/fd | awk 'NR>1 {print $9, $10, $11}'
+grep -E 'VmRSS|Threads' /proc/$pid/status
+grep 'open files' /proc/$pid/limits
+cat /proc/loadavg
+kill $pid
+#+end_src
+Tools like =ps=, =top= and =lsof= are mostly friendly readers of these files.
+
+** TODO E4.6 — lsof and the case of the missing disk space
+Create a 200 MB file, keep it open with a background =tail -f=, and delete it.
+Did =df= report the space back? Find the culprit with =lsof=, then free the
+space.
+You'll meet: =lsof -p=, =lsof +L1=, =lsof -i=, =fuser=, "deleted" files.
+*** Hint
+Deleting a file removes its /name/; the data is only freed once no process
+still has it open. =lsof +L1= lists open files with no names left. =lsof -i
+:22= shows who is using port 22, =fuser -v FILE= who is using a file.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+df -m /tmp | tail -1
+head -c 200M /dev/zero > big.bin && tail -f big.bin > /dev/null & sleep 1; pid=$(pgrep -f 'tail -f big.bin')
+rm big.bin
+df -m /tmp | tail -1
+lsof +L1 2>/dev/null | grep big.bin
+kill $pid; sleep 0.5
+df -m /tmp | tail -1
+lsof -i :22 2>/dev/null | head -3
+#+end_src
+This is a classic production mystery: a log file deleted while a service still
+writes to it keeps filling the disk invisibly until the service is restarted.
+
+** TODO E4.7 — strace: the mystery program
+=procs/mystery= greets you as "stranger" and there is no source code. Make it
+greet you by name without reading its binary: watch what files it tries to
+open.
+You'll meet: =strace=, =-e trace=openat=, =-e trace=%file=, =-f=, =-o=.
+*** Hint
+=strace CMD= prints every system call the program makes and what the kernel
+answered. =-e trace=openat= shows only file opens; failed ones end in =ENOENT=
+(no such file). Programs often look for config files in several places
+silently.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+./mystery
+strace -e trace=openat ./mystery 2>&1 | grep -v -E '\.so|/etc/ld.so|locale'
+mkdir -p ~/.config/greeter && id -un > ~/.config/greeter/name
+./mystery
+#+end_src
+It tries =/etc/greeter/name= and then =~/.config/greeter/name=. =strace= finds
+this kind of thing in seconds: missing configs, wrong paths, permission
+failures, a program waiting on a network socket.
+
+** TODO E4.8 — strace: profiles, children, and running processes
+Count which system calls =ls -R /root/corpus= makes most. Trace a shell
+pipeline including every child process. Attach to your running =sleeper.sh= to
+watch it live, then detach.
+You'll meet: =strace -c=, =-f=, =-p PID=, =-t= / =-T=, =ltrace=.
+*** Hint
+=-c= prints a summary table instead of each call. =-f= follows child processes
+(every command in a pipeline is one). =-p PID= attaches to something already
+running; =C-c= detaches without harming it. =ltrace= does the same for calls
+into shared libraries.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+strace -c -S calls -o /tmp/ls.trace ls -R /root/corpus > /dev/null; head -8 /tmp/ls.trace
+strace -f -e trace=execve -o /tmp/pipe.trace bash -c 'grep -c Holmes /root/corpus/sherlock.txt | cat'
+grep execve /tmp/pipe.trace | cut -c1-90
+./sleeper.sh > /dev/null & pid=$!; sleep 0.5
+timeout 3 strace -p $pid -e trace=clone,wait4,execve 2>&1 | head -4
+kill $pid
+#+end_src
+If a program "hangs", =strace -p= usually shows it blocked in one call:
+=read= on a socket, =futex= on a lock, =wait4= on a child.
+
+* 5. Finding files & the text toolbox
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The small programs every Unix pipeline is built from. =find= locates files by
+any property and acts on them, =xargs= turns a list into arguments, and a dozen
+single-purpose tools (=sort=, =uniq=, =cut=, =tr=, =join=, =comm=, =column=,
+=tee=, =diff=, =patch=) do one job each and combine endlessly. =jq= does the
+same for JSON. Practice files are in =/root/workbook-data/toolbox=; the
+corpus is in =/root/corpus=.
+
+** TODO E5.1 — find by name, type, size and age
+In =toolbox/tree=, find: every =.c= file; every directory; files over 500 KB;
+empty files; files not modified in 30 days; and markdown files whose names
+contain spaces.
+You'll meet: =-name= / =-iname=, =-type f= / =d=, =-size=, =-empty=,
+=-mtime=, =-maxdepth=, =-newer=.
+*** Hint
+=find WHERE TESTS...= walks the tree and prints matches. Quote patterns
+(=-name '*.c'=) so the shell doesn't expand them first. =-size +500k= means
+larger than 500 KiB, =-mtime +30= older than 30 days, =-mtime -1= changed
+within a day. Tests are ANDed; =-o= means OR.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/toolbox/tree :results output
+find . -name '*.c'
+find . -type d | sort
+find . -type f -size +500k -exec ls -lh {} + | awk '{print $5, $9}'
+find . -type f -empty
+find . -type f -mtime +30
+find . -name '* *.md'
+#+end_src
+
+** TODO E5.2 — find that acts: -exec, -delete, and safe filenames
+Count lines in every =.log= file under =tree= with one =wc= call, delete the
+empty =.tmp= files (preview first), and pipe a list of names that contain
+spaces into another command without breaking them.
+You'll meet: =-exec cmd {} \;= vs =-exec cmd {} +=, =-delete=, =-print0=,
+=xargs -0=, =-prune=.
+*** Hint
+=-exec ... {} \;= runs once per file; =-exec ... {} += passes many files to one
+run, like =xargs=. Always run a =find= without =-delete= first to see what it
+matches. File names can contain spaces and even newlines, so =-print0= with
+=xargs -0= separates them with NUL bytes, which can't appear in names.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/toolbox/tree :results output
+find . -name '*.log' -exec wc -l {} +
+find . -name '*.tmp' -empty
+cp -a . /tmp/tree-copy && find /tmp/tree-copy -name '*.tmp' -empty -delete && find /tmp/tree-copy -name '*.tmp'
+find . -name '*.md' -print0 | xargs -0 ls -l
+find . -path ./logs/old -prune -o -name '*.log' -print
+#+end_src
+
+** TODO E5.3 — xargs: batches and parallelism
+Count words in each book with a single =wc= call built by =xargs=. Then
+compress copies of every log in parallel, four at a time. Finally, run one
+command per input line with the value in the middle of the command.
+You'll meet: =xargs=, =-n=, =-P=, =-I{}=, =-t=.
+*** Hint
+=xargs CMD= reads words from stdin and appends them to =CMD=. =-n 1= runs once
+per word, =-P 4= runs up to four at a time, =-I{}= puts each line where =={}==
+appears (and implies one per line). =-t= prints each command before running
+it, which is a good way to check what will happen.
+*** Solution
+#+begin_src bash :dir /root/corpus :results output
+ls *.txt | xargs wc -w
+rm -rf /tmp/zip && mkdir /tmp/zip && cp /root/workbook-data/toolbox/tree/logs/*.log /tmp/zip/
+ls /tmp/zip/*.log | xargs -n 1 -P 4 gzip && ls /tmp/zip
+cut -d, -f4 employees.csv | tail -n +2 | sort -u | xargs -I{} echo "department: {}"
+#+end_src
+
+** TODO E5.4 — sort, uniq, cut, tr
+Without awk: list the departments by head count, largest first; the ten most
+common first names; every distinct HTTP method in the access log; and the log
+converted to upper case with runs of spaces squeezed.
+You'll meet: =cut -d -f=, =sort -t -k -n -r=, =uniq -c=, =tr= (=-s=, =-d=,
+ranges), =head=, =tail -n +2=.
+*** Hint
+=cut -d, -f4= takes field 4 of comma-separated lines. =uniq= only collapses
+/adjacent/ duplicates, so =sort= first; =uniq -c= counts them. =sort -rn= sorts
+numbers, largest first. =tr 'a-z' 'A-Z'= maps characters, =tr -s ' '= squeezes
+repeats. =tail -n +2= skips a header line.
+*** Solution
+#+begin_src bash :results output
+tail -n +2 employees.csv | cut -d, -f4 | sort | uniq -c | sort -rn
+tail -n +2 employees.csv | cut -d, -f2 | sort | uniq -c | sort -rn | head -3
+cut -d'"' -f2 access.log | cut -d' ' -f1 | sort -u
+head -2 access.log | tr 'a-z' 'A-Z' | tr -s ' '
+#+end_src
+Compare with E8.3: awk does the dept count in one program. Both styles are worth
+knowing; pipelines are often quicker to type and easier to build up step by
+step.
+
+** TODO E5.5 — join, paste, comm and column
+Join each employee's department to its manager and floor from =depts.csv=,
+aligned as a table. Paste two columns side by side. Find people who appear in
+both the =eng= and =ops= rosters, and people only in =eng=.
+You'll meet: =join -t, -1 -2=, =sort -t, -k=, =paste=, =comm -12= / =-23=,
+=column -t -s,=.
+*** Hint
+=join= merges two files on a common field, like a database join, but both
+inputs must be sorted on that field. =comm= compares two sorted files and
+prints three columns: only in the first, only in the second, in both; =-12=
+hides the first two columns. =column -t= aligns columns.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/toolbox :results output
+tail -n +2 /root/corpus/employees.csv | sort -t, -k4,4 > /tmp/emp.sorted
+tail -n +2 depts.csv | sort -t, -k1,1 > /tmp/depts.sorted
+join -t, -1 4 -2 1 -o 1.2,1.3,1.4,2.2,2.3 /tmp/emp.sorted /tmp/depts.sorted | head -4 | column -t -s,
+paste -d: <(head -3 eng.txt) <(head -3 ops.txt)
+echo "in both: $(comm -12 eng.txt ops.txt | wc -l)"; comm -12 eng.txt ops.txt | head -3
+echo "only eng: $(comm -23 eng.txt ops.txt | wc -l)"
+#+end_src
+=<( ... )= is /process substitution/: bash hands the command's output to
+=paste= as if it were a file.
+
+** TODO E5.6 — head, tail, tee, wc, split
+Print lines 100–105 of Moby Dick with =head= and =tail=; follow the access log as
+it grows; save a pipeline's intermediate results while still passing them on;
+split the access log into 500-line pieces and check the pieces add up.
+You'll meet: =head -n=, =tail -n=, =tail -n +N=, =tail -f=, =tee=, =wc -l=,
+=split -l=.
+*** Hint
+=tail -n +100= starts /at/ line 100. =tail -f= keeps printing new lines as a
+file grows (=C-c= to stop). =tee FILE= copies stdin to a file and to stdout, so
+you can inspect a pipeline's middle. =split -l 500= writes =xaa=, =xab=, ...
+*** Solution
+#+begin_src bash :results output
+head -n 105 moby-dick.txt | tail -n 6
+grep -o '" [0-9]* ' access.log | tee /tmp/statuses.txt | sort | uniq -c | sort -rn | head -3
+wc -l < /tmp/statuses.txt
+rm -rf /tmp/split && mkdir /tmp/split && cd /tmp/split && split -l 500 /root/corpus/access.log part-
+wc -l part-* | tail -1
+#+end_src
+
+** TODO E5.7 — diff and patch
+Make a unified diff between =app.conf= and =app.conf.new=, save it as a patch,
+apply it to a copy of =app.conf=, confirm the result matches, then undo it.
+You'll meet: =diff -u=, reading hunks (=@@=, =-=, =+=), =patch=,
+=--dry-run=, =-R=, =diff -r=.
+*** Hint
+=diff -u OLD NEW= prints only what changed, with a few lines of context: lines
+starting =-= are removed, =+= added. That output /is/ a patch: =patch FILE <
+fix.patch= applies it, =--dry-run= checks it first, =-R= reverses it. =diff -r=
+compares whole directories. (Git, track 10, uses this same format.)
+*** Solution
+#+begin_src bash :dir /tmp :results output
+cp /root/workbook-data/toolbox/app.conf app.conf
+diff -u app.conf /root/workbook-data/toolbox/app.conf.new > fix.patch; cat fix.patch
+patch --dry-run app.conf < fix.patch
+patch app.conf < fix.patch && cmp app.conf /root/workbook-data/toolbox/app.conf.new && echo "identical"
+patch -R app.conf < fix.patch && grep workers app.conf
+#+end_src
+
+** TODO E5.8 — jq: querying JSON
+From =tickets.json=: count the tickets; list the IDs of open tickets with
+priority 4 or higher; count tickets per status; list each assignee once with
+their ticket count, busiest first; and output the high-priority ones as CSV.
+You'll meet: =jq '.'=, =length=, =.[]=, =select()=, =map()=, =group_by()=,
+=sort_by()=, =-r=, =@csv=, =-c=.
+*** Hint
+=.= is the whole input, =.[]= iterates an array, =|= pipes inside jq.
+=select(COND)= keeps matching items. =group_by(.status)= makes arrays of
+equal items, so =map({status: .[0].status, n: length})= counts them. =-r=
+prints raw strings, =@csv= formats an array as a CSV line.
+*** Solution
+#+begin_src bash :results output
+jq 'length' tickets.json
+jq -c '[.[] | select(.status == "open" and .priority >= 4) | .id]' tickets.json
+jq -c 'group_by(.status) | map({status: .[0].status, n: length})' tickets.json
+jq -r 'group_by(.assignee) | map([.[0].assignee, length]) | sort_by(-.[1]) | .[:3][] | @tsv' tickets.json
+jq -r '.[] | select(.priority == 5) | [.id, .status, .assignee] | @csv' tickets.json | head -3
+#+end_src
+
+* 6. grep & egrep
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -510,9 +1316,9 @@ colours. The stock tmux keys all still work.
 Regex-driven searching. You will discover that the "same" tool has a basic and
 an extended dialect, that /where/ a pattern matches matters as much as /what/,
 and that grep is only ever a filter — the moment you need to /transform/, you
-have outgrown it (that is tracks 2 and 3).
+have outgrown it (that is tracks 7 and 8).
 
-** TODO E1.1 — Is Watson mentioned more than Holmes?
+** TODO E6.1 — Is Watson mentioned more than Holmes?
 Count, don't eyeball. Get a number for each in =sherlock.txt=.
 You'll meet: a counting flag, and case-insensitivity.
 *** Hint
@@ -524,7 +1330,7 @@ grep -ci holmes sherlock.txt
 grep -ci watson sherlock.txt
 #+end_src
 
-** TODO E1.2 — Lines where BOTH Holmes and Watson appear
+** TODO E6.2 — Lines where BOTH Holmes and Watson appear
 One grep matches one pattern. You want the intersection.
 You'll meet: grep as a filter you can chain; order-independence.
 *** Hint
@@ -535,7 +1341,7 @@ grep Holmes sherlock.txt | grep Watson
 #+end_src
 Chaining = logical AND. (A single-pass AND needs =awk=, later.)
 
-** TODO E1.3 — Every 404 in the access log — exactly
+** TODO E6.3 — Every 404 in the access log — exactly
 =grep -c '404' access.log= is wrong. Prove it, then get the true count.
 You'll meet: false matches, and why fields beat substrings.
 *** Hint
@@ -547,9 +1353,9 @@ whitespace field*. grep sees a line, not fields — so anchor the pattern to the
 echo "naive:"; grep -c '404' access.log
 echo "anchored to the response code:"; grep -cE '" 404 ' access.log
 #+end_src
-The gap is the lesson: grep matches text, not structure. Track 3 does this right.
+The gap is the lesson: grep matches text, not structure. Track 8 does this right.
 
-** TODO E1.4 — Pull out every IP address
+** TODO E6.4 — Pull out every IP address
 Not the lines containing IPs — the IPs themselves, one per line.
 You'll meet: extended regex (=-E=), quantifiers, and =-o=.
 *** Hint
@@ -561,7 +1367,7 @@ lets you write ={1,3}= and group with =(...)=.
 grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | head
 #+end_src
 
-** TODO E1.5 — The 20 longest words in Moby Dick
+** TODO E6.5 — The 20 longest words in Moby Dick
 Words of 12+ letters, ranked by how often they occur.
 You'll meet: the =-o= → =sort= → =uniq -c= → =sort -rn= pipeline (memorise it).
 *** Hint
@@ -574,7 +1380,7 @@ grep -hoE '[A-Za-z]{12,}' moby-dick.txt | tr 'A-Z' 'a-z' \
 #+end_src
 (=-h= suppresses filenames when you later point this at several files.)
 
-** TODO E1.6 — Which corpus files mention "London"?
+** TODO E6.6 — Which corpus files mention "London"?
 The filenames, not the matching lines.
 You'll meet: =-l=, =-r=, and =-i= together.
 *** Hint
@@ -584,7 +1390,7 @@ There is a flag that prints only names of files with a match.
 grep -rilE 'london' /root/corpus
 #+end_src
 
-** TODO E1.7 — Lines with a doubled word ("the the")
+** TODO E6.7 — Lines with a doubled word ("the the")
 Find accidental repeats. Pure grep can do it — barely.
 You'll meet: back-references, and =-P= (the moment egrep isn't enough).
 *** Hint
@@ -595,9 +1401,9 @@ GNU grep's Perl mode (=-P=) does: =\b(\w+)\s+\1\b=.
 printf 'the the game\na a fresh start\nall is well\n' \
   | grep -P '\b(\w+)\s+\1\b'
 #+end_src
-Hitting grep's ceiling here is exactly why Perl (track 5) exists.
+Hitting grep's ceiling here is exactly why Perl (track 17) exists.
 
-* 2. sed
+* 7. sed
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -606,7 +1412,7 @@ The stream editor: line addresses + a tiny command set (=p d s a i c=). You'll
 discover it is a scalpel for line-oriented edits and substitution — and that
 its power ends where "understand the data as fields/records" begins.
 
-** TODO E2.1 — Print only lines 40–60 of a book
+** TODO E7.1 — Print only lines 40–60 of a book
 Without opening it in a pager.
 You'll meet: =-n=, the =p= command, address ranges.
 *** Hint
@@ -617,7 +1423,7 @@ you ask. Addresses can be line numbers: =40,60=.
 sed -n '40,60p' moby-dick.txt
 #+end_src
 
-** TODO E2.2 — Strip all blank lines from a book
+** TODO E7.2 — Strip all blank lines from a book
 You'll meet: regex addresses, the =d= command.
 *** Hint
 =/regex/d= deletes matching lines. A blank line is =^$=.
@@ -626,7 +1432,7 @@ You'll meet: regex addresses, the =d= command.
 sed '/^$/d' moby-dick.txt | head
 #+end_src
 
-** TODO E2.3 — Show only the substitutions you made
+** TODO E7.3 — Show only the substitutions you made
 Replace "Holmes" with "Poirot", but print *only* the changed lines.
 You'll meet: the =s///= command, its =p= flag, and =-n=.
 *** Hint
@@ -637,7 +1443,7 @@ You'll meet: the =s///= command, its =p= flag, and =-n=.
 sed -n 's/Holmes/Poirot/gp' sherlock.txt
 #+end_src
 
-** TODO E2.4 — Reformat every hire date YYYY-MM-DD → MM/DD/YYYY
+** TODO E7.4 — Reformat every hire date YYYY-MM-DD → MM/DD/YYYY
 In =employees.csv=. The output has slashes.
 You'll meet: =-E=, capture groups & back-refs, and picking a new delimiter.
 *** Hint
@@ -651,7 +1457,7 @@ sed -nE 's#^([0-9]+),([^,]+),([^,]+),([^,]+),([0-9]+),([0-9]{4})-([0-9]{2})-([0-
 #+end_src
 Counting fields by hand to reach the date is annoying — foreshadowing =awk -F,=.
 
-** TODO E2.5 — Edit a file in place, but survive your own mistakes
+** TODO E7.5 — Edit a file in place, but survive your own mistakes
 Uppercase the CSV header row, saving a backup first.
 You'll meet: =-i= with a backup suffix.
 *** Hint
@@ -664,7 +1470,7 @@ sed -i.bak -E '1s/.*/\U&/' /tmp/emp.csv
 head -1 /tmp/emp.csv; echo "backup:"; head -1 /tmp/emp.csv.bak
 #+end_src
 
-** TODO E2.6 — g or not g?
+** TODO E7.6 — g or not g?
 On a line with a word repeated several times, replace only the *first* vs *all*.
 You'll meet: the difference the =g= flag makes, per line.
 *** Hint
@@ -675,7 +1481,7 @@ echo "na na na na batman" | sed 's/na/NA/'
 echo "na na na na batman" | sed 's/na/NA/g'
 #+end_src
 
-** TODO E2.7 — Extract the assignee numbers from tickets.json
+** TODO E7.7 — Extract the assignee numbers from tickets.json
 Just the integers after ="user"=, one per line — using sed.
 You'll meet: match-whole-line-then-capture, and sed's limits on structured data.
 *** Hint
@@ -687,9 +1493,9 @@ with just the capture =\1= (add =-n ... p= so non-matching lines vanish). Under
 sed -nE 's/.*"assignee":"user([0-9]+)".*/\1/p' tickets.json | head
 #+end_src
 It works, but it is fragile (one object per line, exact key order). Real JSON
-wants =jq= or Python (track 6). Feeling that fragility is the point.
+wants =jq= or Python (track 18). Feeling that fragility is the point.
 
-* 3. awk
+* 8. awk
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -698,7 +1504,7 @@ The moment your data has *fields and records*, awk is the right tool. You'll
 discover =$1..$NF=, associative arrays (the workhorse), =BEGIN/END=, and that a
 "report" is often three lines of awk.
 
-** TODO E3.1 — Just the full names from employees.csv
+** TODO E8.1 — Just the full names from employees.csv
 Print "First Last" for every employee, no header.
 You'll meet: =-F=, fields =$2 $3=, skipping a record with =NR=.
 *** Hint
@@ -709,7 +1515,7 @@ row.
 awk -F, 'NR>1{print $2, $3}' employees.csv | head
 #+end_src
 
-** TODO E3.2 — Company-wide average salary
+** TODO E8.2 — Company-wide average salary
 One number.
 You'll meet: accumulation across records, the =END= block.
 *** Hint
@@ -720,7 +1526,7 @@ counter.
 awk -F, 'NR>1{s+=$5; n++} END{printf "avg %.0f over %d people\n", s/n, n}' employees.csv
 #+end_src
 
-** TODO E3.3 — Average salary *per department*
+** TODO E8.3 — Average salary *per department*
 You'll meet: associative arrays keyed by a string, =for (k in arr)=.
 *** Hint
 =sum[$4]+=$5= and =n[$4]++= build per-dept totals. Loop the keys in =END=.
@@ -732,7 +1538,7 @@ awk -F, 'NR>1{sum[$4]+=$5; n[$4]++}
 This four-line pattern — accumulate into an array keyed by a field, report in
 END — is the single most useful thing awk does.
 
-** TODO E3.4 — Tally HTTP status codes in the access log
+** TODO E8.4 — Tally HTTP status codes in the access log
 How many 200s, 404s, 500s…?
 You'll meet: whitespace field-splitting (no =-F= needed), =$9=.
 *** Hint
@@ -742,9 +1548,9 @@ an array keyed by =$9=.
 #+begin_src bash
 awk '{c[$9]++} END{for (k in c) print c[k], k}' access.log | sort -rn
 #+end_src
-Compare this to the grep gymnastics in E1.3 — awk got the field for free.
+Compare this to the grep gymnastics in E6.3 — awk got the field for free.
 
-** TODO E3.5 — Top 5 IPs by bytes transferred
+** TODO E8.5 — Top 5 IPs by bytes transferred
 You'll meet: =$NF= (last field), and piping awk's output onward.
 *** Hint
 Bytes are the *last* field: =$NF=. Sum per =$1= (the IP), then =sort -rn | head=.
@@ -753,7 +1559,7 @@ Bytes are the *last* field: =$NF=. Sum per =$1= (the IP), then =sort -rn | head=
 awk '{b[$1]+=$NF} END{for (ip in b) print b[ip], ip}' access.log | sort -rn | head -5
 #+end_src
 
-** TODO E3.6 — Word frequency, in awk alone
+** TODO E8.6 — Word frequency, in awk alone
 Top 15 words of any book — no grep/sort pipeline, do it inside awk.
 You'll meet: =gsub=, =tolower=, =split=, and sorting an array by hand-ish.
 *** Hint
@@ -767,7 +1573,7 @@ awk '{ $0=tolower($0); gsub(/[^a-z]+/," ");
      END{ for(k in c) print c[k], k }' moby-dick.txt | sort -rn | head -15
 #+end_src
 
-** TODO E3.7 — Lines per file, across all books
+** TODO E8.7 — Lines per file, across all books
 Report each filename with its line count — using awk, not =wc=.
 You'll meet: =FILENAME=, and =FNR= vs =NR=.
 *** Hint
@@ -778,7 +1584,7 @@ Count into =c[FILENAME]=.
 awk '{c[FILENAME]++} END{for(f in c) print c[f], f}' /root/corpus/*.txt
 #+end_src
 
-** TODO E3.8 — A formatted salary-band report
+** TODO E8.8 — A formatted salary-band report
 Add a computed column: LOW (<70k), MID, HIGH (>=110k). Print a tidy table.
 You'll meet: =BEGIN=, =printf= column widths, rebuilding =$0=/=OFS=.
 *** Hint
@@ -791,7 +1597,7 @@ awk -F, 'BEGIN{printf "%-4s %-9s %-6s %8s\n","ID","DEPT","BAND","SALARY"}
                printf "%-4d %-9s %-6s %8d\n", $1,$4,band,$5 }' employees.csv | head
 #+end_src
 
-* 4. bash scripting
+* 9. bash scripting
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -803,7 +1609,7 @@ work from scripts that eat your files.
 
 Write these as real files (=script.sh=, =chmod +x=), not one-liners.
 
-** TODO E4.1 — Top 5 biggest files under a directory
+** TODO E9.1 — Top 5 biggest files under a directory
 A script =bigfiles.sh DIR= that prints the five largest files beneath DIR.
 You'll meet: command substitution, =find=, =du=/=sort=, quoting =$1=.
 *** Hint
@@ -818,7 +1624,7 @@ find "$dir" -type f -printf '%s\t%p\n' | sort -rn | head -5
 Run: =bash /root/workbook-data/bigfiles.sh /root/corpus=. (=:tangle= writes the
 block to a file when you =C-c C-v t=.)
 
-** TODO E4.2 — Line/word/char counts for every book
+** TODO E9.2 — Line/word/char counts for every book
 Loop the =*.txt= files; print a row per file plus a total.
 You'll meet: =for= over a glob, capturing =wc= output, arithmetic.
 *** Hint
@@ -836,7 +1642,7 @@ done
 printf "%6d %6d %8d  TOTAL\n" "$tl" "$tw" "$tc"
 #+end_src
 
-** TODO E4.3 — A grep-across-the-corpus wrapper
+** TODO E9.3 — A grep-across-the-corpus wrapper
 =search.sh PATTERN= greps every corpus file, case-insensitive, with filenames,
 and exits nonzero if nothing matched.
 You'll meet: =$#=/=$1=, a usage message, ="$@"=, exit status.
@@ -850,7 +1656,7 @@ if [ $# -lt 1 ]; then echo "usage: search.sh PATTERN..." >&2; exit 2; fi
 grep -rinE "$*" /root/corpus
 #+end_src
 
-** TODO E4.4 — Rename the messy files safely
+** TODO E9.4 — Rename the messy files safely
 In =/root/workbook-data/messy=, lowercase every =.JPG= to =.jpg=. The filenames
 contain spaces and punctuation — do it without corrupting anything.
 You'll meet: THE quoting lesson — =-print0=, =read -d ''=, ="$var"= everywhere.
@@ -871,7 +1677,7 @@ done
 Try the naive =for f in $(ls *.JPG)= version too, and watch it shred the
 space-containing names. That contrast is the whole lesson.
 
-** TODO E4.5 — Make failure loud
+** TODO E9.5 — Make failure loud
 Write a two-command pipeline where the first command fails, and show that the
 script *doesn't* notice — then make it notice.
 You'll meet: =set -euo pipefail=, and why every serious script starts with it.
@@ -885,7 +1691,7 @@ bash -c 'false | wc -l; echo "exit=$?  (looks fine, but false failed)"'
 bash -c 'set -o pipefail; false | wc -l; echo "exit=$?  (now the failure shows)"'
 #+end_src
 
-** TODO E4.6 — A reusable function + a self-cleaning temp file
+** TODO E9.6 — A reusable function + a self-cleaning temp file
 Write =count_matches PATTERN FILE= as a function, and have the script stage work
 in a =mktemp= file that is removed even if the script dies.
 You'll meet: functions, =local=, =mktemp=, =trap ... EXIT=.
@@ -903,7 +1709,7 @@ echo "Holmes count: $(count_matches Holmes /root/corpus/sherlock.txt)"
 # on exit, trap removes $tmp automatically
 #+end_src
 
-** TODO E4.7 — Compare two department rosters without temp files
+** TODO E9.7 — Compare two department rosters without temp files
 Produce the sorted list of employees in =eng= and in =sales=, and diff them —
 using no intermediate files.
 You'll meet: process substitution =<(...)=.
@@ -916,7 +1722,1194 @@ diff <(awk -F, '$4=="eng"{print $2,$3}'  employees.csv | sort) \
      <(awk -F, '$4=="sales"{print $2,$3}' employees.csv | sort) | head
 #+end_src
 
-* 5. perl
+* 10. Git
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Version control is how every piece of software you'll ever touch is built,
+shared and recovered. The lab has a practice repository at
+=/root/workbook-data/git/project= (a tiny shell calculator with a history, a
+side branch, a bug hiding somewhere, and a "lost" commit), plus a bare
+=remote.git= next to it that acts like GitHub. =lazygit= is installed too; track
+13 uses it.
+
+Your identity for commits is set in the practice repo. For your own repos, run
+=git config --global user.name "..."= and =user.email= once.
+
+** TODO E10.1 — Read a repository's story
+Show the whole history as a graph including all branches. What does the latest
+commit on =main= change? Which branch isn't merged? Which files exist in the
+very first commit?
+You'll meet: =git log --oneline --graph --all=, =git show=, =git status=,
+=git branch -a=, =git ls-tree=.
+*** Hint
+=git log= shows history newest first; =--oneline --graph --all --decorate=
+draws branches. =git show COMMIT= shows one commit's message and diff; =HEAD=
+is where you are, =HEAD~3= three commits back. =git ls-tree -r --name-only
+COMMIT= lists files at a commit.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/git/project :results output
+git status -sb
+git log --oneline --graph --all --decorate
+git show --stat HEAD
+git branch --no-merged
+git ls-tree -r --name-only "$(git rev-list --max-parents=0 HEAD)"
+#+end_src
+
+** TODO E10.2 — Your first repository
+In =/tmp/myrepo=, start a repository, add a file, commit it, change it, and
+look at the difference before and after staging. Ignore =*.log= files. Undo an
+unwanted edit to a file you haven't staged.
+You'll meet: =git init=, =add=, =commit=, the staging area, =diff= vs
+=diff --staged=, =.gitignore=, =git restore=.
+*** Hint
+Git has three places: your working files, the /staging area/ (what the next
+commit will contain), and history. =git add= stages, =git commit= records.
+=git diff= shows unstaged changes, =git diff --staged= staged ones. =git restore
+FILE= throws away unstaged edits (there is no undo for that).
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf myrepo && git init -q -b main myrepo && cd myrepo
+git config user.name "You" && git config user.email "you@nixlab.local"
+echo "hello" > notes.txt && git add notes.txt && git commit -qm "Add notes"
+echo "world" >> notes.txt
+git diff --stat; git add notes.txt; git diff --staged
+echo '*.log' > .gitignore && touch debug.log && git status --short
+echo "oops" >> notes.txt && git restore notes.txt && cat notes.txt
+git add .gitignore && git commit -qm "Add greeting and ignore logs" && git log --oneline
+#+end_src
+
+** TODO E10.3 — Branches and merging
+In a copy of the practice repo, merge =feature/greeting= into =main=. There
+will be a conflict in =README.md=: resolve it by keeping both ideas, finish the
+merge, and look at the resulting graph.
+You'll meet: =git switch=, =git merge=, conflict markers (=<<<<<<<=, ======,
+=>>>>>>>=), =git add= to mark resolved, merge commits.
+*** Hint
+=git merge BRANCH= brings its commits into the current branch. When both
+changed the same lines, git stops and writes both versions into the file
+between markers. Edit the file to the result you want, =git add= it, then
+=git commit=. =git merge --abort= backs out entirely.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf merge-demo && cp -a /root/workbook-data/git/project merge-demo && cd merge-demo
+git switch -q main
+git merge feature/greeting 2>&1 | tail -2
+cat README.md
+printf '# calc\n\nA friendly little calculator for the shell. Hello!\n\nUsage: source calc.sh\n' > README.md
+git add README.md && git commit -q --no-edit && git log --oneline --graph | head -4
+#+end_src
+
+** TODO E10.4 — Rebasing instead
+Start again from a fresh copy and this time /rebase/ =feature/greeting= onto
+=main= so history stays a straight line. Then squash two commits into one with
+an interactive rebase.
+You'll meet: =git rebase=, conflicts during a rebase, =git rebase --continue=,
+=git rebase -i=, =pick= / =squash=, rewriting history.
+*** Hint
+=git rebase main= (while on the feature branch) replays its commits on top of
+=main=, one by one; conflicts are resolved the same way, then =git rebase
+--continue=. =git rebase -i HEAD~3= opens an editor listing the last three
+commits: change =pick= to =squash= to fold a commit into the one above it.
+Only rewrite commits you haven't shared: others' copies would diverge.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf rebase-demo && cp -a /root/workbook-data/git/project rebase-demo && cd rebase-demo
+git switch -q feature/greeting
+git rebase main > /dev/null 2>&1 || true
+printf '# calc\n\nA friendly little calculator for the shell. Hello!\n\nUsage: source calc.sh\n' > README.md
+git add README.md && GIT_EDITOR=true git rebase --continue > /dev/null
+git log --oneline --graph | head -3
+echo "draft" > notes.md && git add notes.md && git commit -qm "Draft notes"
+echo "fixed" >> notes.md && git commit -qam "Fix typo in notes"
+GIT_SEQUENCE_EDITOR="sed -i '2s/^pick/squash/'" GIT_EDITOR=true git rebase -i HEAD~2 > /dev/null
+git log --oneline | head -3
+#+end_src
+The two notes commits became one. Interactively you'd edit the todo list and
+the combined message yourself; the =GIT_SEQUENCE_EDITOR= trick just scripts
+those edits.
+
+** TODO E10.5 — History forensics
+Find: every commit that touched =calc.sh=, with its changes; who last changed
+each line of =calc.sh=; the commit that first added the word =pow=; and what
+=README.md= looked like three commits ago.
+You'll meet: =git log -p FILE=, =git log --follow=, =git blame=, =git log -S=,
+=git show COMMIT:PATH=.
+*** Hint
+=git log -p -- FILE= shows each commit's patch for that file. =git blame FILE=
+annotates every line with the commit that last changed it. =git log -S word=
+(the "pickaxe") finds commits that added or removed that text.
+=git show HEAD~3:README.md= prints a file as it was at that commit.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/git/project :results output
+git log --oneline -- calc.sh
+git blame --date=short calc.sh | cut -c1-70 | head -4
+git log -S pow --oneline
+git show HEAD~3:README.md
+#+end_src
+
+** TODO E10.6 — stash, restore and reset
+You're halfway through an edit when you need a clean tree. Stash the work,
+check the tree is clean, bring the work back. Then compare =git reset --soft=,
+=--mixed= and =--hard= on a throwaway commit.
+You'll meet: =git stash push / list / pop=, =git reset --soft / --mixed /
+--hard=, =git restore --staged=.
+*** Hint
+=git stash= shelves uncommitted changes and cleans the tree; =git stash pop=
+brings them back. =reset= moves the branch pointer: =--soft= keeps your changes
+staged, =--mixed= (the default) keeps them unstaged, =--hard= throws them away.
+=--hard= is the one command here that really loses work.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf stash-demo && cp -a /root/workbook-data/git/project stash-demo && cd stash-demo
+echo "half-done idea" >> README.md
+git stash push -qm "wip readme" && git status --short && git stash list
+git stash pop -q && git status --short
+git commit -qam "Throwaway"
+git reset --soft HEAD~1 && echo "soft:" && git status --short
+git reset -q --mixed HEAD && echo "mixed:" && git status --short
+git reset -q --hard HEAD && echo "hard:" && git status --short && echo "(clean)"
+#+end_src
+
+** TODO E10.7 — The reflog: undoing "lost" work
+Someone committed a secret recipe to =main= and then ran =git reset --hard= to
+get rid of it. It isn't in =git log=. Find it anyway and restore it on a new
+branch.
+You'll meet: =git reflog=, =HEAD@{n}=, =git branch NAME COMMIT=,
+=git cherry-pick=.
+*** Hint
+The reflog records every place =HEAD= has pointed, including commits no branch
+points to any more. Commits stay recoverable for weeks after they seem gone.
+Find the commit, then give it a name with =git branch rescued COMMIT=.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf reflog-demo && cp -a /root/workbook-data/git/project reflog-demo && cd reflog-demo
+git log --oneline | grep -i recipe || echo "not in the log"
+git reflog | grep -i recipe
+git branch rescued "$(git reflog | grep -i 'secret recipe' | head -1 | cut -d' ' -f1)"
+git show --stat rescued | head -5
+#+end_src
+
+** TODO E10.8 — bisect: find the commit that broke it
+=./test.sh= fails on =main=. It passed when tests were added. Let git find the
+exact commit that broke it, automatically.
+You'll meet: =git bisect start / good / bad=, =git bisect run=,
+=git bisect reset=.
+*** Hint
+Bisect is a binary search through history: mark one commit bad and an older
+one good, and git checks out the middle for you to test. =git bisect run CMD=
+automates it: exit code 0 means good, non-zero bad. Find a good commit with
+=git log --oneline= (the one that added the tests).
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf bisect-demo && cp -a /root/workbook-data/git/project bisect-demo && cd bisect-demo
+./test.sh || echo "main is broken"
+git bisect start HEAD "$(git log --format=%h --grep='Add tests')" > /dev/null
+git bisect run ./test.sh 2>/dev/null | grep -E 'is the first bad commit' -A 3
+git bisect reset > /dev/null
+git show "$(git log --format=%h --grep='square')" -- calc.sh | grep '^[-+]mul'
+#+end_src
+The "Add square helper" commit quietly changed =mul=. Bisect finds such a
+commit among thousands in a dozen steps.
+
+** TODO E10.9 — Remotes: clone, push, pull
+Clone =remote.git= into a second working copy (your "laptop"). Make a commit
+there and push it. Back in =project=, pull it. Then reproduce the classic "the
+remote has work you don't have" rejection and fix it with =pull --rebase=.
+You'll meet: =git clone=, =git remote -v=, =git push=, =git fetch=,
+=git pull --rebase=, upstream tracking (=-u=), non-fast-forward rejections.
+*** Hint
+A remote is just another repository; =origin= is the default name. =git push=
+sends your commits, =git fetch= downloads theirs without changing your files,
+=git pull= is fetch plus merge (or rebase, with =--rebase=). A push is rejected
+when the remote has commits you don't: integrate them first. =git push -u origin
+main= remembers the upstream so later plain =git push= works.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf remote-demo && mkdir remote-demo && cd remote-demo
+git clone -q --bare /root/workbook-data/git/remote.git origin.git
+git clone -q origin.git laptop && git clone -q origin.git desk
+cd laptop && git config user.name L && git config user.email l@lab && echo "from laptop" > laptop.txt && git add . && git commit -qm "Laptop work" && git push -q
+cd ../desk && git config user.name D && git config user.email d@lab && echo "from desk" > desk.txt && git add . && git commit -qm "Desk work"
+git push 2>&1 | grep -E 'rejected|hint: Updates' | head -2
+git pull -q --rebase && git push -q && git log --oneline | head -3
+#+end_src
+When a remote and a local repository start from /unrelated/ histories (say,
+GitHub created a LICENSE commit), =git pull --rebase origin main= replays your
+work on top of theirs. Track 12 pushes to a repository on another lab over
+SSH.
+
+* 11. Archives & integrity
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Bundling, compressing, shipping and verifying files. =tar= packs a tree into
+one stream, compressors shrink it, and checksums prove nothing changed on the
+way. Practice files are in =/root/workbook-data/archive=: a small =site/=
+directory to archive and a =release/= folder with a checksum file, where one
+file has been tampered with.
+
+** TODO E11.1 — tar: create, list, extract
+Pack =site/= into =site.tar.gz=, list its contents without extracting, extract
+it into =/tmp/restore=, and extract just the CSS file somewhere else. Then make
+an archive that leaves out the images.
+You'll meet: =tar -c= / =-t= / =-x=, =-z= / =-J= / =--zstd=, =-f=, =-v=,
+=-C=, =--exclude=.
+*** Hint
+=c= creates, =t= lists, =x= extracts, =f FILE= names the archive, =v= is
+verbose. =z= gzips (=J= xz, =--zstd= zstd); modern tar also guesses from the
+extension with =-a=. =-C DIR= changes directory first, so the paths stored in
+the archive stay relative. Name a single member to extract only it.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/archive :results output
+tar -czf /tmp/site.tar.gz site
+tar -tzf /tmp/site.tar.gz
+rm -rf /tmp/restore && mkdir /tmp/restore && tar -xzf /tmp/site.tar.gz -C /tmp/restore && find /tmp/restore -type f
+tar -xzf /tmp/site.tar.gz -C /tmp site/css/style.css && cat /tmp/site/css/style.css
+tar -czf /tmp/site-noimg.tar.gz --exclude='*.jpg' site && tar -tzf /tmp/site-noimg.tar.gz
+#+end_src
+Never extract an archive you haven't listed first: one built with absolute or
+=../= paths can write outside the target directory.
+
+** TODO E11.2 — Compressors compared
+Compress a copy of the corpus with gzip, bzip2, xz and zstd. Compare sizes and
+times, then find out how much zstd's highest levels and multithreading change
+things.
+You'll meet: =gzip=, =bzip2=, =xz=, =zstd=, levels (=-1= … =-19=), =-T0=,
+=-k=, =zcat= / =zstdcat=.
+*** Hint
+They trade speed for size: gzip is everywhere, xz compresses hardest and
+slowest, zstd is fast at every level and very good at high ones. =-k= keeps the
+original. Wrap each in =time=, and compare with =ls -l=. Text compresses far
+better than random data such as JPEGs.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+tar -cf corpus.tar -C /root corpus
+for c in "gzip -k" "bzip2 -k" "xz -k" "zstd -q -k"; do
+  s=$(date +%s.%N); $c -f corpus.tar; e=$(date +%s.%N)
+  printf '%-10s %.2fs\n' "${c%% *}" "$(echo "$e - $s" | bc 2>/dev/null || awk "BEGIN{print $e-$s}")"
+done
+ls -l corpus.tar* | awk '{printf "%10d %s\n", $5, $9}'
+zstd -q -19 -T0 -f corpus.tar -o corpus.19.tar.zst && ls -l corpus.19.tar.zst | awk '{print $5, $9}'
+#+end_src
+
+** TODO E11.3 — zip for everyone else
+Make a zip of =site/= that Windows and macOS users can open, list it, test it,
+and extract it.
+You'll meet: =zip -r=, =unzip -l=, =unzip -t=, =unzip -d=.
+*** Hint
+=zip -r OUT.zip DIR= recurses. =unzip -l= lists, =-t= tests integrity, =-d DIR=
+extracts somewhere. Unlike tar, zip compresses each file separately, so you
+can pull one file out quickly, but it compresses a little worse.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/archive :results output
+rm -f /tmp/site.zip && zip -qr /tmp/site.zip site
+unzip -l /tmp/site.zip
+unzip -tq /tmp/site.zip
+rm -rf /tmp/unz && unzip -q /tmp/site.zip -d /tmp/unz && ls -R /tmp/unz | head -4
+#+end_src
+
+** TODO E11.4 — Checksums: prove nothing changed
+The =release/= folder came with a =SHA256SUMS= file. Verify the release. Which
+file was tampered with, and which line? Then make your own checksum list for
+=site/=.
+You'll meet: =sha256sum=, =sha256sum -c=, =--quiet=, =cmp=, =b2sum=.
+*** Hint
+=sha256sum FILES > SUMS= records a fingerprint per file; =sha256sum -c SUMS=
+recomputes and compares them. Changing a single bit changes the whole hash. To
+find /where/ a file changed, compare it with a trusted copy: the originals are
+in =/root/corpus=.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/archive/release :results output
+sha256sum -c SHA256SUMS 2>&1
+cmp employees.csv /root/corpus/employees.csv
+diff employees.csv /root/corpus/employees.csv
+cd .. && find site -type f -exec sha256sum {} + | sort -k2 > /tmp/site.sums && cat /tmp/site.sums | cut -c1-16,65-
+#+end_src
+Checksums detect accidents and tampering in transit, but anyone who can change
+the file can also change =SHA256SUMS=: real releases sign the checksum file too
+(=gpg --verify=).
+
+** TODO E11.5 — Streams: archive without temporary files
+Copy a directory tree by piping one =tar= into another. Make a dated,
+compressed backup of your =workbook-data= in one command, and check it. (Track
+12 streams the same way to another lab over SSH.)
+You'll meet: =tar -c ... | tar -x=, =-= as stdin/stdout, =$(date +%F)=,
+=zstd -dc | tar -t=.
+*** Hint
+With =-f -= (or no =-f=), tar writes to stdout or reads stdin, so it composes
+with pipes: =tar -C SRC -cf - . | tar -C DEST -xf -=. =date +%F= prints
+=YYYY-MM-DD= for file names.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+rm -rf copy && mkdir copy && tar -C /root/workbook-data/archive -cf - site | tar -C copy -xf - && find copy -type f
+backup=/tmp/workbook-data-$(date +%F).tar.zst
+tar -C /root -cf - workbook-data | zstd -q -T0 -o "$backup" -f
+ls -lh "$backup" | awk '{print $5, $9}'
+zstd -dc "$backup" | tar -tf - | head -3
+#+end_src
+
+* 12. Networking & SSH
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Every lab is a separate Linux machine on a small private network with your Mac,
+and every lab runs an SSH server. That makes a real two-machine setup one
+command away: from your Mac, run =./container-lab.sh new peer= to create a
+second lab, then work between the two. In these exercises "this lab" is the one
+you're reading the workbook in, and "peer" is the second one.
+
+The first few exercises need only one lab; the SSH ones need both. Solutions
+that need two labs are shown as commands to type rather than runnable blocks.
+
+** TODO E12.1 — Your machine on the network
+Find this lab's IP address, its network interfaces, its default gateway, the
+DNS server it uses, and its hostname. Do the same in =peer=.
+You'll meet: =ip -br addr=, =ip route=, =/etc/resolv.conf=, =/etc/hosts=,
+=hostname=, =getent hosts=.
+*** Hint
+=ip -br addr= (brief) lists interfaces with their addresses; =lo= is the
+loopback, =127.0.0.1=, which never leaves the machine. =ip route= shows the
+default gateway, where traffic for other networks goes. Name resolution reads
+=/etc/hosts= first, then asks the servers in =/etc/resolv.conf=.
+*** Solution
+#+begin_src bash :results output
+hostname
+ip -br addr
+ip route
+cat /etc/resolv.conf
+getent hosts localhost
+#+end_src
+From your Mac, =container ls= shows every lab's address too.
+
+** TODO E12.2 — DNS
+Look up the addresses of =gnu.org=, just the address, its mail servers, and its
+IPv6 address. Ask a specific DNS server directly. Then give =peer= a name in
+this lab so =ping peer= works.
+You'll meet: =dig=, =+short=, record types (=A=, =AAAA=, =MX=, =NS=, =TXT=),
+=@server=, =/etc/hosts=, =ping -c=.
+*** Hint
+=dig NAME TYPE= asks DNS directly and shows the whole answer; =+short= prints
+just the data. =dig @1.1.1.1 NAME= bypasses your configured resolver. For
+machines DNS doesn't know about, add a line =IP NAME= to =/etc/hosts=.
+*** Solution
+#+begin_src bash :results output
+dig +short gnu.org A
+dig +short gnu.org MX
+dig +short gnu.org AAAA
+dig @1.1.1.1 +noall +answer gnu.org
+#+end_src
+#+begin_example
+# in this lab, with peer's address from E12.1:
+$ echo "192.168.64.5 peer" >> /etc/hosts
+$ ping -c 3 peer
+#+end_example
+
+** TODO E12.3 — HTTP with curl
+Fetch a web page's headers only; follow a redirect; save a file under its own
+name; print just the status code and total time; and talk to a web server you
+start yourself.
+You'll meet: =curl -I=, =-L=, =-O= / =-o=, =-s= / =-S=, =-w=, =-v=,
+=python3 -m http.server=.
+*** Hint
+=curl URL= prints the body. =-I= fetches headers only, =-L= follows
+redirects, =-o FILE= / =-O= save, =-sS= is quiet but still shows errors, =-w
+'%{http_code}'= prints a variable after the transfer, =-v= shows the whole
+conversation. =python3 -m http.server 8000= serves the current directory.
+*** Solution
+#+begin_src bash :dir /root/corpus :results output
+curl -sSI https://example.com | head -5
+curl -sS -o /dev/null -w 'status %{http_code}, %{time_total}s\n' https://example.com
+python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & srv=$!; sleep 1
+curl -sS http://127.0.0.1:8000/ | grep -o 'href="[^"]*"' | head -3
+curl -sS -O http://127.0.0.1:8000/README.txt --output-dir /tmp && head -2 /tmp/README.txt
+kill $srv
+#+end_src
+
+** TODO E12.4 — Ports and sockets
+List every listening TCP port and the program behind it. Open a raw TCP "chat"
+with =nc= between two terminals (two tmux panes), then between this lab and
+=peer=.
+You'll meet: =ss -tlnp=, =ss -tnp=, =lsof -i=, =nc -l=, =nc HOST PORT=.
+*** Hint
+=ss -tlnp= shows TCP (=t=) listening (=l=) sockets numerically (=n=) with the
+process (=p=). =sshd= on port 22 should be there. =nc -l 9000= waits for a
+connection; =nc HOST 9000= connects; whatever you type goes across.
+*** Solution
+#+begin_src bash :results output
+ss -tlnp | awk 'NR==1 || /:22 /'
+nc -l 127.0.0.1 9000 > /tmp/received.txt & sleep 0.5
+echo "hello over tcp" | nc -q 1 127.0.0.1 9000 2>/dev/null || echo "hello over tcp" | nc -N 127.0.0.1 9000
+sleep 0.5; cat /tmp/received.txt
+#+end_src
+#+begin_example
+peer$  nc -l 9000
+this$  nc peer 9000        # type; lines appear on peer. C-c to stop.
+#+end_example
+
+** TODO E12.5 — SSH keys
+Make an SSH key pair in this lab. On =peer=, set a root password so you can
+log in once, then install your public key there and log in without a password.
+Finally, run a single command on =peer= without opening a shell.
+You'll meet: =ssh-keygen -t ed25519=, =passwd=, =ssh-copy-id=, =ssh HOST
+CMD=, =~/.ssh/authorized_keys=, host key fingerprints, =known_hosts=.
+*** Hint
+=ssh-keygen= writes a private key (=~/.ssh/id_ed25519=, never share it) and a
+public one (=.pub=). Logging in with a key means the server has your public key
+in =~/.ssh/authorized_keys=. =ssh-copy-id USER@HOST= puts it there, using your
+password one last time. The first connection asks you to confirm the server's
+host key fingerprint; SSH remembers it in =~/.ssh/known_hosts=.
+*** Solution
+#+begin_example
+peer$  passwd                         # set a root password on peer
+this$  ssh-keygen -t ed25519          # accept the defaults; a passphrase is good
+this$  ssh-copy-id root@peer          # type peer's password, the last time you'll need it
+this$  ssh root@peer                  # no password now
+this$  ssh root@peer 'hostname; uptime'
+#+end_example
+On a real server you'd then turn off password logins (=PasswordAuthentication
+no= in =/etc/ssh/sshd_config=). The lab leaves them on so this first step works.
+
+** TODO E12.6 — ~/.ssh/config and the agent
+Make =ssh peer= work with no user name. Protect your key with a passphrase, then
+use =ssh-agent= so you type it once per session.
+You'll meet: =~/.ssh/config= (=Host=, =HostName=, =User=, =IdentityFile=),
+=ssh-keygen -p=, =ssh-agent=, =ssh-add=, =ssh-add -l=.
+*** Hint
+=~/.ssh/config= holds per-host defaults; the =Host= alias can be anything.
+=ssh-keygen -p -f KEY= adds or changes a passphrase. =eval "$(ssh-agent)"=
+starts the agent in your shell, =ssh-add= unlocks your key into it, and every
+later =ssh=, =scp=, =rsync= and =git= uses it.
+*** Solution
+#+begin_example
+this$  cat >> ~/.ssh/config <<'EOF'
+Host peer
+    HostName peer
+    User root
+    IdentityFile ~/.ssh/id_ed25519
+EOF
+this$  chmod 600 ~/.ssh/config
+this$  ssh-keygen -p -f ~/.ssh/id_ed25519      # add a passphrase
+this$  eval "$(ssh-agent)" && ssh-add          # type it once
+this$  ssh-add -l && ssh peer hostname
+#+end_example
+
+** TODO E12.7 — Port forwarding
+On =peer=, start a web server that only listens on =127.0.0.1=, so nothing
+outside =peer= can reach it. From this lab, reach it anyway through an SSH
+tunnel.
+You'll meet: =ssh -L local:host:remote=, =-N=, =-f=, =ssh -R=, =ssh -J=.
+*** Hint
+=ssh -L 8080:localhost:8000 peer= opens port 8080 in /this/ lab; connections to
+it travel through SSH and come out on =peer= going to =localhost:8000= there.
+=-N= means "no remote command", =-f= backgrounds it. =-R= is the reverse
+direction, =-J= hops through a jump host.
+*** Solution
+#+begin_example
+peer$  cd /root/corpus && python3 -m http.server 8000 --bind 127.0.0.1
+this$  curl -s http://peer:8000/ | head -2          # fails: not reachable
+this$  ssh -f -N -L 8080:localhost:8000 peer
+this$  curl -s http://localhost:8080/ | head -2      # works, through the tunnel
+this$  pkill -f 'ssh -f -N -L 8080'
+#+end_example
+
+** TODO E12.8 — scp and rsync
+Copy one file to =peer= with =scp=. Mirror =/root/corpus= to =peer= with
+=rsync=, change a file, and sync again: how much was sent the second time? Use
+a dry run and =--delete=, and learn what a trailing slash means.
+You'll meet: =scp=, =rsync -av=, =-z=, =-n= / =--dry-run=, =--delete=,
+=--progress=, =src/= vs =src=.
+*** Hint
+=scp FILE peer:/tmp/= copies once. =rsync= copies only what differs, so repeat
+runs are fast. =-a= keeps permissions and times, =-v= lists files, =-z=
+compresses in transit, =-n= shows what /would/ happen. =rsync -a dir/ dest/=
+copies the /contents/ of =dir=; without the slash it copies =dir= itself.
+=--delete= removes files on the destination that no longer exist at the source.
+*** Solution
+#+begin_example
+this$  scp /root/corpus/tickets.json peer:/tmp/
+this$  rsync -avz /root/corpus/ peer:/root/corpus-mirror/
+this$  echo "one more line" >> /root/corpus/README.txt
+this$  rsync -avz /root/corpus/ peer:/root/corpus-mirror/     # sends just README.txt
+this$  ssh peer 'touch /root/corpus-mirror/stale.txt'
+this$  rsync -avzn --delete /root/corpus/ peer:/root/corpus-mirror/   # dry run: "deleting stale.txt"
+this$  tar -C /root -cf - workbook-data | ssh peer 'tar -C /tmp -xf -'   # track 11's stream, over SSH
+#+end_example
+
+** TODO E12.9 — Watching packets
+Capture the packets of a single HTTP request to your local web server and read
+the TCP handshake. Then push a git repository to =peer= over SSH.
+You'll meet: =tcpdump -i -n -c=, TCP flags (=S=, =S.=, =.=), =git remote add=
+with an SSH URL.
+*** Hint
+=tcpdump -i lo -n -c 10 port 8000= prints ten packets on the loopback
+interface to or from port 8000. A TCP connection opens with =[S]= (SYN),
+=[S.]= (SYN-ACK), =[.]= (ACK). A git remote can be any SSH path:
+=root@peer:/root/repo.git=.
+*** Solution
+#+begin_src bash :dir /root/corpus :results output
+python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & srv=$!; sleep 1
+timeout 5 tcpdump -i lo -n -c 6 'tcp port 8000' 2>/dev/null > /tmp/pkts.txt & td=$!; sleep 1
+curl -s -o /dev/null http://127.0.0.1:8000/
+wait $td; kill $srv
+cut -c1-95 /tmp/pkts.txt
+#+end_src
+#+begin_example
+peer$  git init --bare /root/calc.git
+this$  cd /root/workbook-data/git/project
+this$  git remote add peer peer:/root/calc.git && git push peer main
+#+end_example
+
+* 13. The modern command line
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+A newer generation of tools that make the classics faster and friendlier: fuzzy
+finding with =fzf=, searching with =rg= (ripgrep) and =fd=, reading with =bat=,
+listing with =eza=, jumping with =zoxide=, and full-screen file and git
+managers in =yazi= and =lazygit=. They're all installed, and the lab's
+=~/.bashrc= already turns on the =fzf= and =zoxide= shell integration. None of
+them replace knowing =grep= and =find=: they're what you reach for once you do.
+
+** TODO E13.1 — fzf: fuzzy-find anything
+Open a file from the corpus in Neovim by picking it from a fuzzy list. Search
+your shell history fuzzily, insert a file path into a command without typing
+it, and =cd= into a directory by picking it. Add a live preview.
+You'll meet: =fzf=, =$(fzf)=, =C-r=, =C-t=, =M-c=, =--preview=, =--multi=.
+*** Hint
+=fzf= reads lines on stdin and lets you pick one by typing fragments in any
+order; the choice goes to stdout. So =nvim "$(fzf)"= opens whatever you pick.
+The shell bindings: =C-r= searches history, =C-t= inserts file paths at the
+cursor, =M-c= (=ESC c=) =cd=s into a picked directory. =--preview 'bat
+--color=always {}'= shows the file under the cursor. =TAB= marks several with
+=--multi=.
+*** Solution
+#+begin_example
+$ nvim "$(fd . /root/corpus | fzf)"
+$ C-r               # type a few letters of an old command
+$ wc -l C-t         # pick files; their paths are inserted
+$ M-c               # pick a directory to cd into
+$ fd -e csv . /root | fzf --multi --preview 'bat --color=always {}'
+#+end_example
+Anything that produces lines can feed fzf: =git branch | fzf=, =ps aux | fzf=.
+
+** TODO E13.2 — ripgrep
+Search the corpus for "Holmes" with line numbers; case-insensitive whole-word
+"watson"; only in Python files; list only file names; show two lines of
+context; and search for a literal =.*= without it being a regex.
+You'll meet: =rg=, =-n=, =-i=, =-w=, =-t=, =-l=, =-C=, =-F=, =--files=,
+=.gitignore= awareness.
+*** Hint
+=rg PATTERN [PATH]= searches recursively by default, skips hidden files and
+anything in =.gitignore=, and is very fast. Most flags match grep's. =-t py=
+limits to a file type (=rg --type-list= shows them). =-F= treats the pattern
+as fixed text. =--files= just lists what it would search. In scripts, always give
+a path: with none, and input that isn't a terminal, =rg= searches its stdin.
+*** Solution
+#+begin_src bash :dir /root/corpus :results output
+rg -n Holmes sherlock.txt | head -3
+rg -iw watson -c .
+rg -l Holmes .
+rg -C 1 'singular' sherlock.txt
+rg -F '.*' /root/workbook-data -l | head -3
+rg --files /root/workbook-data/toolbox/tree | head -4
+#+end_src
+
+** TODO E13.3 — fd and bat
+With =fd=: every =.c= file under =/root/workbook-data=; directories named
+=src=; hidden files too; files changed in the last day; and run a command on
+each result. With =bat=: page through a file with syntax highlighting and line
+numbers, and use it to colour man pages.
+You'll meet: =fd PATTERN=, =-e=, =-t d=, =-H=, =--changed-within=, =-x=,
+=bat=, =-p=, =-l LANG=, =MANPAGER=.
+*** Hint
+=fd= is =find= with sensible defaults: the pattern is a regex matched against
+names, hidden and ignored files are skipped unless you ask (=-H=, =-I=). =-x
+CMD= runs a command per result, like =find -exec=. =bat= is =cat= with syntax
+highlighting and a pager; =-p= drops the decorations. The lab sets =MANPAGER=
+so =man= pages come out coloured through bat.
+*** Solution
+#+begin_src bash :dir /root/workbook-data :results output
+fd -e c
+fd -t d '^src$'
+fd -H settings
+fd --changed-within 1d -t f . shell | head -3
+fd -e csv . toolbox -x wc -l
+bat -p --color=never -r 1:3 toolbox/app.conf
+#+end_src
+
+** TODO E13.4 — eza and zoxide
+List the playground as a tree with git status and icons, sorted by size. Then
+visit a few deep directories and jump back to them with two letters.
+You'll meet: =eza -l=, =--tree=, =--git=, =--icons=, =-s size=, =z=, =zi=.
+*** Hint
+=eza= is a modern =ls=: =eza -l --git --icons=, =eza --tree -L 2=, =eza -s
+size=. =zoxide= learns the directories you =cd= into; after that, =z word=
+jumps to the best match and =zi= picks one with fzf.
+*** Solution
+#+begin_src bash :dir /root/workbook-data :results output
+eza --tree -L 2 shell/playground | head -12
+eza -l -s size --no-user --no-time toolbox/tree/logs | tail -3
+eza -l --git git/project | head -4
+#+end_src
+#+begin_example
+$ cd /root/workbook-data/git/project; cd /srv/lab/perms; cd /root/corpus; cd ~
+$ z proj            # jumps to .../git/project
+$ z perms           # jumps to /srv/lab/perms
+$ zi                # pick from everywhere you've been
+#+end_example
+
+** TODO E13.5 — yazi: a file manager in the terminal
+Open yazi in the playground. Move around, preview files, select several, copy
+them to =/tmp=, rename one, jump to a directory by name, and open a file in
+Neovim. Then use it from inside Neovim.
+You'll meet: =yazi=, =h j k l=, =SPC= select, =y= / =p= copy-paste, =r=
+rename, =/= search, =z= / =Z= jump, =.= hidden files, =q= quit, =C-n= in
+Neovim.
+*** Hint
+Keys are Vim-like: =j k= move, =l= enters a directory or opens a file, =h=
+goes up. =SPC= selects, =y= yanks, =p= pastes, =d= trashes, =r= renames, =a=
+creates (end with =/= for a directory). =/= searches the listing, =z= jumps
+with zoxide, =.= shows hidden files. =~= shows help. In the lab's Neovim, =C-n=
+opens yazi as a floating window.
+*** Solution
+#+begin_example
+$ yazi /root/workbook-data/shell/playground
+  j j l            # into notes/
+  SPC SPC          # select two reports
+  y  then  g h ... # yank, go somewhere, then p to paste
+  r                # rename the file under the cursor
+  .                # show hidden files, then find .hidden-treasure
+  q
+#+end_example
+Interactive by design; the payoff is managing files with the same keys as your
+editor.
+
+** TODO E13.6 — lazygit
+Open lazygit in a copy of the practice repository. Stage part of a file (one
+hunk, not all of it), commit, create a branch, switch between branches, and
+look at a commit's diff. Then undo a commit.
+You'll meet: =lazygit=, panels (=1=–=5=), =SPC= stage, =ENTER= to see hunks,
+=c= commit, =n= new branch, =z= undo, =?= help.
+*** Hint
+lazygit shows status, files, branches, commits and stash as panels; number keys
+jump between them. In Files, =SPC= stages a file; =ENTER= opens it so you can
+stage individual hunks or lines. =c= commits, =P= pushes, =p= pulls. In
+Branches, =n= creates one and =SPC= checks it out. =z= undoes the last action
+using the reflog (track 10's rescue tool). =?= lists keys for the current panel.
+*** Solution
+#+begin_example
+$ cp -a /root/workbook-data/git/project /tmp/lg && cd /tmp/lg
+$ printf 'x\n' >> calc.sh && printf 'y\n' >> README.md
+$ lazygit
+  2  SPC           # Files panel: stage README.md
+  c  "Update docs" ENTER
+  3  n  "try-lazygit" ENTER
+  4  ENTER         # commits panel: read a diff
+  z                # undo
+#+end_example
+lazygit runs ordinary git commands underneath; its command log (=@=) shows
+exactly which ones, which makes it a good way to learn git too.
+
+* 14. Observability & performance
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Measure, don't guess. How long does it take and where did the time go? Where
+did the memory and the disk go? Is the machine busy with CPU or waiting on the
+disk? And which of two ways is actually faster? The tools here answer those
+questions in seconds. =procs/hog.sh= from track 4 is handy for making load.
+
+** TODO E14.1 — time: real, user and sys
+Time =sleep 1=, a CPU-bound loop, and =find /nix/store -name '*.so' | wc -l=.
+Explain the three numbers for each. Then get the peak memory of a command.
+You'll meet: the =time= keyword, GNU =/usr/bin/time -v= (here
+=command time -v=), real vs user vs sys, maximum resident set size.
+*** Hint
+/real/ is wall-clock time; /user/ is CPU time spent in the program's own code;
+/sys/ is CPU time the kernel spent on its behalf (system calls, I/O). Sleeping
+uses neither. A multithreaded program can have user > real. GNU time's =-v=
+adds memory and I/O statistics; =command time= skips bash's built-in keyword.
+*** Solution
+#+begin_src bash :results output
+{ time sleep 1; } 2>&1
+{ time (i=0; while [ $i -lt 300000 ]; do i=$((i+1)); done); } 2>&1
+{ time (find /nix/store -maxdepth 3 -name '*.so' 2>/dev/null | wc -l); } 2>&1
+command time -v python3 -c 'x = bytearray(100_000_000)' 2>&1 | grep -E 'Maximum resident|Elapsed'
+#+end_src
+Bash writes =time='s report to stderr; =2>&1= on the group brings it into the
+output here.
+
+** TODO E14.2 — Memory
+How much memory does the lab have, how much is in use, and how much is really
+available? Which processes use the most? Watch a program's memory grow.
+You'll meet: =free -h=, =/proc/meminfo=, "available" vs "free", buffers and
+cache, =ps --sort=-rss=, RSS vs VSZ.
+*** Hint
+Linux uses spare memory as disk cache, so "free" is always small; "available"
+estimates what programs could get without swapping. RSS is the memory a
+process is actually using; VSZ is address space it has reserved, often much
+larger.
+*** Solution
+#+begin_src bash :results output
+free -h
+grep -E 'MemTotal|MemAvailable|^Cached' /proc/meminfo
+ps -eo pid,rss,vsz,cmd --sort=-rss | head -4 | cut -c1-80
+python3 -c 'import time; x = bytearray(200_000_000); time.sleep(3)' & p=$!; sleep 1
+ps -o pid,rss,vsz,cmd -p $p; wait $p
+#+end_src
+
+** TODO E14.3 — Disk space
+Which filesystems are how full? What are the ten biggest directories under
+=/root=, and the biggest single files in the lab? Explore =/nix/store=
+interactively.
+You'll meet: =df -h=, =df -i=, =du -sh=, =du -h -d 1 | sort -h=,
+=find -size=, =ncdu=.
+*** Hint
+=df= reports per filesystem, =du= adds up files under a directory. =du -h -d 1
+DIR | sort -h= ranks subdirectories by size. =df -i= shows inodes: a disk can
+be "full" of tiny files while space remains. =ncdu DIR= is an interactive =du=:
+arrows to navigate, =d= to delete, =q= to quit.
+*** Solution
+#+begin_src bash :results output
+df -h / /root 2>/dev/null
+df -i / | tail -1
+du -h -d 1 /root 2>/dev/null | sort -h | tail -5
+find / -xdev -type f -size +20M -exec ls -lh {} + 2>/dev/null | awk '{print $5, $9}' | sort -h | tail -3
+#+end_src
+Then try =ncdu /nix/store=: every tool in this lab, one directory each.
+
+** TODO E14.4 — Load and CPU
+Run two copies of =hog.sh= and watch the system from the outside: load
+average, per-CPU usage, run queue, context switches. What does a load of 2.0
+mean on this machine?
+You'll meet: =uptime=, =nproc=, =vmstat 1=, =mpstat -P ALL=, the columns
+=r=, =us=, =sy=, =id=, =wa=.
+*** Hint
+Load average is the average number of processes running or waiting to run,
+over 1, 5 and 15 minutes; compare it with =nproc=. =vmstat 1 5= prints a line
+per second: =r= runnable processes, =us= / =sy= user and kernel CPU, =id= idle,
+=wa= waiting on I/O. =mpstat -P ALL 1 1= breaks CPU down per core.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/procs :results output
+nproc; uptime
+./hog.sh & a=$!; ./hog.sh & b=$!
+vmstat 1 4
+mpstat -P ALL 1 1 | tail -n +4 | head -6
+kill $a $b
+#+end_src
+Two hogs on four CPUs: =r= around 2, =us= around 50%, =id= around 50%. With
+more hogs than CPUs, =r= climbs past =nproc= and everything waits.
+
+** TODO E14.5 — Disk I/O
+Write 500 MB straight to disk, bypassing the cache, while =iostat= watches.
+Then read it back twice and explain why the second read is so much faster.
+You'll meet: =dd bs= =count= =oflag=direct=, =iostat -x 1=, =%util=,
+=await=, the page cache, =sync=.
+*** Hint
+=dd if=/dev/zero of=FILE bs=1M count=500 oflag=direct= writes 500 MiB without
+the page cache, so you measure the disk. =iostat -x 1 3= shows per-device
+throughput, =await= (average ms per request) and =%util=. Reads of a file
+that's already in memory never reach the disk.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+iostat -dx 1 3 > /tmp/iostat.txt & st=$!
+dd if=/dev/zero of=/tmp/io.bin bs=1M count=500 oflag=direct 2>&1 | tail -1
+wait $st; awk '$1 == "Device" || ($1 ~ /^(vd|sd|nvme)/ && $NF + 0 > 1) {print $1, "%util=" $NF}' /tmp/iostat.txt | uniq
+dd if=/tmp/io.bin of=/dev/null bs=1M 2>&1 | tail -1
+dd if=/tmp/io.bin of=/dev/null bs=1M 2>&1 | tail -1
+rm /tmp/io.bin
+#+end_src
+
+** TODO E14.6 — hyperfine: which is faster?
+Count the lines containing "Holmes" in the corpus with =grep=, =rg=, =awk= and
+Python. Benchmark them properly, with warm-up runs, and export the results as a
+Markdown table.
+You'll meet: =hyperfine=, =--warmup=, =-N=, =--export-markdown=, mean ± σ,
+"x times faster".
+*** Hint
+Timing one run is noise. =hyperfine CMD1 CMD2= runs each many times and
+reports the mean, spread and relative speed. =--warmup 3= fills caches first.
+Quote each command as one argument.
+*** Solution
+#+begin_src bash :dir /root/corpus :results output
+hyperfine -N --warmup 3 --style basic \
+  'grep -c Holmes sherlock.txt' \
+  'rg -c Holmes sherlock.txt' \
+  "awk '/Holmes/{n++} END{print n}' sherlock.txt" \
+  "python3 -c 'print(sum(\"Holmes\" in l for l in open(\"sherlock.txt\")))'" \
+  --export-markdown /tmp/bench.md 2>&1 | grep -E 'Benchmark|Time|faster|±' | head -12
+cat /tmp/bench.md
+#+end_src
+Python pays tens of milliseconds just to start; for one small file that
+dominates everything else. Measure with realistic inputs before choosing a
+tool for speed.
+
+** TODO E14.7 — perf: counting what the CPU does
+Count cycles, instructions and cache misses for a C program and compare two
+versions of a loop. Then see which functions a program spends its time in.
+You'll meet: =perf stat=, =perf record= / =perf report=, instructions per
+cycle, =<not supported>=.
+*** Hint
+=perf stat CMD= reads the CPU's hardware counters while =CMD= runs. =perf
+record -g CMD= samples where the program is, and =perf report --stdio= shows
+the hottest functions. Inside a VM some hardware counters may be missing; perf
+prints =<not supported>= for those, and the software ones (task-clock,
+context-switches) still work.
+*** Solution
+#+begin_src bash :dir /tmp :results output
+cat > sum.c <<'C'
+#include <stdio.h>
+#define N 4000
+static int m[N][N];
+int main(int argc, char **argv) {
+    long s = 0;
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            s += argc > 1 ? m[j][i] : m[i][j];
+    printf("%ld\n", s);
+    return 0;
+}
+C
+gcc -O1 -g sum.c -o sum
+perf stat -e task-clock,cycles,instructions,cache-misses ./sum 2>&1 | grep -E 'task-clock|cycles|instructions|cache-misses|elapsed'
+perf stat -e task-clock,cache-misses ./sum columns 2>&1 | grep -E 'task-clock|cache-misses|elapsed'
+#+end_src
+Walking the matrix by columns jumps across memory and misses the cache on
+almost every access; by rows it streams. Same work, very different speed.
+
+* 15. Auditing with auditd
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The Linux audit system records security-relevant events inside the kernel:
+who read or changed a file, who ran which program, which access was denied,
+tied to the user who originally logged in even after =sudo=. It's how servers
+answer "who changed =/etc/passwd= and when?" and it's a requirement in most
+security standards. =auditctl= loads rules into the kernel, =auditd= writes
+events to =/var/log/audit/audit.log=, and =ausearch= and =aureport= read them.
+
+Each lab is its own VM with its own kernel, so experimenting here can't affect
+anything else. The lab's audit config is in =/etc/audit/auditd.conf=.
+
+** TODO E15.1 — Is auditing on?
+Check whether the kernel's audit system is enabled and whether a daemon is
+collecting events. Start =auditd=, enable auditing, and confirm events are
+being written.
+You'll meet: =auditctl -s=, =auditctl -e 1=, =auditd -c=, =pid=,
+=/var/log/audit/audit.log=.
+*** Hint
+=auditctl -s= shows the kernel's status: =enabled 1= means on, =pid= is the
+daemon receiving events (0 means nobody). There's no service manager in a lab,
+so start the daemon yourself: =auditd -c /etc/audit= (it backgrounds itself).
+*** Solution
+#+begin_src bash :results output
+pgrep -x auditd > /dev/null || auditd -c /etc/audit
+sleep 1
+auditctl -e 1 > /dev/null
+auditctl -s | grep -E '^(enabled|pid|backlog)'
+tail -2 /var/log/audit/audit.log | cut -c1-110
+#+end_src
+
+** TODO E15.2 — Watch a file
+Put a watch on =/etc/passwd= for writes and attribute changes, tagged with a
+key. Add a user =carol= (and remove her again). Then find exactly which
+programs touched the file, when, and as whom.
+You'll meet: =auditctl -w PATH -p wa -k KEY=, =auditctl -l=, =ausearch -k=,
+=-i= (interpret), =--start recent=.
+*** Hint
+=-w= watches a path; =-p= picks the access types: =r= read, =w= write, =x=
+execute, =a= attribute change. =-k= tags matching events with a key you can
+search for. =ausearch -k KEY -i= shows them with numbers turned into names;
+=--start recent= limits it to the last ten minutes.
+*** Solution
+#+begin_src bash :results output
+auditctl -w /etc/passwd -p wa -k passwd-changes
+auditctl -l
+useradd carol && userdel carol
+sleep 1
+ausearch -k passwd-changes -i --start recent 2>/dev/null | grep -oE 'type=SYSCALL.*' | grep -oE 'comm=[^ ]+|exe=[^ ]+|uid=[^ ]+' | sort | uniq -c
+#+end_src
+
+** TODO E15.3 — Who read the secret?
+Watch the private secret in =/srv/lab/perms= for reads. Read it as root; then
+let alice "log in" and read it through =sudo=; then let bob try. Find the
+reads, and show that the log names alice even though =sudo= made her root: the
+/audit UID/ (=auid=) survives =sudo=. Why is bob's attempt missing?
+You'll meet: =-p r=, =success=yes/no=, =uid= vs =auid=, =ausearch -ui=,
+=--success=.
+*** Hint
+Every audit event carries =uid= (who the process runs as now) and =auid= (who
+originally logged in). Login programs write your UID to =/proc/self/loginuid=
+once; after that nothing, including =sudo= and =su=, can change it. A lab shell
+opened with =container exec= never logged in, so root's =auid= is "unset". The
+solution simulates alice's login the same way =login= does it. A watch on a
+file only fires when something actually reaches the file.
+*** Solution
+#+begin_src bash :results output
+auditctl -w /srv/lab/perms/private/secret.txt -p r -k secret-read
+cat /srv/lab/perms/private/secret.txt > /dev/null
+bash -c 'echo "$(id -u alice)" > /proc/self/loginuid && exec sudo -u alice sudo cat /srv/lab/perms/private/secret.txt' > /dev/null
+sudo -u bob cat /srv/lab/perms/private/secret.txt 2>/dev/null
+sleep 1
+ausearch -k secret-read -i --start recent 2>/dev/null | grep -oE 'type=SYSCALL.*' | grep -oE 'success=[a-z]+|auid=[^ ]+ uid=[^ ]+|comm=[^ ]+' | paste - - - | sort | uniq -c
+#+end_src
+The second read shows =auid=alice uid=root=: root did it, on alice's behalf.
+Bob's attempt is absent because he was stopped at the =private= directory and
+never reached the file; E15.5 catches failures like his.
+
+** TODO E15.4 — Audit every command run
+Log every program execution with a syscall rule. Run a few commands, then list
+exactly which ones ran with their full command lines, and get a summary of the
+most-run executables.
+You'll meet: =auditctl -a always,exit -F arch=b64 -S execve -k KEY=,
+=PROCTITLE= / =EXECVE= records, =aureport -x --summary=.
+*** Hint
+Syscall rules have the form =-a always,exit -F FIELD=VALUE -S SYSCALL=.
+=arch=b64= matches 64-bit programs (both amd64 and arm64). Every =execve= is a
+program starting. The =EXECVE= record holds its arguments; =aureport -x
+--summary= counts executables.
+*** Solution
+#+begin_src bash :results output
+auditctl -a always,exit -F arch=b64 -S execve -k exec
+ls /tmp > /dev/null; date > /dev/null; uname -a > /dev/null
+sleep 1
+ausearch -k exec -i --start recent 2>/dev/null | grep -oE 'proctitle=.*' | sed 's/proctitle=//' | grep -E '^(ls /tmp|date|uname -a)'
+aureport -x --summary -i --start recent 2>/dev/null | head -8
+#+end_src
+Execution logging is noisy; real systems restrict it with more =-F= filters
+(one user, one directory, only root).
+
+** TODO E15.5 — Catch denied access
+Record every file open that fails with "Permission denied", whoever tries it.
+Let bob poke around =/srv/lab/perms=, then report the denials by user and file.
+You'll meet: =-S openat -F exit=-EACCES=, =-F auid>=1000=, =aureport -f
+--failed=, =ausearch --success no=.
+*** Hint
+=-F exit=-EACCES= matches only calls that failed with EACCES. Many attacks
+start with a burst of these. =aureport -f --failed -i= summarises failed file
+accesses; =ausearch --success no -k KEY= lists them.
+*** Solution
+#+begin_src bash :results output
+auditctl -a always,exit -F arch=b64 -S openat -F exit=-EACCES -k denied
+for f in private/secret.txt listonly/visible.txt report.txt; do sudo -u bob cat /srv/lab/perms/$f > /dev/null 2>&1; done
+sleep 1
+ausearch -k denied --success no -i --start recent 2>/dev/null | grep -oE 'type=PATH.*' | grep -oE 'name=/srv[^ ]+' | sort | uniq -c
+aureport -f --failed -i --start recent 2>/dev/null | tail -4
+#+end_src
+
+** TODO E15.6 — Clean up and make rules permanent
+List the rules you added, remove one, then remove them all. Write your
+favourite rules to a file and load it in one go, the way a server does at boot.
+Why should you think twice about =-e 2=?
+You'll meet: =auditctl -l=, =-W= (remove a watch), =-d= (remove a rule),
+=-D= (remove all), =auditctl -R FILE=, =/etc/audit/rules.d=, =-e 2=.
+*** Hint
+Removing a rule means repeating it with =-W= instead of =-w=, or =-d= instead
+of =-a=. =-D= deletes everything. Rule files contain the same arguments,
+without =auditctl=, one rule per line; =auditctl -R FILE= loads them. =-e 2=
+makes the configuration immutable until reboot, so nobody (not even root) can
+turn auditing off; test your rules before locking them.
+*** Solution
+#+begin_src bash :results output
+auditctl -l
+auditctl -W /etc/passwd -p wa -k passwd-changes
+auditctl -D
+auditctl -l
+mkdir -p /etc/audit/rules.d
+printf -- '-w /etc/passwd -p wa -k passwd-changes\n-w /etc/sudoers -p wa -k sudoers\n' > /etc/audit/rules.d/lab.rules
+auditctl -R /etc/audit/rules.d/lab.rules
+auditctl -l
+#+end_src
+
+* 16. SQLite
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+A complete SQL database in a single file, with no server to run. It's inside
+your phone, your browser and most desktop apps, and it's the quickest way to
+ask real questions of CSV files and logs. You'll load the corpus into a
+database, query it, join it, index it, and drive it from the shell, Python and
+Org. SQL blocks here run through Babel with =sqlite= blocks; the database lives
+at =/root/workbook-data/sql/lab.db=.
+
+** TODO E16.1 — Import a CSV
+Create =lab.db=, import =employees.csv= and =depts.csv= as tables, look at the
+schema SQLite inferred, and count the rows.
+You'll meet: =sqlite3 FILE=, dot-commands (=.import --csv=, =.tables=,
+=.schema=, =.mode=, =.headers=), =SELECT count(*)=.
+*** Hint
+=sqlite3 lab.db= opens (or creates) a database. Lines starting with =.= are
+commands to the shell itself; everything else is SQL ending in =;=.
+=.import --csv FILE TABLE= creates the table from the header row if it doesn't
+exist. Imported columns are text unless you create the table first with
+types.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/sql :results output
+rm -f lab.db
+sqlite3 lab.db <<'SQL'
+CREATE TABLE employees (id INTEGER PRIMARY KEY, first TEXT, last TEXT, dept TEXT, salary INTEGER, hired DATE);
+.import --csv --skip 1 /root/corpus/employees.csv employees
+.import --csv depts.csv depts
+.tables
+.schema depts
+SELECT count(*) FROM employees;
+SQL
+#+end_src
+Creating =employees= first makes =salary= a real integer, so sorting and
+averaging behave. =depts= was created from the header, so every column is text.
+
+** TODO E16.2 — SELECT, WHERE, ORDER BY
+Find the ten best-paid employees; everyone hired in 2024; everyone whose last
+name starts with "T"; and the number of distinct first names. Show results as
+an aligned table.
+You'll meet: =SELECT … FROM … WHERE … ORDER BY … LIMIT=, =LIKE=, =BETWEEN=,
+=DISTINCT=, =.mode box=.
+*** Hint
+Conditions go in =WHERE=; strings use single quotes. =LIKE 'T%'= matches a
+prefix. =hired BETWEEN '2024-01-01' AND '2024-12-31'= works because ISO dates
+sort as text. =count(DISTINCT col)= counts unique values.
+*** Solution
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT first, last, dept, salary FROM employees ORDER BY salary DESC LIMIT 5;
+#+end_src
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT count(*) AS hired_2024,
+       (SELECT count(*) FROM employees WHERE last LIKE 'T%') AS last_starts_T,
+       (SELECT count(DISTINCT first) FROM employees) AS distinct_first
+FROM employees WHERE hired BETWEEN '2024-01-01' AND '2024-12-31';
+#+end_src
+
+** TODO E16.3 — GROUP BY: the salary question, one more time
+Average, minimum and maximum salary per department, highest average first, to
+two decimals. Then only departments with more than 170 people. Compare with
+awk (E8.3), Python and Lisp.
+You'll meet: =GROUP BY=, =avg= / =min= / =max= / =count=, =round=, =HAVING=.
+*** Hint
+=GROUP BY dept= makes one output row per department; aggregate functions
+summarise each group. =WHERE= filters rows before grouping, =HAVING= filters
+groups after.
+*** Solution
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT dept, count(*) AS people, round(avg(salary), 2) AS avg_salary,
+       min(salary) AS min, max(salary) AS max
+FROM employees GROUP BY dept ORDER BY avg_salary DESC;
+#+end_src
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT dept, count(*) AS people FROM employees GROUP BY dept HAVING count(*) > 170;
+#+end_src
+
+** TODO E16.4 — JOIN
+List each department with its manager, floor and head count. Then find every
+employee on floor 1, and any department in =employees= with no row in =depts=.
+You'll meet: =JOIN … ON=, =LEFT JOIN=, table aliases, =IS NULL=.
+*** Hint
+=FROM employees e JOIN depts d ON e.dept = d.dept= pairs each employee with
+their department's row. =LEFT JOIN= keeps every left-hand row even without a
+match, filling the right side with =NULL=; =WHERE d.dept IS NULL= then finds
+the unmatched ones.
+*** Solution
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT d.dept, d.manager, d.floor, count(*) AS people
+FROM employees e JOIN depts d ON e.dept = d.dept
+GROUP BY d.dept ORDER BY d.floor;
+#+end_src
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+SELECT count(*) AS on_floor_1 FROM employees e JOIN depts d ON e.dept = d.dept WHERE d.floor = '1';
+SELECT DISTINCT e.dept AS no_dept_row FROM employees e LEFT JOIN depts d ON e.dept = d.dept WHERE d.dept IS NULL;
+#+end_src
+The second query returns nothing: every department has a row. Try deleting
+one (=DELETE FROM depts WHERE dept='ops';=) and run it again.
+
+** TODO E16.5 — Logs into SQL
+Load =access.log= into a table with columns for IP, day, hour, method, path,
+status and bytes. Then find: the top 5 IPs by bytes, status counts, requests per
+hour of the day, and the error rate per path.
+You'll meet: turning text into CSV with awk, =.import= from stdin,
+=substr=, =CASE WHEN=, =sum()=, computed percentages.
+*** Hint
+awk can split each log line into the fields you need and print CSV; =.import
+--csv /dev/stdin TABLE= reads it from a pipe. In SQL, =sum(status >= 500)=
+counts server errors, because a comparison is 1 or 0.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/sql :results output
+sqlite3 lab.db 'DROP TABLE IF EXISTS hits; CREATE TABLE hits (ip TEXT, day INTEGER, hour INTEGER, method TEXT, path TEXT, status INTEGER, bytes INTEGER);'
+awk '{ split($4, t, /[\[\/:]/); gsub(/"/, "", $6); print $1 "," t[2] "," t[5] "," $6 "," $7 "," $9 "," $10 }' /root/corpus/access.log \
+  | sqlite3 lab.db '.import --csv /dev/stdin hits'
+sqlite3 -box lab.db 'SELECT ip, sum(bytes) AS bytes FROM hits GROUP BY ip ORDER BY bytes DESC LIMIT 3;'
+sqlite3 -box lab.db 'SELECT path, count(*) AS hits, round(100.0 * sum(status >= 500) / count(*), 1) AS pct_5xx FROM hits GROUP BY path ORDER BY pct_5xx DESC LIMIT 4;'
+#+end_src
+One path fails on every request. In a real log that's the first thing you'd
+investigate; here it's how the synthetic log was generated.
+
+** TODO E16.6 — Indexes and query plans
+Time a query that looks up employees by last name, look at its query plan, add
+an index, and compare both.
+You'll meet: =.timer on=, =EXPLAIN QUERY PLAN=, =SCAN= vs =SEARCH … USING
+INDEX=, =CREATE INDEX=.
+*** Hint
+Without an index SQLite reads every row (=SCAN=). An index is a sorted copy of
+one or more columns that lets it jump straight to matches (=SEARCH=). With
+1,000 rows the difference is tiny; with millions it's everything. Indexes cost
+space and slow down writes.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/sql :results output
+sqlite3 lab.db "DROP INDEX IF EXISTS idx_last; EXPLAIN QUERY PLAN SELECT * FROM employees WHERE last = 'Turing';"
+sqlite3 lab.db "CREATE INDEX idx_last ON employees(last); EXPLAIN QUERY PLAN SELECT * FROM employees WHERE last = 'Turing';"
+#+end_src
+
+** TODO E16.7 — JSON inside SQLite
+Without jq or Python, count =tickets.json= by status and find the assignee with
+the most open tickets, reading the JSON file directly from SQL.
+You'll meet: =readfile()=, =json_each()=, =json_extract()= / =->>=,
+table-valued functions.
+*** Hint
+The =sqlite3= shell's =readfile(PATH)= returns a file's contents.
+=json_each(JSON)= turns a JSON array into rows, one per element, with the
+element in =value=. =value ->> '$.status'= (or =json_extract(value,
+'$.status')=) pulls out a field.
+*** Solution
+#+begin_src bash :results output
+sqlite3 -box :memory: "SELECT value ->> '\$.status' AS status, count(*) AS n
+  FROM json_each(readfile('/root/corpus/tickets.json')) GROUP BY status;"
+sqlite3 :memory: "SELECT value ->> '\$.assignee', count(*) AS n
+  FROM json_each(readfile('/root/corpus/tickets.json'))
+  WHERE value ->> '\$.status' = 'open' GROUP BY 1 ORDER BY n DESC LIMIT 1;"
+#+end_src
+
+** TODO E16.8 — SQLite from the shell and from Python
+Use a query's output directly in a pipeline as CSV. Then run the per-department
+query from Python with parameters, never by pasting values into the SQL string.
+You'll meet: =sqlite3 -csv= / =-json=, =sqlite3 DB 'SQL'= one-shots,
+Python's =sqlite3= module, =?= placeholders, SQL injection.
+*** Hint
+=sqlite3 -csv lab.db 'SELECT …'= prints CSV for other tools; =-json= prints
+JSON for jq. In Python, =con.execute(sql, (value,))= passes values separately
+from the SQL text. Building SQL with string formatting lets a crafted value
+rewrite your query: that's SQL injection.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/sql :results output
+sqlite3 -csv lab.db 'SELECT dept, count(*) FROM employees GROUP BY dept' | sort -t, -k2 -rn | head -2
+sqlite3 -json lab.db "SELECT dept, manager FROM depts WHERE floor = '1'" | jq -c '.[]'
+python3 - <<'PY'
+import sqlite3
+con = sqlite3.connect("/root/workbook-data/sql/lab.db")
+for dept in ["eng", "ops'; DROP TABLE employees; --"]:
+    n, avg = con.execute("SELECT count(*), round(avg(salary), 2) FROM employees WHERE dept = ?", (dept,)).fetchone()
+    print(f"{dept!r}: {n} people, avg {avg}")
+PY
+#+end_src
+The second "department" is an injection attempt; with a placeholder it's just a
+string that matches nothing, and the table survives.
+
+* 17. perl
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -926,7 +2919,7 @@ with back-references, real hashes, and slurp/multi-line matching. You'll
 discover the =-n -p -a -F -l -i= one-liner flags first, then graduate to a
 script with a nested data structure.
 
-** TODO E5.1 — grep, reimplemented in Perl
+** TODO E17.1 — grep, reimplemented in Perl
 Print lines of =sherlock.txt= matching /Holmes/, using =perl= not =grep=.
 You'll meet: =-n=, =-e=, the implicit =$_=.
 *** Hint
@@ -937,7 +2930,7 @@ You'll meet: =-n=, =-e=, the implicit =$_=.
 perl -ne 'print if /Holmes/' sherlock.txt
 #+end_src
 
-** TODO E5.2 — sed, reimplemented in Perl
+** TODO E17.2 — sed, reimplemented in Perl
 Substitute Holmes→Poirot across the file.
 You'll meet: =-p= (print each line automatically), and =-i= for in-place.
 *** Hint
@@ -948,7 +2941,7 @@ edits the stream.
 perl -pe 's/Holmes/Poirot/g' sherlock.txt
 #+end_src
 
-** TODO E5.3 — awk, reimplemented: sum the salary column
+** TODO E17.3 — awk, reimplemented: sum the salary column
 You'll meet: autosplit =-a=, custom split =-F=, =@F=, =-l=, the line number =$.=.
 *** Hint
 =-a= splits each line into =@F=; =-F,= sets the separator; salary is =$F[4]=;
@@ -958,7 +2951,7 @@ skip the header with =$. > 1=; sum and print in an =END{}=.
 perl -F, -lane '$s += $F[4] if $. > 1; END { print $s }' employees.csv
 #+end_src
 
-** TODO E5.4 — Word frequency with a hash
+** TODO E17.4 — Word frequency with a hash
 Top 10 words of a book.
 You'll meet: hashes =%c=, a global match =//g= in list context, =lc=, sorting keys.
 *** Hint
@@ -971,7 +2964,7 @@ perl -lne 'for (/([A-Za-z]+)/g){ $c{lc $1}++ }
                 print "$c{$_}\t$_" for @k[0..9] }' moby-dick.txt
 #+end_src
 
-** TODO E5.5 — Parse the access log with named captures
+** TODO E17.5 — Parse the access log with named captures
 Print "IP CODE BYTES" for each request using one regex with *named* groups.
 You'll meet: =(?<name>...)= and the =%+= hash.
 *** Hint
@@ -982,7 +2975,7 @@ perl -ne 'print "$+{ip} $+{code} $+{bytes}\n"
           if /^(?<ip>\S+).*" (?<code>\d{3}) (?<bytes>\d+)/' access.log | head
 #+end_src
 
-** TODO E5.6 — Collapse accidental doubled words
+** TODO E17.6 — Collapse accidental doubled words
 Turn "the the game is is afoot" into "the game is afoot".
 You'll meet: back-references *inside a substitution*, word boundaries.
 *** Hint
@@ -992,7 +2985,7 @@ You'll meet: back-references *inside a substitution*, word boundaries.
 echo 'the the game is is is afoot' | perl -pe 's/\b(\w+)(\s+\1\b)+/$1/g'
 #+end_src
 
-** TODO E5.7 — A real script: per-department roster
+** TODO E17.7 — A real script: per-department roster
 Read =employees.csv=, build a hash-of-arrays (dept → list of "First Last"), and
 print each department with its members, sorted.
 You'll meet: references, =push @{ $h{$k} }=, nested iteration — Perl's data structures.
@@ -1017,7 +3010,7 @@ for my $dept (sort keys %roster) {
 #+end_src
 Run with =C-c C-c=, or tangle and =perl /root/workbook-data/roster.pl=.
 
-** TODO E5.8 — Multi-line matching (slurp mode)
+** TODO E17.8 — Multi-line matching (slurp mode)
 Find sentences that span two lines in a book (a lowercase word, newline, more
 words, then a period).
 You'll meet: =-0777= slurp, and the =/s= =/m= regex modifiers.
@@ -1030,7 +3023,7 @@ perl -0777 -ne 'while (/([a-z]+\s*\n[^.\n]{0,60}\.)/g){ ($x=$1)=~s/\s+/ /g; prin
   sherlock.txt | head
 #+end_src
 
-* 6. python
+* 18. python
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1039,7 +3032,7 @@ When data is structured (JSON), or the logic outgrows a one-liner, Python is
 the reach. You'll discover the batteries — =json=, =csv=, =re=, =collections=,
 =pathlib=, =argparse=, =dataclasses= — and the shape of a real, testable module.
 
-** TODO E6.1 — Count tickets by status
+** TODO E18.1 — Count tickets by status
 Load =tickets.json= properly and tally the statuses.
 You'll meet: =json.load=, =collections.Counter=.
 *** Hint
@@ -1051,7 +3044,7 @@ data = json.load(open('/root/corpus/tickets.json'))
 print(collections.Counter(t['status'] for t in data))
 #+end_src
 
-** TODO E6.2 — Average salary per department, the Python way
+** TODO E18.2 — Average salary per department, the Python way
 You'll meet: =csv.DictReader=, =collections.defaultdict=.
 *** Hint
 =DictReader= yields dict rows keyed by header. Accumulate salaries into
@@ -1066,9 +3059,9 @@ for dept in sorted(by):
     xs = by[dept]
     print(f"{dept:9} {sum(xs)//len(xs):>7} ({len(xs)} people)")
 #+end_src
-Same answer as awk E3.3 — three tools, one truth. Diff them.
+Same answer as awk E8.3 — three tools, one truth. Diff them.
 
-** TODO E6.3 — Top talkers from the log, with regex
+** TODO E18.3 — Top talkers from the log, with regex
 Parse =access.log= with the =re= module; sum bytes per IP; print the top 5.
 You'll meet: =re.compile=, named groups =(?P<name>...)=, =Counter.most_common=.
 *** Hint
@@ -1086,7 +3079,7 @@ for ip, b in tot.most_common(5):
     print(f"{b:>8} {ip}")
 #+end_src
 
-** TODO E6.4 — A CLI search tool
+** TODO E18.4 — A CLI search tool
 =argparse=-driven: search the corpus for a pattern, optional =--ignore-case=.
 You'll meet: =argparse=, =pathlib=, exit codes.
 *** Hint
@@ -1114,7 +3107,7 @@ if __name__ == "__main__":
 #+end_src
 Tangle, then: =python3 /root/workbook-data/search.py -i holmes=.
 
-** TODO E6.5 — Stream a big file with a generator
+** TODO E18.5 — Stream a big file with a generator
 Yield only the matching lines of =access.log= without loading it all; count 404s.
 You'll meet: generator functions =yield=, lazy iteration.
 *** Hint
@@ -1131,7 +3124,7 @@ n = sum(1 for _ in matches('/root/corpus/access.log', '" 404 '))
 print("404s:", n)
 #+end_src
 
-** TODO E6.6 — Model a ticket with a dataclass
+** TODO E18.6 — Model a ticket with a dataclass
 Load tickets into =Ticket= objects, print the 5 highest-priority open ones.
 You'll meet: =@dataclass=, =sorted(key=...)=, comprehensions.
 *** Hint
@@ -1150,7 +3143,7 @@ top = sorted((t for t in tix if t.status == 'open'),
 for t in top: print(t)
 #+end_src
 
-** TODO E6.7 — A testable module
+** TODO E18.7 — A testable module
 Turn "word frequency" into =wordfreq.py= with a function and a =unittest=, run
 the test.
 You'll meet: =if __name__ == "__main__"=, =unittest=, module structure.
@@ -1171,7 +3164,7 @@ if __name__ == "__main__":
 #+end_src
 Tangle, then =python3 /root/workbook-data/wordfreq.py=.
 
-* 7. C
+* 19. C
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1181,7 +3174,7 @@ Down to the metal. You'll discover that the compiler is a teacher (=-Wall
 ASan), and that structs + function pointers + =qsort= are how C does what awk
 did in one line. The broken programs from *Setup* live in =/root/workbook-data/c=.
 
-** TODO E7.1 — Hello, warnings
+** TODO E19.1 — Hello, warnings
 Compile a hello program with =-Wall -Wextra=, then introduce an unused variable
 and a format-mismatch and read what the compiler says.
 You'll meet: warning flags as a feedback loop.
@@ -1203,7 +3196,7 @@ C
 gcc -Wall -Wextra hello.c -o hello && ./hello
 #+end_src
 
-** TODO E7.2 — Reimplement =wc -l=
+** TODO E19.2 — Reimplement =wc -l=
 Read a file and count newlines. Match coreutils exactly.
 You'll meet: =FILE*=, =fopen=, =fgetc=, =argv=.
 *** Hint
@@ -1229,7 +3222,7 @@ gcc -Wall -Wextra wcl.c -o wcl
 echo "coreutils: $(wc -l < /root/corpus/employees.csv)"
 #+end_src
 
-** TODO E7.3 — Catch a heap bug with valgrind
+** TODO E19.3 — Catch a heap bug with valgrind
 Compile =leaky.c= (from Setup), run it under valgrind, read the report, fix both
 problems.
 You'll meet: valgrind's "Invalid write" and "definitely lost".
@@ -1258,7 +3251,7 @@ gcc -g -Wall leaky_fixed.c -o leaky_fixed
 valgrind --leak-check=full --error-exitcode=1 ./leaky_fixed 2>&1 | grep -E 'ERROR SUMMARY'
 #+end_src
 
-** TODO E7.4 — Catch a stack bug with the sanitizer
+** TODO E19.4 — Catch a stack bug with the sanitizer
 =offbyone.c= writes one past an array. valgrind often misses stack bugs — use
 AddressSanitizer instead.
 You'll meet: =-fsanitize=address=, and when to prefer it over valgrind.
@@ -1274,7 +3267,7 @@ sed 's/i <= 5/i < 5/' offbyone.c > offbyone_fixed.c
 gcc -g -fsanitize=address offbyone_fixed.c -o offbyone_fixed && ./offbyone_fixed
 #+end_src
 
-** TODO E7.5 — Sort employees by salary with =qsort=
+** TODO E19.5 — Sort employees by salary with =qsort=
 Parse =employees.csv= into an array of structs and sort descending by salary.
 You'll meet: =struct=, =qsort=, a comparator function pointer.
 *** Hint
@@ -1314,7 +3307,7 @@ gcc -g -Wall -Wextra sortemp.c -o sortemp && ./sortemp
 #+end_src
 awk did this in E3.x with one line — now you know what it does underneath.
 
-** TODO E7.6 — A Makefile, then a CMakeLists
+** TODO E19.6 — A Makefile, then a CMakeLists
 Turn your growing =c/= directory into a =make=-built project, then do the same
 with cmake and an out-of-source build.
 You'll meet: =make= targets & implicit rules; =cmake= configure/build.
@@ -1343,10 +3336,10 @@ CM
 cmake -S . -B build >/dev/null && cmake --build build >/dev/null && echo "cmake built into build/"
 #+end_src
 
-** TODO E7.7 — Give your editor real understanding (bear + clangd)
+** TODO E19.7 — Give your editor real understanding (bear + clangd)
 Generate =compile_commands.json= so =clangd= (hence Emacs/nvim LSP) knows how
 each file is compiled.
-You'll meet: =bear=, =compile_commands.json= — the bridge to track 8.
+You'll meet: =bear=, =compile_commands.json= — the bridge to track 20.
 *** Hint
 =bear -- make -B= records the exact compiler invocations. clangd reads the
 resulting =compile_commands.json= automatically.
@@ -1360,7 +3353,7 @@ head -c 300 compile_commands.json; echo
 Now open =sortemp.c= in Emacs (=M-x eglot=) and hover a symbol — that works
 because of this file.
 
-* 8. Emacs & Elisp
+* 20. Emacs & Elisp
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1368,23 +3361,23 @@ because of this file.
 You've been living in Emacs this whole time; now bend it. You'll discover that
 Org Babel ran every block above, that Emacs's regex engine is its *own dialect*,
 that keyboard macros are a poor man's script, and that Elisp lets you grow new
-commands — culminating in re-solving track 3's word-frequency in Lisp.
+commands — culminating in re-solving track 8's word-frequency in Lisp.
 
 Do these interactively in Emacs, not as shell blocks.
 
-** TODO E8.1 — You already ran code: prove it
+** TODO E20.1 — You already ran code: prove it
 Re-run any =bash= block above with =C-c C-c= and watch =#+RESULTS:= appear.
 Then =C-c C-v t= to /tangle/ every =:tangle= block to disk at once.
 You'll meet: Org Babel evaluation, =#+RESULTS:=, tangling.
 *** Hint
-Point at a block from track 3 and =C-c C-c=. For tangling the whole file:
+Point at a block from track 8 and =C-c C-c=. For tangling the whole file:
 =org-babel-tangle= (=C-c C-v t=). Check =/root/workbook-data= for the =.sh/.pl/.py=
 files that appear.
 *** Solution
 No code — this is muscle memory. Blocks run in the directory given by =:dir=
 (for bash, the file-wide default is =/root/corpus=, set at the top of this file).
 
-** TODO E8.2 — Reformat a column with a keyboard macro
+** TODO E20.2 — Reformat a column with a keyboard macro
 In =employees.csv= (open it with =SPC . /root/corpus/employees.csv=),
 record a macro that turns the first data line's =id,first,last= into
 =last, first (#id)=, then apply it to the next 20 lines.
@@ -1398,7 +3391,7 @@ Macros are a discovery exercise; there is no single "answer". The insight: a
 macro is a recorded edit you replay — a script made of keystrokes, useful
 exactly when writing awk would be overkill.
 
-** TODO E8.3 — Emacs regex is NOT PCRE
+** TODO E20.3 — Emacs regex is NOT PCRE
 Use =M-x query-replace-regexp= (=C-M-%=) on a book buffer to swap first/last of
 "Holmes, Sherlock" style names. Notice the parenthesis escaping.
 You'll meet: Emacs regex syntax — literal =(= matches a paren; =\(...\)= groups.
@@ -1411,7 +3404,7 @@ The lesson is the friction itself: after a week of =grep -E=/=perl=, Emacs's
 =\(...\)= feels backwards. Keep =SPC h f re-search-forward= and =M-x
 regexp-builder= (=re-builder=) handy.
 
-** TODO E8.4 — =occur= vs grep
+** TODO E20.4 — =occur= vs grep
 With a book open, =M-x occur= for =Holmes=. Then =M-x rgrep= across the corpus.
 Compare navigating hits in-buffer vs across files.
 You'll meet: =occur=, =grep-mode= buffers, =next-error= (=M-g n=).
@@ -1421,9 +3414,9 @@ gives a =*grep*= buffer you step through with =M-g n= / =M-g p=.
 *** Solution
 Interactive. Takeaway: =occur= is grep for the buffer you're in; =grep-mode=
 turns file-wide search results into a navigable list — the editor-native version
-of track 1.
+of track 6.
 
-** TODO E8.5 — Evaluate Lisp in place
+** TODO E20.5 — Evaluate Lisp in place
 In =*scratch*= (or here), type =(+ 1 2)= and =C-x C-e=. Then evaluate
 =(shell-command-to-string "awk 'END{print NR}' /root/corpus/access.log")=.
 You'll meet: =C-x C-e=, the =*Messages*= echo, calling the shell from Lisp.
@@ -1437,7 +3430,7 @@ output as a string — Lisp gluing to the tools you already know.
 #+end_src
 
 
-** TODO E8.6 — Write your first interactive command
+** TODO E20.6 — Write your first interactive command
 Define =count-words-region= that reports the word count of the selected region
 in the echo area, and bind it to =C-c w=.
 You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
@@ -1454,7 +3447,7 @@ You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
 #+end_src
 Evaluate the block (=C-c C-c=), select some text, press =C-c w=.
 
-** TODO E8.7 — Word frequency, in Elisp (capstone of the language tracks)
+** TODO E20.7 — Word frequency, in Elisp (capstone of the language tracks)
 Write =corpus-word-freq= that reads a corpus file into a temp buffer, tallies
 words in a hash table, and shows the top 15 in a new buffer. You've now done
 this in grep+sort, awk, perl, and python — do it in Lisp.
@@ -1492,7 +3485,7 @@ Five implementations, one algorithm. That comparison — pipeline vs field-tool
 vs scripting-language vs systems-language vs editor-extension — is the real
 lesson of the whole workbook.
 
-* 9. Nix
+* 21. Nix
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1504,7 +3497,7 @@ into a first-class system command.
 
 Work against your real flake in =~/nixlab= (or =/etc/nixos= on the box).
 
-** TODO E9.1 — Add a tool the declarative way
+** TODO E21.1 — Add a tool the declarative way
 Add =hyperfine= (a benchmarking tool) to =toolchain.nix=, rebuild, and use it to
 race =grep= vs =awk= on the 404 count.
 You'll meet: the one true install path on NixOS — edit config, rebuild.
@@ -1519,7 +3512,7 @@ hyperfine "grep -cE '\" 404 ' /root/corpus/access.log" \
   || echo "add hyperfine to toolchain.nix and ./lab-ctl.sh rebuild first"
 #+end_src
 
-** TODO E9.2 — Explore packages in the repl
+** TODO E21.2 — Explore packages in the repl
 Open =nix repl=, load nixpkgs, and inspect a package: its version, its store
 path.
 You'll meet: =nix repl=, attribute sets, =:p=.
@@ -1532,7 +3525,7 @@ echo ':p builtins.attrNames { a = 1; b = 2; }' | nix repl 2>/dev/null | tail -3 
   || echo "run interactively: nix repl nixpkgs  then  pkgs.hello.version"
 #+end_src
 
-** TODO E9.3 — Which package provides a binary?
+** TODO E21.3 — Which package provides a binary?
 You want =pstree= but don't know its package. Find it.
 You'll meet: =nix search=, and package-vs-binary name mismatches.
 *** Hint
@@ -1543,7 +3536,7 @@ differ (=pstree= lives in =psmisc=).
 nix search nixpkgs pstree 2>/dev/null | head || echo "nix search nixpkgs pstree"
 #+end_src
 
-** TODO E9.4 — Time-travel with generations
+** TODO E21.4 — Time-travel with generations
 Make a trivial config change, rebuild, then roll back — and see both generations
 listed.
 You'll meet: system generations, =--rollback=, the profiles directory.
@@ -1557,8 +3550,8 @@ nix-env --list-generations -p /nix/var/nix/profiles/system 2>/dev/null | tail -5
   || echo "run on the box as root"
 #+end_src
 
-** TODO E9.5 — Turn a script into a system command
-Package your =search.sh= (from track 4) as a proper =corpus-search= binary using
+** TODO E21.5 — Turn a script into a system command
+Package your =search.sh= (from track 9) as a proper =corpus-search= binary using
 =writeShellScriptBin=, and add it to =systemPackages=.
 You'll meet: trivial builders — Nix wrapping a script into the PATH.
 *** Hint
@@ -1578,7 +3571,7 @@ environment.systemPackages = with pkgs; [
 Referencing =${gnugrep}= instead of bare =grep= is the Nix habit: the script
 carries its own dependency, so it can't break when PATH changes.
 
-** TODO E9.6 — Introspect your own flake
+** TODO E21.6 — Introspect your own flake
 From =~/nixlab=, show what your flake actually provides and how it's pinned.
 You'll meet: =nix flake show=, =nix flake metadata=, =flake.lock=.
 *** Hint
@@ -1590,7 +3583,7 @@ cd /etc/nixos 2>/dev/null && nix flake show 2>/dev/null | head -20 \
   || echo "cd to your flake dir and: nix flake show"
 #+end_src
 
-* 10. Common Lisp
+* 22. Common Lisp
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1600,14 +3593,14 @@ program runs /while you write it/: every block below is evaluated in one SBCL
 image that SLIME keeps running, so a function defined in one exercise is still
 there in the next. You'll meet exact arithmetic, hash tables, structs, macros
 that write code, and a condition system that lets you fix an error without
-unwinding the stack — and you'll re-solve problems from tracks 3 and 6 to feel
+unwinding the stack — and you'll re-solve problems from tracks 8 and 18 to feel
 the difference.
 
 Run blocks with =SPC c c=. The first one starts SBCL (a few seconds). Keep
 [[file:/root/workbook-data/practice/hello.lisp][hello.lisp]] and E0.14–E0.15 in mind: =SPC c e= opens any block in a
 real Lisp buffer where =SPC l= and =SPC k= work.
 
-** TODO E10.1 — Numbers that don't lie
+** TODO E22.1 — Numbers that don't lie
 Compute =1/3 * 3=, =2^100=, and =22/7= as a decimal. Compare with what Python or
 awk give you.
 You'll meet: prefix notation, ratios, bignums, =float=.
@@ -1626,7 +3619,7 @@ Everything is =(function args...)=. Division of integers gives an exact
 =(* 1/3 3)= is exactly =1=, not =0.9999999=. Lisp only loses precision when you
 ask it to.
 
-** TODO E10.2 — Count the lines of access.log
+** TODO E22.2 — Count the lines of access.log
 Open the file, read it line by line, count. No shelling out.
 You'll meet: =with-open-file=, =read-line=, =loop=.
 *** Hint
@@ -1641,7 +3634,7 @@ exactly this: =for line = ... while line count t=.
         count t))
 #+end_src
 
-** TODO E10.3 — Split a CSV line
+** TODO E22.3 — Split a CSV line
 Standard Common Lisp has no string-split. Write =split-on= so that
 =(split-on #\, "a,b,c")= returns =("a" "b" "c")=. Test it on the CSV header.
 You'll meet: =defun=, =position=, =subseq=, characters (=#\,=).
@@ -1662,8 +3655,8 @@ no more — and =(subseq s start nil)= means "to the end".
 =split-on= now lives in the running image. The next exercises use it without
 redefining it.
 
-** TODO E10.4 — Average salary per department (track 3, again)
-Same question as E3.3, in Lisp. Print each department with its average to two
+** TODO E22.4 — Average salary per department (track 8, again)
+Same question as E8.3, in Lisp. Print each department with its average to two
 decimals.
 You'll meet: hash tables, =gethash= / =incf=, =parse-integer=, =maphash=,
 =format= directives.
@@ -1692,7 +3685,7 @@ Compare with awk's output: a couple of averages differ in the last digit. The
 division here is an exact ratio rounded once; awk rounds a binary float. Lisp is
 the one that's right.
 
-** TODO E10.5 — Tally HTTP status codes (track 3, again)
+** TODO E22.5 — Tally HTTP status codes (track 8, again)
 Count each status code in access.log and print them most-frequent first.
 You'll meet: =search=, =parse-integer :junk-allowed=, alists, =sort :key=.
 *** Hint
@@ -1718,7 +3711,7 @@ line. =(search "\" " line :from-end t)= finds it; =parse-integer= with
 #+end_src
 Check it against =awk '{print $9}' access.log | sort | uniq -c | sort -rn=.
 
-** TODO E10.6 — Word frequency, in Lisp
+** TODO E22.6 — Word frequency, in Lisp
 The top 10 words in sherlock.txt, lowercase, letters only — the same problem
 you solved in grep, awk, perl, python and elisp.
 You'll meet: reading a whole file, =alpha-char-p=, string output streams,
@@ -1756,7 +3749,7 @@ word (a =make-string-output-stream=), anything else ends the word. Count in an
         do (format t "~7d ~a~%" n w)))
 #+end_src
 
-** TODO E10.7 — Structs: the five best-paid employees
+** TODO E22.7 — Structs: the five best-paid employees
 Load employees.csv into a list of =employee= structs and print the top five by
 salary, with thousands separators.
 You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
@@ -1789,7 +3782,7 @@ You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
 Now press =SPC l i= and enter =(first *employees*)=: the inspector lets you
 poke around a live object (=RET= on a slot dives in, =l= goes back, =q= quits).
 
-** TODO E10.8 — A macro that writes code for you
+** TODO E22.8 — A macro that writes code for you
 Write =with-timing= so that =(with-timing body...)= runs the body, prints how
 long it took, and still returns the body's value. Then look at what it expands
 into.
@@ -1821,7 +3814,7 @@ first, use second — the same reason =defmacro= goes near the top of a file.
 Interactive version: =SPC c e= to open this block in a Lisp buffer, put the
 cursor on =(with-timing ...)=, and press =SPC l m=.
 
-** TODO E10.9 — Conditions and restarts
+** TODO E22.9 — Conditions and restarts
 Make a salary parser that survives bad input two ways: by catching the error,
 and by offering /restarts/ that the caller (or you, in the debugger) chooses.
 You'll meet: =handler-case=, =restart-case=, =handler-bind=,
@@ -1859,7 +3852,7 @@ handler. The debugger lists =USE-ZERO= and =USE-VALUE=: pick =USE-VALUE=, type
 =200=, and the =mapcar= /continues/ as if nothing happened — =(100 200 300)=.
 Few languages can do that.
 
-** TODO E10.10 — From REPL to program
+** TODO E22.10 — From REPL to program
 Turn a Lisp function into (a) a script you run with =./=, and (b) a
 standalone executable that needs no SBCL installed.
 You'll meet: =sbcl --script=, =sb-ext:*posix-argv*=, =save-lisp-and-die=.
@@ -1891,7 +3884,7 @@ ls -lh count-lines | awk '{print $5, $9}'
 The binary is large because it carries the whole Lisp with it — compiler and
 all.
 
-* 11. Debuggers
+* 23. Debuggers
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -1914,7 +3907,7 @@ to find the bug with the debugger, not by reading the source — resist peeking.
 Solution blocks run the debugger non-interactively so you can compare notes;
 the real exercise is typing those commands yourself.
 
-** TODO E11.1 — gdb: break, run, look
+** TODO E23.1 — gdb: break, run, look
 =debug/c/avg.c= averages five scores and prints something absurd. Compile it
 for debugging, stop inside =sum=, and find out where the absurd number comes
 from.
@@ -1935,8 +3928,8 @@ gdb -q -batch -ex 'break sum' -ex run -ex 'info args' -ex 'print *xs@n' \
 The array holds exactly the five scores, yet the loop runs while =i <= n=, so
 it also adds =xs[5]= — whatever garbage sits past the end. Fix: =i < n=.
 
-** TODO E11.2 — gdb: watchpoints, conditions, and return values
-Fix the loop from E11.1 and run again: the answer is now /close/ but still
+** TODO E23.2 — gdb: watchpoints, conditions, and return values
+Fix the loop from E23.1 and run again: the answer is now /close/ but still
 wrong. Use gdb to prove where the precision disappears, without adding a
 single =printf=.
 You'll meet: =watch=, =break FILE:LINE if COND=, =finish=, =display=,
@@ -1956,7 +3949,7 @@ gdb -q -batch -ex 'break 6 if i == 4' -ex run -ex 'print i' -ex 'print total' \
 83.2. Fix: =return (double)sum(xs, n) / n;=. The debugger showed the right
 value leaving =sum=, which pins the bug to the one line after it.
 
-** TODO E11.3 — gdb: a crash and its backtrace
+** TODO E23.3 — gdb: a crash and its backtrace
 =debug/c/crash.c= segfaults. Find which employee crashes it and why, using
 only the debugger.
 You'll meet: running until a signal, =bt= (backtrace), =frame N=, =up= /
@@ -1979,7 +3972,7 @@ succeed first: into a pipe, =printf= output is buffered and dies with the
 crash. Run =./crash= in a terminal and you'll see them — a classic trap when
 "debugging with printf".
 
-** TODO E11.4 — The same session, inside your editor
+** TODO E23.4 — The same session, inside your editor
 Debug =avg.c= again, but from Neovim and then from Emacs: set a breakpoint by
 pointing at a line, step with keys, and read variables without typing =print=.
 You'll meet: nvim-dap (=<leader>d…=), Emacs GUD (=M-x gdb=,
@@ -2001,7 +3994,7 @@ No code — this is muscle memory. The takeaway: an editor front-end speaks the
 same debugger underneath (gdb, via the Debug Adapter Protocol in Neovim and via
 gdb's machine interface in Emacs); it just saves you from typing =print=.
 
-** TODO E11.5 — pdb: step into the call that goes wrong
+** TODO E23.5 — pdb: step into the call that goes wrong
 =debug/py/tally.py= counts ticket statuses in two halves and reports 400
 tickets out of 200. Find the bug by stopping on the /second/ call to =tally=.
 You'll meet: =python3 -m pdb=, =b LINE=, =c=, =s= vs =n=, =p=, =w=,
@@ -2019,7 +4012,7 @@ The default ={}= is created /once/, when =def= runs, and every call that omits
 =counts= shares it. Fix: =counts=None=, then =counts = {} if counts is None
 else counts=.
 
-** TODO E11.6 — pdb: post-mortem debugging
+** TODO E23.6 — pdb: post-mortem debugging
 =debug/py/report.py= dies with a =KeyError=. Instead of re-running with
 prints, let it crash /inside/ the debugger and inspect the wreckage.
 You'll meet: =python3 -m pdb -c continue=, post-mortem mode, =w=, =u= / =d=,
@@ -2037,19 +4030,19 @@ names, e.g. =if name not in depts: print(f"{name:10} (no data)"); continue=.
 In your own scripts, =python3 -m pdb -c continue script.py= is the fastest way
 to see a crash from the inside.
 
-** TODO E11.7 — Python debugging in the editor
-Repeat E11.5 from Neovim and from Emacs.
+** TODO E23.7 — Python debugging in the editor
+Repeat E23.5 from Neovim and from Emacs.
 You'll meet: nvim-dap-python, Emacs =M-x pdb=.
 *** Hint
 Neovim: in =tally.py=, =<leader>db= on line 18, =<leader>dc=, choose =file=.
 When it stops, =<leader>di= steps into =tally=; hover =counts= and
 =<leader>de=. Emacs: =SPC SPC pdb=, accept =python -m pdb tally.py=, and use
-the same pdb commands as E11.5 — the source follows in the other window.
+the same pdb commands as E23.5 — the source follows in the other window.
 *** Solution
 No code. nvim-dap talks to =debugpy= (installed in the lab), Emacs talks to
 plain pdb; the stops, steps and values are identical.
 
-** TODO E11.8 — Delve: debugging Go
+** TODO E23.8 — Delve: debugging Go
 =debug/go= prints the /least/ common words in sherlock.txt instead of the most
 common. Stop at the end of =topN= and prove which way the slice is sorted.
 You'll meet: =dlv debug=, =break FUNC= / =break FILE:LINE=, =continue=,
@@ -2068,7 +4061,7 @@ dlv debug --init /tmp/dlv-topn --allow-non-terminal-interactive=true 2>&1 \
 =out[0]= has the smallest count: the =sort.Slice= comparator uses =<=, which
 sorts ascending. Fix: =out[i].n > out[j].n=.
 
-** TODO E11.9 — Delve: conditional breakpoints, stacks, goroutines
+** TODO E23.9 — Delve: conditional breakpoints, stacks, goroutines
 Stop inside the counting loop only when the word is "holmes", then look at the
 stack and every goroutine. Finally, debug the same program from Neovim.
 You'll meet: =cond=, =bt=, =goroutines=, nvim-dap-go.
@@ -2086,7 +4079,7 @@ dlv debug --init /tmp/dlv-holmes --allow-non-terminal-interactive=true 2>&1 \
 Even this single-threaded program has several goroutines — the Go runtime's
 garbage collector and finalizer run alongside =main=.
 
-** TODO E11.10 — Elisp: read a backtrace
+** TODO E23.10 — Elisp: read a backtrace
 Load =debug/elisp/salary.el= and call =(nixlab-average-salary "eng")=. It
 fails. Turn on the debugger for errors, trigger it again, and read the
 =*Backtrace*= buffer to find the bad value.
@@ -2107,8 +4100,8 @@ is where it failed; =e= evaluates an expression in that context (try
 =(wrong-type-argument number-or-marker-p "134950")=: =+= got a /string/.
 =split-string= returns strings; wrap it: =(string-to-number (nth 4 fields))=.
 
-** TODO E11.11 — Elisp: Edebug, step by step
-Fix E11.10's bug, then /instrument/ the function with Edebug and step through
+** TODO E23.11 — Elisp: Edebug, step by step
+Fix E23.10's bug, then /instrument/ the function with Edebug and step through
 one call. You'll find two more bugs: a wrong average for "eng", and a crash for
 "marketing".
 You'll meet: =C-u C-M-x= (=edebug-defun=), =SPC=, =n=, =i=, =o=, =b=, =g=,
@@ -2135,7 +4128,7 @@ expression of the function.
 92860.90), and =count= is 0 for a missing department. Fix:
 =(if (zerop count) 0.0 (/ (float total) count))=.
 
-** TODO E11.12 — SLIME: fix a bug without restarting
+** TODO E23.12 — SLIME: fix a bug without restarting
 Load =debug/lisp/means.lisp= and run =(dept-means '(("eng" 100 200) ("ops")))=.
 In the debugger, find the failing frame, look at its locals, fix =mean= in the
 source, and /resume the original call/ from the broken frame.
@@ -2164,7 +4157,7 @@ The call finished with the /new/ =mean=, without re-running from the top.
 =(declaim (optimize (debug 3)))= at the top of the file is what makes frames
 restartable.
 
-** TODO E11.13 — SLIME: stepping and tracing
+** TODO E23.13 — SLIME: stepping and tracing
 Watch =(fact 3)= compute step by step, then trace every call to =fact= for
 =(fact 5)=.
 You'll meet: =step=, the stepper keys =s= / =x= / =o= / =c=, =trace= /

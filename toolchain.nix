@@ -60,6 +60,53 @@ pkgs: with pkgs; [
   fzf
   unzip
 
+  # system, processes, and debugging the OS
+  procps
+  psmisc
+  util-linux
+  htop
+  strace
+  ltrace
+  lsof
+  sysstat
+  hyperfine
+  perf
+  time
+  ncdu
+  audit
+  libcap
+  acl
+  shadow
+  sudo
+  which
+  man-db
+
+  # files, archives, and text
+  findutils
+  diffutils
+  patch
+  gnutar
+  gzip
+  bzip2
+  xz
+  zstd
+  zip
+  sqlite-interactive
+  bat
+  eza
+  zoxide
+
+  # networking
+  openssh
+  iproute2
+  iputils
+  dig
+  netcat-openbsd
+  socat
+  curl
+  rsync
+  tcpdump
+
   # common helpers
   jq
   git
