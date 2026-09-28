@@ -23,6 +23,7 @@ RUN mkdir -p skel/.emacs.d && bash provision-corpus.sh skel/corpus
 # COPY sources are paths in the project dir, not the image
 COPY init.el skel/.emacs.d/init.el
 COPY bashrc skel/.bashrc
+COPY tmux.conf skel/.tmux.conf
 RUN printf '[ -f ~/.bashrc ] && . ~/.bashrc\n' > skel/.bash_profile
 COPY nvim skel/.config/nvim
 COPY workbook.org skel/workbook.org

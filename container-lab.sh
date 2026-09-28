@@ -4,6 +4,7 @@
 #   ./container-lab.sh build              build/refresh the image (once)
 #   ./container-lab.sh new  NAME          create + enter a fresh lab
 #   ./container-lab.sh enter NAME         shell into a running lab
+#   ./container-lab.sh attach NAME        enter a lab's tmux session (creates it)
 #   ./container-lab.sh stop NAME          stop (keeps the volume)
 #   ./container-lab.sh start NAME         start it again
 #   ./container-lab.sh ls                 list labs
@@ -34,8 +35,11 @@ labs() { container ls -aq 2>/dev/null | grep "^${PREFIX}-" || true; }
 exists() { labs | grep -qx "$(name "$1")"; }
 running() { container ls -q 2>/dev/null | grep -qx "$(name "$1")"; }
 shell() {
+    local n=$1
+    shift
+    [ $# -gt 0 ] || set -- bash -l
     container exec -it -e HOME=/root -e TERM=xterm-256color -e COLORTERM=truecolor -e LANG=C.UTF-8 -w /root \
-        "$(name "$1")" bash -l
+        "$(name "$n")" "$@"
 }
 need() {
     exists "$1" || {
@@ -75,6 +79,13 @@ enter)
     shell "$n"
     ;;
 
+attach)
+    n="${2:?usage: attach NAME}"
+    need "$n"
+    running "$n" || container start "$(name "$n")" >/dev/null
+    shell "$n" tmux new-session -A -s main
+    ;;
+
 stop)
     n="${2:?usage: stop NAME}"
     need "$n"
@@ -111,7 +122,7 @@ teardown)
     echo "all $PREFIX labs, volumes, and the image removed"
     ;;
 *)
-    echo "usage: $0 {build|new NAME|enter NAME|stop NAME|start NAME|ls|rm NAME|teardown}"
+    echo "usage: $0 {build|new NAME|enter NAME|attach NAME|stop NAME|start NAME|ls|rm NAME|teardown}"
     exit 1
     ;;
 esac

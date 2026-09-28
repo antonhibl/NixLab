@@ -343,6 +343,165 @@ for removing parens.
 | =SPC k w W r j J=     | wrap, unwrap, raise, join, split              |
 | =SPC q q=             | quit Emacs                                    |
 
+* 0b. tmux
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+A terminal that outlives you. tmux runs /inside/ the lab and keeps your shells,
+editors and REPLs alive after you close the terminal: detach, walk away, come
+back with =./container-lab.sh enter NAME=, reattach, and everything is exactly
+where you left it. It also splits one terminal into windows and panes, so the
+editor, a shell, and a =tail -f= can sit side by side for the tracks ahead.
+
+Every tmux command starts with the /prefix/ =C-b= (hold Ctrl, press b, let go),
+then a key. So =C-b d= means "Ctrl-b, then d". The lab ships a =~/.tmux.conf=
+that adds a few friendlier keys; E0b.7 walks through it. From your Mac,
+=./container-lab.sh attach NAME= enters a lab straight into a tmux session
+called =main=, creating it if needed.
+
+** TODO E0b.1 — Sessions that survive
+Start a session called =work=, run =top= in it, detach, and list sessions.
+Then leave the lab entirely (=exit=), come back in with
+=./container-lab.sh enter NAME=, and reattach: =top= should still be running.
+You'll meet: =tmux new -s=, =C-b d=, =tmux ls=, =tmux attach -t=,
+=tmux kill-session=.
+*** Hint
+=tmux new -s work= starts a named session. =C-b d= /detaches/: the session
+keeps running without you. =tmux ls= lists sessions, =tmux attach -t work=
+(or =tmux a=) reattaches. Sessions live as long as the lab is running;
+=./container-lab.sh stop= ends them.
+*** Solution
+=tmux new -s work=, =top=, =C-b d=, =tmux ls=, =exit=, re-enter the lab,
+=tmux attach -t work=. =q= quits =top=; =tmux kill-session -t work= ends the
+session. =./container-lab.sh attach NAME= does the new-or-attach step for you
+every time.
+
+** TODO E0b.2 — Windows: tabs for your terminal
+In one session, make three windows named =edit=, =shell= and =logs=, jump
+between them by number and by name, then close one.
+You'll meet: =C-b c=, =C-b ,=, =C-b n= / =C-b p=, =C-b 1=…=9=, =C-b w=,
+=C-b &=.
+*** Hint
+=C-b c= creates a window, =C-b ,= renames the current one. The status bar at
+the bottom lists them; the current one is highlighted. =C-b n= / =C-b p= go to
+the next / previous, =C-b= + a digit jumps straight to one (they're numbered
+from 1 here), =C-b w= shows a tree to pick from. =C-b &= closes a window (it
+asks first); so does exiting its last shell.
+*** Solution
+=C-b c=, =C-b , edit RET=, and the same for =shell= and =logs=. =C-b 2= jumps to
+=shell=, =C-b w= lets you choose visually. Typing =exit= in a window's only
+shell closes it; the remaining windows renumber themselves.
+
+** TODO E0b.3 — Panes: several shells on one screen
+Build this layout in one window: an editor on the left, a shell top-right, and
+=tail -f /root/corpus/access.log= bottom-right. Then zoom the editor to full
+screen and back, and make the left pane wider.
+You'll meet: =C-b |= and =C-b -= (splits), =C-b h j k l= (move), =C-b H J K L=
+(resize), =C-b z= (zoom), =C-b x= (close), =C-b SPC= (layouts), =C-b q=.
+*** Hint
+=C-b |= splits side by side, =C-b -= stacks top and bottom (the stock keys
+=C-b %= and =C-b "= also work); new panes open in the current directory.
+=C-b h j k l= moves left, down, up, right. =C-b H= etc. resize by 5 cells, and
+you can keep pressing =H= without repeating the prefix. =C-b z= toggles
+full-screen for one pane. =C-b q= flashes pane numbers. The mouse works too:
+click a pane, drag a border.
+*** Solution
+In a fresh window: =nvim= (or =emacs -nw=), =C-b |=, =C-b -= in the right-hand
+pane, then =tail -f /root/corpus/access.log= in the bottom one. =C-b h= back to
+the editor, =C-b z= twice, =C-b L L L= to widen it. =C-b SPC= cycles through
+the preset layouts if you want to compare.
+
+** TODO E0b.4 — Copy mode: scroll, search, copy, paste
+Run =grep -n Watson /root/corpus/sherlock.txt=, scroll back through the output
+without the mouse, search it for a line number, copy that line, and paste it at
+a fresh prompt.
+You'll meet: =C-b [=, vi keys in copy mode, =/= and =n=, =v= / =y=, =C-b ]=.
+*** Hint
+=C-b [= enters copy mode: the pane freezes and you move with Vim keys
+(=j k=, =C-u= / =C-d=, =g= / =G=). =/= searches down, =?= up, =n= repeats.
+=v= starts a selection, =V= selects lines, =y= copies and leaves copy mode.
+=C-b ]= pastes. =q= leaves copy mode without copying. The mouse wheel also
+scrolls back.
+*** Solution
+=C-b [=, =?Watson RET= (searching up), =n= until you like the line, =0=, =v=,
+=$=, =y=, then =C-b ]= at the prompt. tmux keeps its own list of copies:
+=C-b == picks an older one.
+
+** TODO E0b.5 — Talk to other panes
+Split a window in two. Turn on synchronized panes and type one command that
+runs in both. Turn it off, start =python3= in the right pane, and send it
+=print(6*7)= from the left pane using a tmux command.
+You'll meet: =C-b := (command prompt), =synchronize-panes=,
+=tmux send-keys -t=, target syntax =session:window.pane=.
+*** Hint
+=C-b := opens tmux's own command line: =setw synchronize-panes on= makes every
+keystroke go to every pane in the window. From a shell, =tmux send-keys -t 2
+'text' Enter= types into pane 2 of the current window; a full target looks like
+=work:1.2= (session =work=, window 1, pane 2). =tmux display -p '#S:#I.#P'=
+prints where you are.
+*** Solution
+=C-b |=, =C-b := =setw synchronize-panes on=, =uptime=, then
+=C-b := =setw synchronize-panes off=. In the right pane: =python3=. In the left:
+#+begin_example
+tmux send-keys -t 2 'print(6*7)' Enter
+#+end_example
+The right pane prints =42=. This is how scripts drive REPLs, and how E0b.6
+builds a whole workspace.
+
+** TODO E0b.6 — Script your workspace
+Write a script that builds, in one command, a session called =workspace= with a
+=lab= window (a shell on the left; a shell and =tail -f access.log= on the
+right, both in the corpus) and a =repl= window running =python3=. Run it, then
+attach.
+You'll meet: =tmux new-session -d=, =split-window -t -c=, =send-keys=,
+=new-window=, =select-window= / =select-pane=, =list-panes -F=.
+*** Hint
+Everything you did by hand has a command. =new-session -d -s NAME -n WINDOW=
+starts a session /detached/, so the script can keep going. =-t= targets a
+window or pane, =-c= sets its directory. Finish by selecting where you want to
+land; attach afterwards with =tmux attach -t workspace=.
+*** Solution
+#+begin_src bash :results output
+s=workspace
+tmux kill-session -t "$s" 2>/dev/null
+tmux new-session -d -s "$s" -n lab -c /root -x 200 -y 50
+tmux split-window -h -t "$s:lab" -c /root/corpus
+tmux split-window -v -t "$s:lab.2" -c /root/corpus
+tmux send-keys -t "$s:lab.3" 'tail -f access.log' Enter
+tmux new-window -t "$s" -n repl -c /root
+tmux send-keys -t "$s:repl" 'python3' Enter
+tmux select-window -t "$s:lab"
+tmux select-pane -t "$s:lab.1"
+sleep 1
+tmux list-windows -t "$s" -F '#{window_index}:#{window_name} #{window_panes} panes'
+tmux list-panes -t "$s:lab" -F '  pane #{pane_index}: #{pane_current_command} in #{pane_current_path}'
+#+end_src
+Then =tmux attach -t workspace=. Save it as =~/bin/workspace=, =chmod +x= it,
+and your whole setup is one word away after every restart.
+
+** TODO E0b.7 — Make it yours
+Read =~/.tmux.conf=, find out what the prefix, =C-b r= and =C-b |= are bound
+to, change the colour of the current window in the status bar, and reload
+without restarting tmux.
+You'll meet: =tmux list-keys=, =tmux show-options -g=, =source-file=,
+=C-b ?=, sending a literal =C-b= to a program.
+*** Hint
+=C-b ?= lists every binding (=q= to close); =tmux list-keys | grep split= finds
+specific ones. =tmux show-options -g= shows current settings. Edit
+=window-status-current-style= in =~/.tmux.conf=, then =C-b r= reloads it. tmux
+grabs =C-b= before any program sees it; press =C-b C-b= to send one through
+(to Emacs, say).
+*** Solution
+#+begin_src bash :results output
+grep -E 'mouse|mode-keys|base-index|window-status-current-style' ~/.tmux.conf
+tmux list-keys -T prefix 2>/dev/null | grep -E ' (r|\|) ' || echo "(start tmux first to list keys)"
+#+end_src
+Everything the lab config adds is visible there: mouse support, vi keys in copy
+mode, windows and panes numbered from 1, splits that open in the current
+directory, =h j k l= / =H J K L= for panes, =C-b r= to reload, and Dracula
+colours. The stock tmux keys all still work.
+
 * 1. grep & egrep
 :PROPERTIES:
 :VISIBILITY: children

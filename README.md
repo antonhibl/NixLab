@@ -71,12 +71,13 @@ teaches you enough of both editors to do everything else.
 
 ## The workbook
 
-`workbook.org` is an Org file of 102 exercises. Code blocks run in place
+`workbook.org` is an Org file of 109 exercises. Code blocks run in place
 (`SPC c c` in Emacs), and every exercise has a folded hint and solution.
 
 | Track | Topic |
 |---|---|
 | 0 | Emacs & Vim fundamentals: Evil, Org, Babel, help, SLIME, structural editing |
+| 0b | tmux: sessions that survive, windows, panes, copy mode, scripting a workspace |
 | 1 | grep & egrep |
 | 2 | sed |
 | 3 | awk |
@@ -98,6 +99,7 @@ are generated in `/root/workbook-data` the first time a lab starts.
 ```bash
 ./container-lab.sh new NAME     # create a lab and open a shell in it
 ./container-lab.sh enter NAME   # open a shell in a lab (starts it if stopped)
+./container-lab.sh attach NAME  # enter the lab's tmux session "main" (creates it if needed)
 ./container-lab.sh stop NAME    # stop a lab; its files are kept
 ./container-lab.sh start NAME   # start it again and open a shell
 ./container-lab.sh ls           # list labs
@@ -186,6 +188,7 @@ lab and restart it, or `rm` the lab and create it again.
 | `nvim-plugins.nix` | Neovim plugins and treesitter parsers from nixpkgs |
 | `init.el` | the lab's Emacs config |
 | `bashrc` | the lab's shell: prompt, colours, aliases, completion |
+| `tmux.conf` | the lab's tmux: mouse, vi copy mode, pane keys, Dracula colours |
 | `nvim/` | the lab's Neovim config |
 | `workbook.org` | the exercises |
 | `provision-corpus.sh` | builds the practice corpus |
