@@ -12,6 +12,7 @@ pkgs: with pkgs; [
   coreutils
   bashInteractive
   bash-completion
+  blesh
   ncurses
 
   # languages

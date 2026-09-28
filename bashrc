@@ -1,4 +1,5 @@
 [[ $- != *i* ]] && return
+command -v blesh-share >/dev/null && source -- "$(blesh-share)/ble.sh" --attach=none
 
 alias vim="nvim"
 alias ls="ls --color=auto"
@@ -36,3 +37,4 @@ __nixlab_prompt() {
     PS1="${blue}\n┌──  ${reset}${purple}\u${white} ॐ  ${reset}${cyan}${dir//\\/\\\\}${reset}${blue}  ∞  ${reset}${yellow}\A${reset}${blue}  ࿔${reset}\n${blue}└─${reset} ${magenta} ${mark} "
 }
 PROMPT_COMMAND=__nixlab_prompt
+[[ ${BLE_VERSION-} ]] && ble-attach
