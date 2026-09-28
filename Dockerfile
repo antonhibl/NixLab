@@ -18,12 +18,15 @@ ENV PATH=/usr/local/bin:/nix/var/nix/profiles/nixlab/bin:${PATH} \
     NIXLAB_NVIM_PLUGINS=/opt/nixlab/nvim-plugins \
     NIXLAB_TS_DIR=/opt/nixlab/nvim-treesitter
 
-RUN mkdir -p /home /usr/local/bin /var/empty /etc/ssh /etc/audit /var/log/audit /etc/pam.d /var/db/sudo && \
+RUN for f in /etc/passwd /etc/group /etc/shadow /etc/gshadow /etc/sudoers /etc/pam.d /etc/ssh /etc/audit; do \
+        if [ -L "$f" ]; then t=$(readlink -f "$f"); rm "$f"; if [ -e "$t" ]; then cp -rL "$t" "$f"; chmod -R u+w "$f"; fi; fi; \
+    done && \
+    mkdir -p /home /usr/local/bin /var/empty /etc/ssh /etc/audit /var/log/audit /etc/pam.d /var/db/sudo && \
     chmod 755 /var/empty && \
     { pwconv 2>/dev/null; grpconv 2>/dev/null; true; } && \
     groupadd -f wheel && groupadd -f devs && \
-    useradd -m -s /nix/var/nix/profiles/nixlab/bin/bash -G wheel,devs alice && \
-    useradd -m -s /nix/var/nix/profiles/nixlab/bin/bash -G devs bob && \
+    useradd -m -U -s /nix/var/nix/profiles/nixlab/bin/bash -G wheel,devs alice && \
+    useradd -m -U -s /nix/var/nix/profiles/nixlab/bin/bash -G devs bob && \
     useradd -r -d /var/empty -s "$(command -v nologin)" sshd && \
     install -o root -g root -m 4755 "$(readlink -f "$(command -v sudo)")" /usr/local/bin/sudo && \
     printf 'auth sufficient pam_rootok.so\nauth required pam_deny.so\naccount required pam_permit.so\nsession required pam_permit.so\n' > /etc/pam.d/sudo && \
