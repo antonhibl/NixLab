@@ -1,0 +1,2061 @@
+#+TITLE: nixlab workbook — learning by doing
+#+STARTUP: overview
+#+STARTUP: hideblocks
+#+PROPERTY: header-args:bash :dir /root/corpus :results output :exports both
+#+OPTIONS: toc:2 num:t
+
+* How to use this workbook
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+This is a set of *tasks*, not a textbook. Each exercise hands you a concrete
+thing to accomplish against real data. You will not have been told the flag,
+function, or syntax you need — reaching for it (=man=, =--help=, =SPC h f=, a
+guess) *is* the exercise. Only after trying should you open the folded /Hint/
+and /Solution/ under each task.
+
+Never used Emacs or Vim? Start with track 0. Everything below assumes it.
+
+The bare minimum to read this file right now:
+- =j= / =k= move down / up a line. =TAB= on a heading opens or closes it.
+- If something looks stuck, press =ESC=, then =C-g= (hold Ctrl, press g).
+- =SPC q q= quits Emacs.
+
+Everything folds. The file opens showing only the tracks.
+- =TAB= on a track  → reveals its exercises (still folded).
+- =TAB= on an exercise → reveals the task, plus a folded /Hint/ and /Solution/.
+- =TAB= again on /Solution/ → the answer.
+
+Where you see a source block, run it in place with =SPC c c= (or =C-c C-c=).
+It executes right here in the lab, in =/root/corpus=, and prints its output
+back into the buffer under =#+RESULTS:=.
+
+Suggested order is top to bottom: each track leans on habits from the last.
+Mark progress with =C-c C-t= (cycles =TODO=/=DONE=) on any exercise heading.
+
+The data lives in =/root/corpus= plus =/root/workbook-data=, both prepared for
+you when the lab starts (see *Setup*).
+
+* Setup - already done for you
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Every time the lab starts, =/opt/nixlab/workbook-setup.sh= runs automatically.
+It checks the corpus and builds the extra inputs a few exercises need: practice
+files for track 0, a deliberately messy directory for the bash quoting lesson,
+some intentionally broken C for the debugging lessons, and buggy programs in
+five languages for the debugger track. It only does this
+once, so your edits survive restarts.
+
+Made a mess of the practice files? Run this block (=SPC c c=) to restore every
+exercise file to its original state. Anything else you created is left alone.
+
+#+begin_src bash :dir /root :results output
+bash /opt/nixlab/workbook-setup.sh --reset
+#+end_src
+
+* 0. Emacs & Vim fundamentals
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+From zero to fluent in the editor this whole workbook lives in. This Emacs
+speaks *Vim* (via Evil mode): you get Vim's fast, modal editing on top of
+Emacs's Org, Babel, SLIME and help system. By the end of this track you will
+move without arrow keys, edit with operators, run code blocks, drive a Lisp
+REPL, and find the answer to "what does this key do?" yourself.
+
+How keys are written:
+- =C-x= means hold Ctrl and press x. =M-x= means hold Meta (Alt/Option) and
+  press x. On a Mac terminal, turn on "Use Option as Meta key" (Terminal.app:
+  Settings → Profiles → Keyboard; iTerm2: Left Option key → Esc+). Or press
+  =ESC= and then the key: =ESC x= is the same as =M-x=.
+- =SPC f f= means press space, then f, then f — one after another, not together.
+- =RET= is Enter, =TAB= is Tab, =ESC= is Escape.
+
+Your practice files live in =/root/workbook-data/practice=. Links like
+[[file:/root/workbook-data/practice/motions.txt][motions.txt]] open with =C-c C-o= while the cursor is on them.
+
+** TODO E0.1 — Modes, and how to always get out
+Vim is /modal/: keys mean different things depending on the mode. Look at the
+bottom line of the screen (the /mode line/): =<N>= is Normal, =<I>= Insert,
+=<V>= Visual, =<E>= plain Emacs. Get into Insert mode, type your name at the
+end of this line, and get back to Normal mode. Then undo it.
+You'll meet: =i=, =ESC=, =u=, =C-g=, and the mode indicator.
+*** Hint
+Normal mode is for moving and commanding; Insert mode is for typing text. =i=
+enters Insert, =ESC= always returns to Normal. =u= undoes, =C-r= redoes.
+=C-g= is Emacs's universal "cancel": it aborts half-typed commands and prompts.
+*** Solution
+=A= (append at end of line), type your name, =ESC=, then =u=. When lost: =ESC=,
+then =C-g=, and look at the mode line. Nothing in Normal mode inserts text, so
+stray keypresses are rarely destructive — and =u= fixes the rest.
+
+** TODO E0.2 — Move without arrow keys
+Open [[file:/root/workbook-data/practice/motions.txt][motions.txt]] (=C-c C-o= on the link) and follow its instructions
+down to the last line and back to the top, never touching an arrow key.
+You'll meet: =h j k l=, =w b e=, =0 ^ $=, =gg G=, ={ }=, =C-d C-u=, counts.
+*** Hint
+=h j k l= are left, down, up, right. =w=/=b= hop by word, =0=/=$= line start and
+end, =gg=/=G= buffer top and bottom, =}= / ={= next/previous blank line.
+A number before a motion repeats it: =5j=, =3w=, =12G= (line 12).
+*** Solution
+Muscle memory, not a single answer. The key idea: every motion is a /noun/ you
+will later combine with /verbs/ (E0.4). =zz= / =zt= / =zb= put the cursor line
+in the middle / top / bottom of the screen. Back to the workbook: =SPC ,= then
+pick =workbook.org=.
+
+** TODO E0.3 — Jump, search, and come back
+In motions.txt: jump to the =x= in "box" with one command, find both
+=TREASURE= lines, bounce between matching brackets, then return to where you
+started.
+You'll meet: =f= / =t= / =;=, =/= search with =n= / =N=, =*=, =%=, =C-o=.
+*** Hint
+=fx= lands on the next =x= in the line; =;= repeats it. =/TREASURE RET=
+searches, =n= / =N= step through hits (the counter in the mode line shows
+"which of how many"). =%= on a bracket jumps to its partner. =C-o= walks back
+through your jump history.
+*** Solution
+=fx=, then =/TREASURE RET n=, then =%= on the =(=, then =C-o= a few times.
+=*= searches for the word under the cursor — the fastest way to find other uses
+of a name in code.
+
+** TODO E0.4 — Operators: the grammar of Vim
+Open [[file:/root/workbook-data/practice/edit-me.txt][edit-me.txt]] and fix lines 1–12. Each line names the keys to use.
+You'll meet: =d= / =c= / =y= + motion, text objects (=iw=, =i"=, =i(=), =dd=,
+=p=, =r=, =J=, =.=, =gU=.
+*** Hint
+Vim edits are sentences: /operator/ + /motion/. =d= deletes, =c= changes
+(deletes and enters Insert), =y= yanks (copies). =dw= deletes a word, =d$= to the
+end of the line, =ciw= changes the word under the cursor, =ci"= everything
+inside the quotes, =ci(= everything inside the parens. Doubling an operator
+acts on the whole line: =dd=, =cc=, =yy=. =p= / =P= paste after / before. =.=
+repeats your last change.
+*** Solution
+1 =dw= on the second "the" · 2 =cw fast ESC= · 3 =ci" hello ESC= ·
+4 =ci( user ESC= · 5 =D= (same as =d$=) · 6 =gUiw= · 7 =r2= on the 1 ·
+8–9 =ddp= on line 8 · 10–11 =J= on line 10 · 12 =yy3p=. Once an edit works,
+=.= repeats it anywhere: fix one typo, jump to the next with =n=, press =.=.
+
+** TODO E0.5 — Visual mode and block editing
+In edit-me.txt, select lines 13–16 and indent them, then use a /block/
+selection to put =- = in front of all four at once.
+You'll meet: =v=, =V=, =C-v=, =>=, block insert with =I=.
+*** Hint
+=v= selects characters, =V= whole lines, =C-v= a rectangle. Any operator works
+on a selection: =d=, =y=, =c=, =>= (indent), =<= (dedent), =gU= (uppercase).
+In a =C-v= block, =I= inserts on every line once you press =ESC=.
+*** Solution
+=V3j>= indents. Then put the cursor on the first letter of "apples", =C-v3j=,
+=I- ESC=. =gv= reselects the last selection if you need it again.
+
+** TODO E0.6 — Macros: record once, replay many
+Undo E0.5 (=u= until it's back), then turn lines 13–16 into =- apples= etc.
+with a keyboard macro instead.
+You'll meet: =qa= … =q=, =@a=, =@@=, counts on macros.
+*** Hint
+=qa= starts recording into register =a=; =q= stops. Record the edit for one
+line, ending with =j= so the cursor is on the next line. =@a= replays, =3@a=
+replays three times.
+*** Solution
+On "apples": =qa0i- ESCjq=, then =3@a=. Macros are how you do a repetitive edit
+awk would be overkill for — track 8 comes back to them.
+
+** TODO E0.7 — Search and replace
+In edit-me.txt, replace every =the= with =THE=, confirming each one.
+You'll meet: Ex commands (=:=), =:%s=, the =c= flag, =:w=.
+*** Hint
+=:= opens the Ex command line at the bottom. =:%s/old/new/g= replaces in the
+whole file; add =c= (=/gc=) to be asked at each match (=y= / =n=). =:w= saves.
+*** Solution
+=:%s/the/THE/gc RET=, answer =y= or =n=, then =:w RET= (or =SPC f s=). Emacs
+regex syntax differs from grep's for anything fancy — track 8 (E8.3) explores
+that. For plain words it just works.
+
+** TODO E0.8 — Files, buffers, and windows
+Open employees.csv and sherlock.txt side by side, switch between them, close
+one, and get back here.
+You'll meet: =SPC .=, =SPC ,=, =SPC f r=, =SPC b k=, =SPC w v= / =SPC w s=,
+=C-w= + =h j k l=, =SPC w o=, =SPC w d=.
+*** Hint
+A /buffer/ is an open thing (file, REPL, help page). A /window/ is a pane
+showing a buffer. =SPC .= opens a file (type to narrow, =TAB= to complete a
+directory, =RET= to open). =SPC ,= switches buffer. =SPC w v= splits
+side-by-side; =C-w l= / =C-w h= moves right/left between windows.
+*** Solution
+=SPC . /root/corpus/employees.csv RET=, =SPC w v=, =SPC . /root/corpus/sherlock.txt RET=.
+Move with =C-w h= / =C-w l=. =SPC b k= kills a buffer, =SPC w d= closes a
+window, =SPC w o= keeps only the current one. =SPC f r= reopens recent files.
+=SPC o d= brings the dashboard back. Avoid =:q= to close files — in Emacs it
+closes the /window/, and on the last one quits Emacs.
+
+** TODO E0.9 — Run any command by name
+Without a keybinding, turn on line wrapping in this buffer, then find a command
+whose name you only half remember: something with "whitespace".
+You'll meet: =SPC SPC= (=M-x=), fuzzy completion, =SPC /= (swiper).
+*** Hint
+Every Emacs feature is a named command. =SPC SPC= prompts for one; type a few
+fragments separated by spaces and the list narrows. =C-n= / =C-p= (or arrows)
+move through the list, =RET= runs, =C-g= cancels.
+*** Solution
+=SPC SPC visual line=, pick =visual-line-mode=, =RET=. =SPC SPC whitespace= shows
+=whitespace-mode=, =delete-trailing-whitespace=, … =SPC /= searches this buffer
+with a live list of matching lines.
+
+** TODO E0.10 — Help yourself (no C-h needed)
+Find out: (a) what =SPC c c= runs, (b) what =org-babel-load-languages= is set
+to and which file defines it, (c) what the =w= key does in Normal mode.
+You'll meet: helpful: =SPC h k=, =SPC h f=, =SPC h v=, =SPC h p=, =SPC h m=, =SPC h b=.
+*** Hint
+=SPC h k= then press a key sequence: it explains what that key does.
+=SPC h f= describes a function, =SPC h v= a variable, =SPC h p= whatever is
+under the cursor, =SPC h m= the current modes and their keys, =SPC h b= every
+binding (searchable). In a help buffer, =RET= on a link follows it, =q= closes.
+*** Solution
+(a) =SPC h k SPC c c= → =org-ctrl-c-ctrl-c=. (b) =SPC h v org-babel-load-languages RET=
+— the page shows the value, where it's defined, and a link to the source.
+(c) =SPC h k w= → =evil-forward-word-begin=. This is the most important habit
+in the whole workbook: every key, command and variable can tell you about itself.
+
+** TODO E0.11 — Org: outlines, lists, TODOs, tables
+In [[file:/root/workbook-data/practice/playground.org][playground.org]]: add a third top-level heading with a TODO, give
+Groceries a checkbox list, and build a two-column table that aligns itself.
+You'll meet: =*= headings, =TAB= / =S-TAB=, =M-RET=, =C-c C-t=, =- [ ]=
+checkboxes, =C-c C-c=, tables and =TAB=, markup.
+*** Hint
+A line starting with =* = is a heading, =** = a subheading. =TAB= folds one,
+=S-TAB= cycles the whole file. =M-RET= makes a new heading or list item like
+the current one. =C-c C-t= cycles TODO → DONE → nothing. =- [ ] item= is a
+checkbox; =C-c C-c= ticks it. Type =| name | qty |= and press =TAB= in Insert
+mode — Org aligns the table. =*bold*=, =/italic/=, ~=verbatim=~, =~code~=.
+=M-left= / =M-right= (or =ESC= then the arrow) promote and demote a heading.
+*** Solution
+Shown indented here so Org doesn't treat it as real headings:
+#+begin_example
+  * Groceries
+  - [X] milk
+  - [ ] bread
+  * Notes
+  | name  | qty |
+  |-------+-----|
+  | eggs  |  12 |
+  * TODO Learn Org
+#+end_example
+Type =|-= then =TAB= to draw the separator line. =C-c C-o= opens links like
+the ones in this track.
+
+** TODO E0.12 — Babel: code blocks that run
+In playground.org, create a bash block that counts the lines of
+=/root/corpus/employees.csv=, run it, clear the result, then change it to print
+the first 3 lines and run it again.
+You'll meet: =<s TAB=, =SPC c c=, =#+RESULTS:=, =SPC c k=, =SPC c e= / =C-c '=,
+header args (=:results=, =:dir=, =:var=).
+*** Hint
+In Insert mode on an empty line, type =<s= then =TAB=: a source block appears.
+Type the language (=bash=) after =#+begin_src=. =SPC c c= runs the block under
+the cursor, =SPC c k= removes its result. =SPC c e= opens the block in its own
+buffer with full language support; =C-c '= brings you back. =SPC c n= / =SPC c p=
+jump between blocks, =SPC c b= runs every block in the file.
+*** Solution
+#+begin_src bash :results output :var file="/root/corpus/employees.csv"
+wc -l < "$file"
+head -3 "$file"
+#+end_src
+=:results output= captures what the code prints; =:results value= (the default
+for most languages) captures what it /returns/. =:dir= sets the working
+directory, =:var= passes values in. Every block in this workbook is just this.
+
+** TODO E0.13 — One file, many languages
+Below the bash block, add a =python= block and a =lisp= block that each compute
+2 to the power 100. Run both.
+You'll meet: Babel language names, =:results value=, SLIME starting on demand.
+*** Hint
+Change the word after =#+begin_src=: =python=, =perl=, =C=, =go=, =awk=, =sed=,
+=lisp=, =elisp=. A Python block's value is whatever it =return=s; a Lisp
+block's value is its last form. The first Lisp block starts SBCL for you —
+give it a few seconds.
+*** Solution
+#+begin_src python
+return 2 ** 100
+#+end_src
+
+#+begin_src lisp
+(expt 2 100)
+#+end_src
+
+** TODO E0.14 — SLIME: a live Lisp at your fingertips
+Open [[file:/root/workbook-data/practice/hello.lisp][hello.lisp]]. Load its definitions into the running Lisp, call =greet=
+and =average= from the REPL, then call =broken= and escape the debugger.
+You'll meet: =SPC o l= (start SLIME), =SPC l d=, =SPC l k=, =SPC l e=,
+=SPC l r=, =SPC l h=, =SPC l .=, the REPL, the debugger.
+*** Hint
+=SPC o l= starts the REPL (or it's already running from E0.13). In a =.lisp=
+file: =SPC l d= compiles the definition under the cursor (=C-c C-c=), =SPC l k=
+compiles the whole file (=C-c C-k=), =SPC l e= evaluates the form just before
+or under the cursor, =SPC l r= jumps to the REPL (=C-c C-z=). In the REPL, type
+a form and =RET=; =M-p= / =M-n= recall history; =ESC= to move around, =i= to
+type again. =SPC l h= describes a symbol, =SPC l .= jumps to its definition,
+=SPC l ,= jumps back.
+*** Solution
+=SPC l k=, =SPC l r=, then type =(greet "Ada")= and =(average '(1 2 3 4))=
+(note it answers =5/2= — an exact ratio, not 2.5). Then =(broken)=: the
+debugger opens listing /restarts/. Press the number next to =ABORT= (or =q=) to
+get back. In the debugger, =v= shows the source of a frame and =t= expands it.
+That debugger is a feature, not a crash — track 10 uses it deliberately.
+
+** TODO E0.15 — Structural editing: slurp, barf, wrap, raise
+Work through [[file:/root/workbook-data/practice/parens.lisp][parens.lisp]]: all seven transformations, using only the
+structural commands.
+You'll meet: paredit via =SPC k s= / =S= / =b= / =B= / =w= / =W= / =r= / =j= / =J=.
+*** Hint
+Lisp code is a tree of lists; paredit edits the tree, never unbalancing the
+parens. /Slurp/ pulls the next thing /into/ the list around the cursor; /barf/
+pushes the last thing /out/. Capital letters work on the left side.
+=SPC k w= wraps in new parens, =SPC k W= removes the parens around you,
+=SPC k r= replaces the parent list with the thing under the cursor,
+=SPC k J= / =SPC k j= split and join lists.
+*** Solution
+1 =SPC k s= · 2 =SPC k b= · 3 =SPC k S= · 4 =SPC k w= then =i print SPC ESC= ·
+5 cursor on the =(= of =(compute)=, =SPC k r= · 6 cursor on =progn=, =SPC k W= ·
+7 cursor on the space after 2, =SPC k J=; then on the space between the two
+lists, =SPC k j=.
+In Insert mode, typing =(= always inserts a matching =)=. If a Normal-mode
+=x= or =dd= ever leaves parens unbalanced, =u= undoes it; prefer =SPC k W=
+for removing parens.
+
+** Keys at a glance
+| Keys                  | Does                                          |
+|-----------------------+-----------------------------------------------|
+| =ESC=, =C-g=          | back to Normal mode; cancel anything          |
+| =SPC SPC=             | run any command by name                       |
+| =SPC .= / =SPC ,=     | open file / switch buffer                     |
+| =SPC f s=, =SPC f r=  | save / recent files                           |
+| =SPC b k=, =SPC b d=  | kill buffer / dashboard                       |
+| =SPC w v s w d o=     | split right, split below, other, close, only  |
+| =SPC /=               | search this buffer                            |
+| =SPC h k f v p m b=   | help: key, function, variable, at point, mode, bindings |
+| =SPC c c e s b k n p= | Babel: run, edit, subtree, buffer, clear, next, prev |
+| =SPC o w c t e l d=   | open workbook, corpus, terminal, eshell, Lisp REPL, dashboard |
+| =SPC l e d k r h .=   | Lisp: eval, compile defun, compile file, REPL, describe, definition |
+| =SPC k s S b B=       | slurp / barf, forward and backward            |
+| =SPC k w W r j J=     | wrap, unwrap, raise, join, split              |
+| =SPC q q=             | quit Emacs                                    |
+
+* 1. grep & egrep
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Regex-driven searching. You will discover that the "same" tool has a basic and
+an extended dialect, that /where/ a pattern matches matters as much as /what/,
+and that grep is only ever a filter — the moment you need to /transform/, you
+have outgrown it (that is tracks 2 and 3).
+
+** TODO E1.1 — Is Watson mentioned more than Holmes?
+Count, don't eyeball. Get a number for each in =sherlock.txt=.
+You'll meet: a counting flag, and case-insensitivity.
+*** Hint
+There is a flag that prints the count instead of the lines. Names get
+capitalised mid-sentence and not — fold case.
+*** Solution
+#+begin_src bash
+grep -ci holmes sherlock.txt
+grep -ci watson sherlock.txt
+#+end_src
+
+** TODO E1.2 — Lines where BOTH Holmes and Watson appear
+One grep matches one pattern. You want the intersection.
+You'll meet: grep as a filter you can chain; order-independence.
+*** Hint
+grep reads stdin. What happens if you pipe one grep into another?
+*** Solution
+#+begin_src bash
+grep Holmes sherlock.txt | grep Watson
+#+end_src
+Chaining = logical AND. (A single-pass AND needs =awk=, later.)
+
+** TODO E1.3 — Every 404 in the access log — exactly
+=grep -c '404' access.log= is wrong. Prove it, then get the true count.
+You'll meet: false matches, and why fields beat substrings.
+*** Hint
+=404= also appears inside byte counts and paths. The status code is the *9th
+whitespace field*. grep sees a line, not fields — so anchor the pattern to the
+=" 404 = shape, or admit this is really an awk job.
+*** Solution
+#+begin_src bash
+echo "naive:"; grep -c '404' access.log
+echo "anchored to the response code:"; grep -cE '" 404 ' access.log
+#+end_src
+The gap is the lesson: grep matches text, not structure. Track 3 does this right.
+
+** TODO E1.4 — Pull out every IP address
+Not the lines containing IPs — the IPs themselves, one per line.
+You'll meet: extended regex (=-E=), quantifiers, and =-o=.
+*** Hint
+=-o= prints only the matched text. A dotted quad is "1–3 digits, a dot, three
+times, then 1–3 digits". Repetition =\{1,3\}= is clumsy in basic regex; =-E=
+lets you write ={1,3}= and group with =(...)=.
+*** Solution
+#+begin_src bash
+grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | head
+#+end_src
+
+** TODO E1.5 — The 20 longest words in Moby Dick
+Words of 12+ letters, ranked by how often they occur.
+You'll meet: the =-o= → =sort= → =uniq -c= → =sort -rn= pipeline (memorise it).
+*** Hint
+=grep -oE '[A-Za-z]{12,}'= gets the words. Downcase them (=tr=) so /Whale/ and
+/whale/ merge, then the classic frequency pipeline.
+*** Solution
+#+begin_src bash
+grep -hoE '[A-Za-z]{12,}' moby-dick.txt | tr 'A-Z' 'a-z' \
+  | sort | uniq -c | sort -rn | head -20
+#+end_src
+(=-h= suppresses filenames when you later point this at several files.)
+
+** TODO E1.6 — Which corpus files mention "London"?
+The filenames, not the matching lines.
+You'll meet: =-l=, =-r=, and =-i= together.
+*** Hint
+There is a flag that prints only names of files with a match.
+*** Solution
+#+begin_src bash
+grep -rilE 'london' /root/corpus
+#+end_src
+
+** TODO E1.7 — Lines with a doubled word ("the the")
+Find accidental repeats. Pure grep can do it — barely.
+You'll meet: back-references, and =-P= (the moment egrep isn't enough).
+*** Hint
+Extended regex has no back-reference to a captured group /within the match/.
+GNU grep's Perl mode (=-P=) does: =\b(\w+)\s+\1\b=.
+*** Solution
+#+begin_src bash
+printf 'the the game\na a fresh start\nall is well\n' \
+  | grep -P '\b(\w+)\s+\1\b'
+#+end_src
+Hitting grep's ceiling here is exactly why Perl (track 5) exists.
+
+* 2. sed
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The stream editor: line addresses + a tiny command set (=p d s a i c=). You'll
+discover it is a scalpel for line-oriented edits and substitution — and that
+its power ends where "understand the data as fields/records" begins.
+
+** TODO E2.1 — Print only lines 40–60 of a book
+Without opening it in a pager.
+You'll meet: =-n=, the =p= command, address ranges.
+*** Hint
+By default sed prints every line. =-n= silences that; then =p= prints only what
+you ask. Addresses can be line numbers: =40,60=.
+*** Solution
+#+begin_src bash
+sed -n '40,60p' moby-dick.txt
+#+end_src
+
+** TODO E2.2 — Strip all blank lines from a book
+You'll meet: regex addresses, the =d= command.
+*** Hint
+=/regex/d= deletes matching lines. A blank line is =^$=.
+*** Solution
+#+begin_src bash
+sed '/^$/d' moby-dick.txt | head
+#+end_src
+
+** TODO E2.3 — Show only the substitutions you made
+Replace "Holmes" with "Poirot", but print *only* the changed lines.
+You'll meet: the =s///= command, its =p= flag, and =-n=.
+*** Hint
+=s/old/new/= substitutes. Add the =p= flag to print lines where it fired, and
+=-n= so nothing else prints.
+*** Solution
+#+begin_src bash
+sed -n 's/Holmes/Poirot/gp' sherlock.txt
+#+end_src
+
+** TODO E2.4 — Reformat every hire date YYYY-MM-DD → MM/DD/YYYY
+In =employees.csv=. The output has slashes.
+You'll meet: =-E=, capture groups & back-refs, and picking a new delimiter.
+*** Hint
+With slashes in the /replacement/, using =s/.../.../= means escaping them all.
+sed lets you choose any delimiter: =s#...#...#=. Capture the three date parts
+with =( )= under =-E= and reorder with =\1 \2 \3=.
+*** Solution
+#+begin_src bash
+sed -nE 's#^([0-9]+),([^,]+),([^,]+),([^,]+),([0-9]+),([0-9]{4})-([0-9]{2})-([0-9]{2})#\7/\8/\6#p' \
+  employees.csv | head
+#+end_src
+Counting fields by hand to reach the date is annoying — foreshadowing =awk -F,=.
+
+** TODO E2.5 — Edit a file in place, but survive your own mistakes
+Uppercase the CSV header row, saving a backup first.
+You'll meet: =-i= with a backup suffix.
+*** Hint
+=-i.bak= edits in place *and* keeps =file.bak=. Target only line =1= with the
+address =1=. =\U= (GNU) uppercases in the replacement.
+*** Solution
+#+begin_src bash
+cp employees.csv /tmp/emp.csv
+sed -i.bak -E '1s/.*/\U&/' /tmp/emp.csv
+head -1 /tmp/emp.csv; echo "backup:"; head -1 /tmp/emp.csv.bak
+#+end_src
+
+** TODO E2.6 — g or not g?
+On a line with a word repeated several times, replace only the *first* vs *all*.
+You'll meet: the difference the =g= flag makes, per line.
+*** Hint
+Without =g=, =s= changes only the first match on each line.
+*** Solution
+#+begin_src bash
+echo "na na na na batman" | sed 's/na/NA/'
+echo "na na na na batman" | sed 's/na/NA/g'
+#+end_src
+
+** TODO E2.7 — Extract the assignee numbers from tickets.json
+Just the integers after ="user"=, one per line — using sed.
+You'll meet: match-whole-line-then-capture, and sed's limits on structured data.
+*** Hint
+Match the entire line with =.*"assignee":"user\([0-9]\+\)".*= and replace it
+with just the capture =\1= (add =-n ... p= so non-matching lines vanish). Under
+=-E= the escapes drop.
+*** Solution
+#+begin_src bash
+sed -nE 's/.*"assignee":"user([0-9]+)".*/\1/p' tickets.json | head
+#+end_src
+It works, but it is fragile (one object per line, exact key order). Real JSON
+wants =jq= or Python (track 6). Feeling that fragility is the point.
+
+* 3. awk
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The moment your data has *fields and records*, awk is the right tool. You'll
+discover =$1..$NF=, associative arrays (the workhorse), =BEGIN/END=, and that a
+"report" is often three lines of awk.
+
+** TODO E3.1 — Just the full names from employees.csv
+Print "First Last" for every employee, no header.
+You'll meet: =-F=, fields =$2 $3=, skipping a record with =NR=.
+*** Hint
+=-F,= splits on commas. =$2= and =$3= are first/last. =NR>1= skips the header
+row.
+*** Solution
+#+begin_src bash
+awk -F, 'NR>1{print $2, $3}' employees.csv | head
+#+end_src
+
+** TODO E3.2 — Company-wide average salary
+One number.
+You'll meet: accumulation across records, the =END= block.
+*** Hint
+Add =$5= into a running total as awk streams each record; divide in =END= by a
+counter.
+*** Solution
+#+begin_src bash
+awk -F, 'NR>1{s+=$5; n++} END{printf "avg %.0f over %d people\n", s/n, n}' employees.csv
+#+end_src
+
+** TODO E3.3 — Average salary *per department*
+You'll meet: associative arrays keyed by a string, =for (k in arr)=.
+*** Hint
+=sum[$4]+=$5= and =n[$4]++= build per-dept totals. Loop the keys in =END=.
+*** Solution
+#+begin_src bash
+awk -F, 'NR>1{sum[$4]+=$5; n[$4]++}
+         END{for (d in sum) printf "%-9s %.0f\n", d, sum[d]/n[d]}' employees.csv | sort
+#+end_src
+This four-line pattern — accumulate into an array keyed by a field, report in
+END — is the single most useful thing awk does.
+
+** TODO E3.4 — Tally HTTP status codes in the access log
+How many 200s, 404s, 500s…?
+You'll meet: whitespace field-splitting (no =-F= needed), =$9=.
+*** Hint
+Default field separator is whitespace, so the status code is =$9=. Count into
+an array keyed by =$9=.
+*** Solution
+#+begin_src bash
+awk '{c[$9]++} END{for (k in c) print c[k], k}' access.log | sort -rn
+#+end_src
+Compare this to the grep gymnastics in E1.3 — awk got the field for free.
+
+** TODO E3.5 — Top 5 IPs by bytes transferred
+You'll meet: =$NF= (last field), and piping awk's output onward.
+*** Hint
+Bytes are the *last* field: =$NF=. Sum per =$1= (the IP), then =sort -rn | head=.
+*** Solution
+#+begin_src bash
+awk '{b[$1]+=$NF} END{for (ip in b) print b[ip], ip}' access.log | sort -rn | head -5
+#+end_src
+
+** TODO E3.6 — Word frequency, in awk alone
+Top 15 words of any book — no grep/sort pipeline, do it inside awk.
+You'll meet: =gsub=, =tolower=, =split=, and sorting an array by hand-ish.
+*** Hint
+Lowercase =$0= (=tolower=), turn non-letters into spaces (=gsub(/[^a-z]+/," ")=),
+=split= into words, count into a hash. For the top-N, it's easiest to =print
+count, word= and pipe to =sort -rn | head=.
+*** Solution
+#+begin_src bash
+awk '{ $0=tolower($0); gsub(/[^a-z]+/," ");
+       n=split($0,w," "); for(i=1;i<=n;i++) c[w[i]]++ }
+     END{ for(k in c) print c[k], k }' moby-dick.txt | sort -rn | head -15
+#+end_src
+
+** TODO E3.7 — Lines per file, across all books
+Report each filename with its line count — using awk, not =wc=.
+You'll meet: =FILENAME=, and =FNR= vs =NR=.
+*** Hint
+=FILENAME= is the current file; =FNR= resets per file while =NR= keeps climbing.
+Count into =c[FILENAME]=.
+*** Solution
+#+begin_src bash
+awk '{c[FILENAME]++} END{for(f in c) print c[f], f}' /root/corpus/*.txt
+#+end_src
+
+** TODO E3.8 — A formatted salary-band report
+Add a computed column: LOW (<70k), MID, HIGH (>=110k). Print a tidy table.
+You'll meet: =BEGIN=, =printf= column widths, rebuilding =$0=/=OFS=.
+*** Hint
+=BEGIN{print header}=. Compute a band from =$5= with nested ternaries or ifs.
+=printf "%-4d %-9s %-6s %8d\n"= aligns columns.
+*** Solution
+#+begin_src bash
+awk -F, 'BEGIN{printf "%-4s %-9s %-6s %8s\n","ID","DEPT","BAND","SALARY"}
+         NR>1{ band = ($5>=110000?"HIGH":($5<70000?"LOW":"MID"));
+               printf "%-4d %-9s %-6s %8d\n", $1,$4,band,$5 }' employees.csv | head
+#+end_src
+
+* 4. bash scripting
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Gluing the tools together into repeatable programs. You'll discover that the
+hard part of shell is not logic but *quoting and word-splitting*, and that a
+handful of habits (strict mode, ="$@"=, =trap=, =mktemp=) separate scripts that
+work from scripts that eat your files.
+
+Write these as real files (=script.sh=, =chmod +x=), not one-liners.
+
+** TODO E4.1 — Top 5 biggest files under a directory
+A script =bigfiles.sh DIR= that prints the five largest files beneath DIR.
+You'll meet: command substitution, =find=, =du=/=sort=, quoting =$1=.
+*** Hint
+=find "$1" -type f -printf '%s %p\n'= gives size + path; =sort -rn | head -5=.
+Quote =$1= so a spacey directory still works.
+*** Solution
+#+begin_src bash :dir /root :tangle /root/workbook-data/bigfiles.sh :shebang "#!/usr/bin/env bash"
+set -euo pipefail
+dir="${1:?usage: bigfiles.sh DIR}"
+find "$dir" -type f -printf '%s\t%p\n' | sort -rn | head -5
+#+end_src
+Run: =bash /root/workbook-data/bigfiles.sh /root/corpus=. (=:tangle= writes the
+block to a file when you =C-c C-v t=.)
+
+** TODO E4.2 — Line/word/char counts for every book
+Loop the =*.txt= files; print a row per file plus a total.
+You'll meet: =for= over a glob, capturing =wc= output, arithmetic.
+*** Hint
+=for f in /root/corpus/*.txt; do ... done=. =read l w c < <(wc -l -w -c < "$f")=
+splits wc's three numbers. Keep running totals with =$(( ))=.
+*** Solution
+#+begin_src bash :dir /root
+set -euo pipefail
+tl=0 tw=0 tc=0
+for f in /root/corpus/*.txt; do
+  read -r l w c < <(wc -l -w -c < "$f")
+  printf "%6d %6d %8d  %s\n" "$l" "$w" "$c" "${f##*/}"
+  tl=$((tl+l)); tw=$((tw+w)); tc=$((tc+c))
+done
+printf "%6d %6d %8d  TOTAL\n" "$tl" "$tw" "$tc"
+#+end_src
+
+** TODO E4.3 — A grep-across-the-corpus wrapper
+=search.sh PATTERN= greps every corpus file, case-insensitive, with filenames,
+and exits nonzero if nothing matched.
+You'll meet: =$#=/=$1=, a usage message, ="$@"=, exit status.
+*** Hint
+Guard =[ $# -eq 1 ]= or print usage to stderr and =exit 2=. grep already
+returns 1 on no-match — let it be the script's exit code.
+*** Solution
+#+begin_src bash :dir /root :tangle /root/workbook-data/search.sh :shebang "#!/usr/bin/env bash"
+set -uo pipefail
+if [ $# -lt 1 ]; then echo "usage: search.sh PATTERN..." >&2; exit 2; fi
+grep -rinE "$*" /root/corpus
+#+end_src
+
+** TODO E4.4 — Rename the messy files safely
+In =/root/workbook-data/messy=, lowercase every =.JPG= to =.jpg=. The filenames
+contain spaces and punctuation — do it without corrupting anything.
+You'll meet: THE quoting lesson — =-print0=, =read -d ''=, ="$var"= everywhere.
+*** Hint
+Never =for f in $(ls)=. Use =find ... -print0= piped into
+=while IFS= read -r -d '' f=. Build the new name with parameter expansion and
+quote every expansion.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/messy
+set -euo pipefail
+find . -maxdepth 1 -name '*.JPG' -print0 |
+while IFS= read -r -d '' f; do
+  new="${f%.JPG}.jpg"
+  echo "mv [$f] -> [$new]"      # drop the echo, keep mv, when you trust it
+  # mv -- "$f" "$new"
+done
+#+end_src
+Try the naive =for f in $(ls *.JPG)= version too, and watch it shred the
+space-containing names. That contrast is the whole lesson.
+
+** TODO E4.5 — Make failure loud
+Write a two-command pipeline where the first command fails, and show that the
+script *doesn't* notice — then make it notice.
+You'll meet: =set -euo pipefail=, and why every serious script starts with it.
+*** Hint
+=false | wc -l= "succeeds" (exit 0) because only the last command's status
+counts — until =set -o pipefail=. =set -u= turns a typo'd =$varr= into an error
+instead of an empty string.
+*** Solution
+#+begin_src bash :dir /root
+bash -c 'false | wc -l; echo "exit=$?  (looks fine, but false failed)"'
+bash -c 'set -o pipefail; false | wc -l; echo "exit=$?  (now the failure shows)"'
+#+end_src
+
+** TODO E4.6 — A reusable function + a self-cleaning temp file
+Write =count_matches PATTERN FILE= as a function, and have the script stage work
+in a =mktemp= file that is removed even if the script dies.
+You'll meet: functions, =local=, =mktemp=, =trap ... EXIT=.
+*** Hint
+=trap 'rm -f "$tmp"' EXIT= fires on any exit. =local= keeps function vars from
+leaking. A function "returns" data by =echo=, status by =return=.
+*** Solution
+#+begin_src bash :dir /root
+set -euo pipefail
+tmp="$(mktemp)"; trap 'rm -f "$tmp"' EXIT
+count_matches() { local pat="$1" file="$2"; grep -c "$pat" "$file"; }
+grep -n Holmes /root/corpus/sherlock.txt > "$tmp"
+echo "staged $(wc -l < "$tmp") lines in $tmp"
+echo "Holmes count: $(count_matches Holmes /root/corpus/sherlock.txt)"
+# on exit, trap removes $tmp automatically
+#+end_src
+
+** TODO E4.7 — Compare two department rosters without temp files
+Produce the sorted list of employees in =eng= and in =sales=, and diff them —
+using no intermediate files.
+You'll meet: process substitution =<(...)=.
+*** Hint
+=diff <(cmd1) <(cmd2)=. Each =<(...)= looks like a filename to =diff= but is a
+live pipe.
+*** Solution
+#+begin_src bash :dir /root/corpus
+diff <(awk -F, '$4=="eng"{print $2,$3}'  employees.csv | sort) \
+     <(awk -F, '$4=="sales"{print $2,$3}' employees.csv | sort) | head
+#+end_src
+
+* 5. perl
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Perl is where sed and awk's habits converge and then keep going: full regex
+with back-references, real hashes, and slurp/multi-line matching. You'll
+discover the =-n -p -a -F -l -i= one-liner flags first, then graduate to a
+script with a nested data structure.
+
+** TODO E5.1 — grep, reimplemented in Perl
+Print lines of =sherlock.txt= matching /Holmes/, using =perl= not =grep=.
+You'll meet: =-n=, =-e=, the implicit =$_=.
+*** Hint
+=-n= wraps your =-e= code in a =while (<>){ ... }= loop over lines; the line is
+=$_=; =print if /Holmes/= prints the current line.
+*** Solution
+#+begin_src bash
+perl -ne 'print if /Holmes/' sherlock.txt
+#+end_src
+
+** TODO E5.2 — sed, reimplemented in Perl
+Substitute Holmes→Poirot across the file.
+You'll meet: =-p= (print each line automatically), and =-i= for in-place.
+*** Hint
+=-p= is =-n= plus "print =$_= at the end of each iteration". So =s/// = on =$_=
+edits the stream.
+*** Solution
+#+begin_src bash
+perl -pe 's/Holmes/Poirot/g' sherlock.txt
+#+end_src
+
+** TODO E5.3 — awk, reimplemented: sum the salary column
+You'll meet: autosplit =-a=, custom split =-F=, =@F=, =-l=, the line number =$.=.
+*** Hint
+=-a= splits each line into =@F=; =-F,= sets the separator; salary is =$F[4]=;
+skip the header with =$. > 1=; sum and print in an =END{}=.
+*** Solution
+#+begin_src bash
+perl -F, -lane '$s += $F[4] if $. > 1; END { print $s }' employees.csv
+#+end_src
+
+** TODO E5.4 — Word frequency with a hash
+Top 10 words of a book.
+You'll meet: hashes =%c=, a global match =//g= in list context, =lc=, sorting keys.
+*** Hint
+=for (/([a-z]+)/gi) { $c{lc $1}++ }= counts. Then
+=sort { $c{$b} <=> $c{$a} } keys %c= ranks.
+*** Solution
+#+begin_src bash
+perl -lne 'for (/([A-Za-z]+)/g){ $c{lc $1}++ }
+           END{ @k = sort { $c{$b} <=> $c{$a} } keys %c;
+                print "$c{$_}\t$_" for @k[0..9] }' moby-dick.txt
+#+end_src
+
+** TODO E5.5 — Parse the access log with named captures
+Print "IP CODE BYTES" for each request using one regex with *named* groups.
+You'll meet: =(?<name>...)= and the =%+= hash.
+*** Hint
+=/^(?<ip>\S+).*" (?<code>\d{3}) (?<bytes>\d+)/= then use =$+{ip}= etc.
+*** Solution
+#+begin_src bash
+perl -ne 'print "$+{ip} $+{code} $+{bytes}\n"
+          if /^(?<ip>\S+).*" (?<code>\d{3}) (?<bytes>\d+)/' access.log | head
+#+end_src
+
+** TODO E5.6 — Collapse accidental doubled words
+Turn "the the game is is afoot" into "the game is afoot".
+You'll meet: back-references *inside a substitution*, word boundaries.
+*** Hint
+=s/\b(\w+)(\s+\1\b)+/$1/g= — capture a word, then one-or-more repeats of it.
+*** Solution
+#+begin_src bash
+echo 'the the game is is is afoot' | perl -pe 's/\b(\w+)(\s+\1\b)+/$1/g'
+#+end_src
+
+** TODO E5.7 — A real script: per-department roster
+Read =employees.csv=, build a hash-of-arrays (dept → list of "First Last"), and
+print each department with its members, sorted.
+You'll meet: references, =push @{ $h{$k} }=, nested iteration — Perl's data structures.
+*** Hint
+=push @{ $roster{$F[3]} }, "$F[1] $F[2]"=. Autovivification creates the arrayref
+for you. Then loop =sort keys %roster= and =@{ $roster{$d} }=.
+*** Solution
+#+begin_src perl :tangle /root/workbook-data/roster.pl :results output
+use strict; use warnings;
+open my $fh, '<', '/root/corpus/employees.csv' or die $!;
+my %roster;
+while (<$fh>) {
+    next if $. == 1;                      # header
+    chomp;
+    my @F = split /,/;
+    push @{ $roster{$F[3]} }, "$F[1] $F[2]";
+}
+for my $dept (sort keys %roster) {
+    my @who = @{ $roster{$dept} };
+    printf "%-9s %d people\n", $dept, scalar @who;
+}
+#+end_src
+Run with =C-c C-c=, or tangle and =perl /root/workbook-data/roster.pl=.
+
+** TODO E5.8 — Multi-line matching (slurp mode)
+Find sentences that span two lines in a book (a lowercase word, newline, more
+words, then a period).
+You'll meet: =-0777= slurp, and the =/s= =/m= regex modifiers.
+*** Hint
+=-0777= reads the whole file into =$_= at once. =/s= makes =.= match newlines.
+=/([a-z]+\n[^.]+\.)/g= grabs cross-line fragments.
+*** Solution
+#+begin_src bash
+perl -0777 -ne 'while (/([a-z]+\s*\n[^.\n]{0,60}\.)/g){ ($x=$1)=~s/\s+/ /g; print "$x\n" }' \
+  sherlock.txt | head
+#+end_src
+
+* 6. python
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+When data is structured (JSON), or the logic outgrows a one-liner, Python is
+the reach. You'll discover the batteries — =json=, =csv=, =re=, =collections=,
+=pathlib=, =argparse=, =dataclasses= — and the shape of a real, testable module.
+
+** TODO E6.1 — Count tickets by status
+Load =tickets.json= properly and tally the statuses.
+You'll meet: =json.load=, =collections.Counter=.
+*** Hint
+=json.load(open(...))= gives a list of dicts. =Counter(t['status'] for t in data)=.
+*** Solution
+#+begin_src python :results output
+import json, collections
+data = json.load(open('/root/corpus/tickets.json'))
+print(collections.Counter(t['status'] for t in data))
+#+end_src
+
+** TODO E6.2 — Average salary per department, the Python way
+You'll meet: =csv.DictReader=, =collections.defaultdict=.
+*** Hint
+=DictReader= yields dict rows keyed by header. Accumulate salaries into
+=defaultdict(list)= by =row['dept']=.
+*** Solution
+#+begin_src python :results output
+import csv, collections
+by = collections.defaultdict(list)
+for row in csv.DictReader(open('/root/corpus/employees.csv')):
+    by[row['dept']].append(int(row['salary']))
+for dept in sorted(by):
+    xs = by[dept]
+    print(f"{dept:9} {sum(xs)//len(xs):>7} ({len(xs)} people)")
+#+end_src
+Same answer as awk E3.3 — three tools, one truth. Diff them.
+
+** TODO E6.3 — Top talkers from the log, with regex
+Parse =access.log= with the =re= module; sum bytes per IP; print the top 5.
+You'll meet: =re.compile=, named groups =(?P<name>...)=, =Counter.most_common=.
+*** Hint
+=re.compile(r'^(?P<ip>\S+).*" (?P<code>\d{3}) (?P<bytes>\d+)')=. Use =m['ip']=,
+=m['bytes']=.
+*** Solution
+#+begin_src python :results output
+import re, collections
+pat = re.compile(r'^(?P<ip>\S+).*" (?P<code>\d{3}) (?P<bytes>\d+)')
+tot = collections.Counter()
+for line in open('/root/corpus/access.log'):
+    m = pat.match(line)
+    if m: tot[m['ip']] += int(m['bytes'])
+for ip, b in tot.most_common(5):
+    print(f"{b:>8} {ip}")
+#+end_src
+
+** TODO E6.4 — A CLI search tool
+=argparse=-driven: search the corpus for a pattern, optional =--ignore-case=.
+You'll meet: =argparse=, =pathlib=, exit codes.
+*** Hint
+=argparse.ArgumentParser=; a positional =pattern=; a =store_true= flag;
+=pathlib.Path('/root/corpus').glob('*')= to walk files.
+*** Solution
+#+begin_src python :tangle /root/workbook-data/search.py :results output
+import argparse, re, sys, pathlib
+def main():
+    ap = argparse.ArgumentParser(description="search the corpus")
+    ap.add_argument("pattern")
+    ap.add_argument("-i", "--ignore-case", action="store_true")
+    a = ap.parse_args()
+    flags = re.IGNORECASE if a.ignore_case else 0
+    rx = re.compile(a.pattern, flags)
+    hits = 0
+    for p in sorted(pathlib.Path("/root/corpus").glob("*")):
+        if not p.is_file(): continue
+        for n, line in enumerate(p.open(errors="replace"), 1):
+            if rx.search(line):
+                print(f"{p.name}:{n}: {line.rstrip()}"); hits += 1
+    sys.exit(0 if hits else 1)
+if __name__ == "__main__":
+    main()
+#+end_src
+Tangle, then: =python3 /root/workbook-data/search.py -i holmes=.
+
+** TODO E6.5 — Stream a big file with a generator
+Yield only the matching lines of =access.log= without loading it all; count 404s.
+You'll meet: generator functions =yield=, lazy iteration.
+*** Hint
+=def matches(path, needle): for line in open(path): if needle in line: yield line=.
+Consume with =sum(1 for _ in matches(...))=.
+*** Solution
+#+begin_src python :results output
+def matches(path, needle):
+    with open(path) as f:
+        for line in f:
+            if needle in line:
+                yield line
+n = sum(1 for _ in matches('/root/corpus/access.log', '" 404 '))
+print("404s:", n)
+#+end_src
+
+** TODO E6.6 — Model a ticket with a dataclass
+Load tickets into =Ticket= objects, print the 5 highest-priority open ones.
+You'll meet: =@dataclass=, =sorted(key=...)=, comprehensions.
+*** Hint
+=@dataclass class Ticket: id:int; status:str; priority:int; assignee:str=.
+Build with =Ticket(**d)= (keys match fields). Filter open, sort by =-priority=.
+*** Solution
+#+begin_src python :results output
+import json
+from dataclasses import dataclass
+@dataclass
+class Ticket:
+    id: int; status: str; priority: int; assignee: str
+tix = [Ticket(**d) for d in json.load(open('/root/corpus/tickets.json'))]
+top = sorted((t for t in tix if t.status == 'open'),
+             key=lambda t: -t.priority)[:5]
+for t in top: print(t)
+#+end_src
+
+** TODO E6.7 — A testable module
+Turn "word frequency" into =wordfreq.py= with a function and a =unittest=, run
+the test.
+You'll meet: =if __name__ == "__main__"=, =unittest=, module structure.
+*** Hint
+=def top_words(text, n=10): -> list[tuple[str,int]]= using =re.findall= +
+=Counter=. Put a =unittest.TestCase= under the main guard, or in a second file.
+*** Solution
+#+begin_src python :tangle /root/workbook-data/wordfreq.py :results output
+import re, collections, unittest
+def top_words(text, n=10):
+    words = re.findall(r"[a-z]+", text.lower())
+    return collections.Counter(words).most_common(n)
+class T(unittest.TestCase):
+    def test_basic(self):
+        self.assertEqual(top_words("a a b", 1), [("a", 2)])
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
+#+end_src
+Tangle, then =python3 /root/workbook-data/wordfreq.py=.
+
+* 7. C
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Down to the metal. You'll discover that the compiler is a teacher (=-Wall
+-Wextra=), that memory bugs are invisible until a tool shows them (valgrind,
+ASan), and that structs + function pointers + =qsort= are how C does what awk
+did in one line. The broken programs from *Setup* live in =/root/workbook-data/c=.
+
+** TODO E7.1 — Hello, warnings
+Compile a hello program with =-Wall -Wextra=, then introduce an unused variable
+and a format-mismatch and read what the compiler says.
+You'll meet: warning flags as a feedback loop.
+*** Hint
+=printf("%d\n", "oops")= is a format/type mismatch =-Wall= will catch. Fix until
+it compiles clean.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+cat > hello.c <<'C'
+#include <stdio.h>
+int main(void){ int unused; printf("%d\n", "oops"); return 0; }
+C
+gcc -Wall -Wextra hello.c -o hello 2>&1 | head
+echo "--- fixed ---"
+cat > hello.c <<'C'
+#include <stdio.h>
+int main(void){ printf("%d\n", 42); return 0; }
+C
+gcc -Wall -Wextra hello.c -o hello && ./hello
+#+end_src
+
+** TODO E7.2 — Reimplement =wc -l=
+Read a file and count newlines. Match coreutils exactly.
+You'll meet: =FILE*=, =fopen=, =fgetc=, =argv=.
+*** Hint
+Loop =fgetc= until =EOF=, increment on ='\n'=. Take the filename from =argv[1]=;
+handle the missing-arg and fopen-failure cases.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+cat > wcl.c <<'C'
+#include <stdio.h>
+int main(int argc, char **argv){
+    if (argc < 2){ fprintf(stderr, "usage: %s FILE\n", argv[0]); return 2; }
+    FILE *f = fopen(argv[1], "r");
+    if (!f){ perror("fopen"); return 1; }
+    long lines = 0; int c;
+    while ((c = fgetc(f)) != EOF) if (c == '\n') lines++;
+    fclose(f);
+    printf("%ld\n", lines);
+    return 0;
+}
+C
+gcc -Wall -Wextra wcl.c -o wcl
+./wcl /root/corpus/employees.csv
+echo "coreutils: $(wc -l < /root/corpus/employees.csv)"
+#+end_src
+
+** TODO E7.3 — Catch a heap bug with valgrind
+Compile =leaky.c= (from Setup), run it under valgrind, read the report, fix both
+problems.
+You'll meet: valgrind's "Invalid write" and "definitely lost".
+*** Hint
+=gcc -g leaky.c -o leaky= (=-g= for line numbers), then
+=valgrind --leak-check=full ./leaky=. The buffer is too small and never freed.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+gcc -g -Wall leaky.c -o leaky
+valgrind --leak-check=full --error-exitcode=1 ./leaky 2>&1 | grep -E 'Invalid|lost|ERROR' | head
+echo "--- fix: size the buffer + free it ---"
+cat > leaky_fixed.c <<'C'
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int main(void){
+    const char *msg = "hello, world";
+    char *buf = malloc(strlen(msg) + 1);
+    strcpy(buf, msg);
+    printf("%s\n", buf);
+    free(buf);
+    return 0;
+}
+C
+gcc -g -Wall leaky_fixed.c -o leaky_fixed
+valgrind --leak-check=full --error-exitcode=1 ./leaky_fixed 2>&1 | grep -E 'ERROR SUMMARY'
+#+end_src
+
+** TODO E7.4 — Catch a stack bug with the sanitizer
+=offbyone.c= writes one past an array. valgrind often misses stack bugs — use
+AddressSanitizer instead.
+You'll meet: =-fsanitize=address=, and when to prefer it over valgrind.
+*** Hint
+=gcc -g -fsanitize=address offbyone.c -o offbyone && ./offbyone=. ASan prints a
+"stack-buffer-overflow" with the exact line.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+gcc -g -fsanitize=address offbyone.c -o offbyone
+./offbyone 2>&1 | grep -E 'ERROR|overflow' | head -3 || true
+echo "--- fix: loop while i < 5 ---"
+sed 's/i <= 5/i < 5/' offbyone.c > offbyone_fixed.c
+gcc -g -fsanitize=address offbyone_fixed.c -o offbyone_fixed && ./offbyone_fixed
+#+end_src
+
+** TODO E7.5 — Sort employees by salary with =qsort=
+Parse =employees.csv= into an array of structs and sort descending by salary.
+You'll meet: =struct=, =qsort=, a comparator function pointer.
+*** Hint
+=struct Emp { int id; char first[32], last[32], dept[16]; long salary; };=
+Read with =fscanf(f, "%d,%31[^,],%31[^,],%15[^,],%ld,%*s", ...)=. =qsort= takes
+=compar(const void*, const void*)=; cast and compare =salary=.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+cat > sortemp.c <<'C'
+#include <stdio.h>
+#include <stdlib.h>
+struct Emp { int id; char first[32], last[32], dept[16]; long salary; };
+static int by_salary_desc(const void *a, const void *b){
+    long s = ((const struct Emp*)a)->salary, t = ((const struct Emp*)b)->salary;
+    return (t > s) - (t < s);
+}
+int main(void){
+    FILE *f = fopen("/root/corpus/employees.csv", "r");
+    if (!f){ perror("fopen"); return 1; }
+    char header[256]; if (!fgets(header, sizeof header, f)) return 1;  /* skip */
+    struct Emp *e = NULL; size_t n = 0, cap = 0;
+    struct Emp tmp;
+    while (fscanf(f, "%d,%31[^,],%31[^,],%15[^,],%ld,%*s\n",
+                  &tmp.id, tmp.first, tmp.last, tmp.dept, &tmp.salary) == 5) {
+        if (n == cap){ cap = cap ? cap*2 : 64; e = realloc(e, cap*sizeof *e); }
+        e[n++] = tmp;
+    }
+    fclose(f);
+    qsort(e, n, sizeof *e, by_salary_desc);
+    for (size_t i = 0; i < 5 && i < n; i++)
+        printf("%-9s %-10s %ld\n", e[i].dept, e[i].last, e[i].salary);
+    free(e);
+    return 0;
+}
+C
+gcc -g -Wall -Wextra sortemp.c -o sortemp && ./sortemp
+#+end_src
+awk did this in E3.x with one line — now you know what it does underneath.
+
+** TODO E7.6 — A Makefile, then a CMakeLists
+Turn your growing =c/= directory into a =make=-built project, then do the same
+with cmake and an out-of-source build.
+You'll meet: =make= targets & implicit rules; =cmake= configure/build.
+*** Hint
+A minimal Makefile: =CFLAGS = -Wall -Wextra -g= then targets. For cmake:
+=cmake_minimum_required=, =project=, =add_executable=, then
+=cmake -S . -B build && cmake --build build=.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+cat > Makefile <<'MK'
+CFLAGS = -Wall -Wextra -g
+BINS = wcl sortemp
+all: $(BINS)
+clean:
+	rm -f $(BINS)
+MK
+make -s clean && make -s && echo "make built: $(ls wcl sortemp 2>/dev/null)"
+
+cat > CMakeLists.txt <<'CM'
+cmake_minimum_required(VERSION 3.20)
+project(nixlab_c C)
+set(CMAKE_C_FLAGS "-Wall -Wextra -g")
+add_executable(wcl wcl.c)
+add_executable(sortemp sortemp.c)
+CM
+cmake -S . -B build >/dev/null && cmake --build build >/dev/null && echo "cmake built into build/"
+#+end_src
+
+** TODO E7.7 — Give your editor real understanding (bear + clangd)
+Generate =compile_commands.json= so =clangd= (hence Emacs/nvim LSP) knows how
+each file is compiled.
+You'll meet: =bear=, =compile_commands.json= — the bridge to track 8.
+*** Hint
+=bear -- make -B= records the exact compiler invocations. clangd reads the
+resulting =compile_commands.json= automatically.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/c :results output
+make -s clean
+bear -- make -B >/dev/null 2>&1 || bear -- make -B
+echo "entries:"; grep -c '"file"' compile_commands.json
+head -c 300 compile_commands.json; echo
+#+end_src
+Now open =sortemp.c= in Emacs (=M-x eglot=) and hover a symbol — that works
+because of this file.
+
+* 8. Emacs & Elisp
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+You've been living in Emacs this whole time; now bend it. You'll discover that
+Org Babel ran every block above, that Emacs's regex engine is its *own dialect*,
+that keyboard macros are a poor man's script, and that Elisp lets you grow new
+commands — culminating in re-solving track 3's word-frequency in Lisp.
+
+Do these interactively in Emacs, not as shell blocks.
+
+** TODO E8.1 — You already ran code: prove it
+Re-run any =bash= block above with =C-c C-c= and watch =#+RESULTS:= appear.
+Then =C-c C-v t= to /tangle/ every =:tangle= block to disk at once.
+You'll meet: Org Babel evaluation, =#+RESULTS:=, tangling.
+*** Hint
+Point at a block from track 3 and =C-c C-c=. For tangling the whole file:
+=org-babel-tangle= (=C-c C-v t=). Check =/root/workbook-data= for the =.sh/.pl/.py=
+files that appear.
+*** Solution
+No code — this is muscle memory. Blocks run in the directory given by =:dir=
+(for bash, the file-wide default is =/root/corpus=, set at the top of this file).
+
+** TODO E8.2 — Reformat a column with a keyboard macro
+In =employees.csv= (open it with =SPC . /root/corpus/employees.csv=),
+record a macro that turns the first data line's =id,first,last= into
+=last, first (#id)=, then apply it to the next 20 lines.
+You'll meet: =F3=/=F4=, =C-u N F4=, =apply-macro-to-region-lines=.
+*** Hint
+=F3= starts recording, =F4= ends. Move by fields with =M-f=/=M-b=. Then
+=C-u 20 F4= replays 20 times, or select a region and =M-x
+apply-macro-to-region-lines=.
+*** Solution
+Macros are a discovery exercise; there is no single "answer". The insight: a
+macro is a recorded edit you replay — a script made of keystrokes, useful
+exactly when writing awk would be overkill.
+
+** TODO E8.3 — Emacs regex is NOT PCRE
+Use =M-x query-replace-regexp= (=C-M-%=) on a book buffer to swap first/last of
+"Holmes, Sherlock" style names. Notice the parenthesis escaping.
+You'll meet: Emacs regex syntax — literal =(= matches a paren; =\(...\)= groups.
+*** Hint
+In Emacs regex you write =\(...\)= for a group and =\1= in the replacement —
+the *opposite* escaping from =grep -E=. Try =\([A-Z][a-z]+\), \([A-Z][a-z]+\)=
+→ =\2 \1=.
+*** Solution
+The lesson is the friction itself: after a week of =grep -E=/=perl=, Emacs's
+=\(...\)= feels backwards. Keep =SPC h f re-search-forward= and =M-x
+regexp-builder= (=re-builder=) handy.
+
+** TODO E8.4 — =occur= vs grep
+With a book open, =M-x occur= for =Holmes=. Then =M-x rgrep= across the corpus.
+Compare navigating hits in-buffer vs across files.
+You'll meet: =occur=, =grep-mode= buffers, =next-error= (=M-g n=).
+*** Hint
+=occur= lists matches in the *current* buffer, clickable. =rgrep= shells out and
+gives a =*grep*= buffer you step through with =M-g n= / =M-g p=.
+*** Solution
+Interactive. Takeaway: =occur= is grep for the buffer you're in; =grep-mode=
+turns file-wide search results into a navigable list — the editor-native version
+of track 1.
+
+** TODO E8.5 — Evaluate Lisp in place
+In =*scratch*= (or here), type =(+ 1 2)= and =C-x C-e=. Then evaluate
+=(shell-command-to-string "awk 'END{print NR}' /root/corpus/access.log")=.
+You'll meet: =C-x C-e=, the =*Messages*= echo, calling the shell from Lisp.
+*** Hint
+=C-x C-e= evaluates the sexp *before point*. =shell-command-to-string= returns
+output as a string — Lisp gluing to the tools you already know.
+*** Solution
+#+begin_src elisp :results value
+(string-to-number
+ (shell-command-to-string "awk 'END{print NR}' /root/corpus/access.log"))
+#+end_src
+
+
+** TODO E8.6 — Write your first interactive command
+Define =count-words-region= that reports the word count of the selected region
+in the echo area, and bind it to =C-c w=.
+You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
+*** Hint
+=(interactive "r")= hands your function =BEG END=. Count with
+=(count-words beg end)= (built-in) and =message= the result.
+*** Solution
+#+begin_src elisp :results silent
+(defun count-words-region-msg (beg end)
+  "Report the number of words between BEG and END."
+  (interactive "r")
+  (message "%d words" (count-words beg end)))
+(global-set-key (kbd "C-c w") #'count-words-region-msg)
+#+end_src
+Evaluate the block (=C-c C-c=), select some text, press =C-c w=.
+
+** TODO E8.7 — Word frequency, in Elisp (capstone of the language tracks)
+Write =corpus-word-freq= that reads a corpus file into a temp buffer, tallies
+words in a hash table, and shows the top 15 in a new buffer. You've now done
+this in grep+sort, awk, perl, and python — do it in Lisp.
+You'll meet: =with-temp-buffer=, =insert-file-contents=, =make-hash-table=,
+=maphash=, =sort=.
+*** Hint
+=with-temp-buffer= + =insert-file-contents= loads the file. Scan words with
+=(while (re-search-forward "[a-z]+" nil t) ...)= after =downcase-region=. Count
+into =(make-hash-table :test 'equal)=. Collect pairs with =maphash=, =sort= by
+=cdr=, take 15, print into =(pop-to-buffer "*freq*")=.
+*** Solution
+#+begin_src elisp :results silent
+(defun corpus-word-freq (file &optional n)
+  "Show the top N (default 15) words in FILE."
+  (interactive "fCorpus file: ")
+  (setq n (or n 15))
+  (let ((counts (make-hash-table :test 'equal)))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (downcase-region (point-min) (point-max))
+      (goto-char (point-min))
+      (while (re-search-forward "[a-z]+" nil t)
+        (let ((w (match-string 0)))
+          (puthash w (1+ (gethash w counts 0)) counts))))
+    (let (pairs)
+      (maphash (lambda (k v) (push (cons k v) pairs)) counts)
+      (setq pairs (seq-take (sort pairs (lambda (a b) (> (cdr a) (cdr b)))) n))
+      (with-current-buffer (get-buffer-create "*freq*")
+        (erase-buffer)
+        (dolist (p pairs) (insert (format "%6d  %s\n" (cdr p) (car p))))
+        (pop-to-buffer (current-buffer))))))
+;; try: M-x corpus-word-freq RET /root/corpus/moby-dick.txt RET
+#+end_src
+Five implementations, one algorithm. That comparison — pipeline vs field-tool
+vs scripting-language vs systems-language vs editor-extension — is the real
+lesson of the whole workbook.
+
+* 9. Nix
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The layer under everything: the box itself is a Nix expression. You'll discover
+the edit→rebuild loop you already use, then the =repl= for exploring packages,
+generations for time-travel, and =writeShellScriptBin= for turning a script
+into a first-class system command.
+
+Work against your real flake in =~/nixlab= (or =/etc/nixos= on the box).
+
+** TODO E9.1 — Add a tool the declarative way
+Add =hyperfine= (a benchmarking tool) to =toolchain.nix=, rebuild, and use it to
+race =grep= vs =awk= on the 404 count.
+You'll meet: the one true install path on NixOS — edit config, rebuild.
+*** Hint
+Add =hyperfine= to the list in =toolchain.nix=, then from your laptop
+=./lab-ctl.sh rebuild=. There is no =apt install=; the file *is* the system.
+*** Solution
+#+begin_src bash :dir /root :results output
+# after adding hyperfine + rebuilding:
+hyperfine "grep -cE '\" 404 ' /root/corpus/access.log" \
+          "awk '\$9==404{n++} END{print n}' /root/corpus/access.log" 2>/dev/null \
+  || echo "add hyperfine to toolchain.nix and ./lab-ctl.sh rebuild first"
+#+end_src
+
+** TODO E9.2 — Explore packages in the repl
+Open =nix repl=, load nixpkgs, and inspect a package: its version, its store
+path.
+You'll meet: =nix repl=, attribute sets, =:p=.
+*** Hint
+=nix repl nixpkgs= (or =:lf .= inside your flake). Then =pkgs.hello.version=,
+=pkgs.ripgrep.outPath=. =:p expr= pretty-prints.
+*** Solution
+#+begin_src bash :dir /root :results output
+echo ':p builtins.attrNames { a = 1; b = 2; }' | nix repl 2>/dev/null | tail -3 \
+  || echo "run interactively: nix repl nixpkgs  then  pkgs.hello.version"
+#+end_src
+
+** TODO E9.3 — Which package provides a binary?
+You want =pstree= but don't know its package. Find it.
+You'll meet: =nix search=, and package-vs-binary name mismatches.
+*** Hint
+=nix search nixpkgs pstree=. Names of packages and the binaries they ship often
+differ (=pstree= lives in =psmisc=).
+*** Solution
+#+begin_src bash :dir /root :results output
+nix search nixpkgs pstree 2>/dev/null | head || echo "nix search nixpkgs pstree"
+#+end_src
+
+** TODO E9.4 — Time-travel with generations
+Make a trivial config change, rebuild, then roll back — and see both generations
+listed.
+You'll meet: system generations, =--rollback=, the profiles directory.
+*** Hint
+Every =nixos-rebuild switch= is a numbered generation. List them with
+=nix-env --list-generations -p /nix/var/nix/profiles/system=; undo the last with
+=nixos-rebuild switch --rollback= (or =./lab-ctl.sh= after editing back).
+*** Solution
+#+begin_src bash :dir /root :results output
+nix-env --list-generations -p /nix/var/nix/profiles/system 2>/dev/null | tail -5 \
+  || echo "run on the box as root"
+#+end_src
+
+** TODO E9.5 — Turn a script into a system command
+Package your =search.sh= (from track 4) as a proper =corpus-search= binary using
+=writeShellScriptBin=, and add it to =systemPackages=.
+You'll meet: trivial builders — Nix wrapping a script into the PATH.
+*** Hint
+In =configuration.nix=: =environment.systemPackages = [ (pkgs.writeShellScriptBin
+"corpus-search" '' grep -rinE "$1" /root/corpus '') ];= (merge with your existing
+list). Rebuild; now =corpus-search holmes= works anywhere.
+*** Solution
+#+begin_src nix :eval no
+# add to configuration.nix (merged into your systemPackages list):
+environment.systemPackages = with pkgs; [
+  # ... your toolchain import ...
+  (writeShellScriptBin "corpus-search" ''
+    exec ${gnugrep}/bin/grep -rinE "$1" /root/corpus
+  '')
+];
+#+end_src
+Referencing =${gnugrep}= instead of bare =grep= is the Nix habit: the script
+carries its own dependency, so it can't break when PATH changes.
+
+** TODO E9.6 — Introspect your own flake
+From =~/nixlab=, show what your flake actually provides and how it's pinned.
+You'll meet: =nix flake show=, =nix flake metadata=, =flake.lock=.
+*** Hint
+=nix flake show= lists outputs (your =nixosConfigurations.nixlab= and the
+devShells). =nix flake metadata= shows the locked inputs.
+*** Solution
+#+begin_src bash :dir /root :results output
+cd /etc/nixos 2>/dev/null && nix flake show 2>/dev/null | head -20 \
+  || echo "cd to your flake dir and: nix flake show"
+#+end_src
+
+* 10. Common Lisp
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The oldest language in the lab, and the most alive. You'll discover that the
+program runs /while you write it/: every block below is evaluated in one SBCL
+image that SLIME keeps running, so a function defined in one exercise is still
+there in the next. You'll meet exact arithmetic, hash tables, structs, macros
+that write code, and a condition system that lets you fix an error without
+unwinding the stack — and you'll re-solve problems from tracks 3 and 6 to feel
+the difference.
+
+Run blocks with =SPC c c=. The first one starts SBCL (a few seconds). Keep
+[[file:/root/workbook-data/practice/hello.lisp][hello.lisp]] and E0.14–E0.15 in mind: =SPC c e= opens any block in a
+real Lisp buffer where =SPC l= and =SPC k= work.
+
+** TODO E10.1 — Numbers that don't lie
+Compute =1/3 * 3=, =2^100=, and =22/7= as a decimal. Compare with what Python or
+awk give you.
+You'll meet: prefix notation, ratios, bignums, =float=.
+*** Hint
+Everything is =(function args...)=. Division of integers gives an exact
+/ratio/; integers grow as large as needed; =float= converts on request.
+=print= shows each value.
+*** Solution
+#+begin_src lisp :results output
+(print (+ 1 2 3))
+(print (/ 1 3))
+(print (* 1/3 3))
+(print (expt 2 100))
+(print (float 22/7))
+#+end_src
+=(* 1/3 3)= is exactly =1=, not =0.9999999=. Lisp only loses precision when you
+ask it to.
+
+** TODO E10.2 — Count the lines of access.log
+Open the file, read it line by line, count. No shelling out.
+You'll meet: =with-open-file=, =read-line=, =loop=.
+*** Hint
+=with-open-file= opens and always closes. =(read-line stream nil)= returns
+=nil= at end of file instead of signalling an error. =loop= has clauses for
+exactly this: =for line = ... while line count t=.
+*** Solution
+#+begin_src lisp
+(with-open-file (in "/root/corpus/access.log")
+  (loop for line = (read-line in nil)
+        while line
+        count t))
+#+end_src
+
+** TODO E10.3 — Split a CSV line
+Standard Common Lisp has no string-split. Write =split-on= so that
+=(split-on #\, "a,b,c")= returns =("a" "b" "c")=. Test it on the CSV header.
+You'll meet: =defun=, =position=, =subseq=, characters (=#\,=).
+*** Hint
+Find each comma with =(position char string :start start)=, take the =subseq=
+between commas, and continue after it. =position= returns =nil= when there are
+no more — and =(subseq s start nil)= means "to the end".
+*** Solution
+#+begin_src lisp
+(defun split-on (char string)
+  (loop for start = 0 then (1+ end)
+        for end = (position char string :start start)
+        collect (subseq string start end)
+        while end))
+
+(split-on #\, "id,first,last,dept,salary,hired")
+#+end_src
+=split-on= now lives in the running image. The next exercises use it without
+redefining it.
+
+** TODO E10.4 — Average salary per department (track 3, again)
+Same question as E3.3, in Lisp. Print each department with its average to two
+decimals.
+You'll meet: hash tables, =gethash= / =incf=, =parse-integer=, =maphash=,
+=format= directives.
+*** Hint
+Two hash tables with =:test #'equal= (string keys): totals and counts.
+=(incf (gethash key table 0) n)= adds to an entry that starts at 0. Skip the
+header with one =read-line=. =(format t "~10a ~,2f~%" ...)= pads and rounds.
+*** Solution
+#+begin_src lisp :results output
+(let ((sums (make-hash-table :test #'equal))
+      (counts (make-hash-table :test #'equal)))
+  (with-open-file (in "/root/corpus/employees.csv")
+    (read-line in)
+    (loop for line = (read-line in nil)
+          while line
+          do (let* ((fields (split-on #\, line))
+                    (dept (fourth fields))
+                    (salary (parse-integer (fifth fields))))
+               (incf (gethash dept sums 0) salary)
+               (incf (gethash dept counts 0)))))
+  (maphash (lambda (dept total)
+             (format t "~10a ~,2f~%" dept (/ total (gethash dept counts))))
+           sums))
+#+end_src
+Compare with awk's output: a couple of averages differ in the last digit. The
+division here is an exact ratio rounded once; awk rounds a binary float. Lisp is
+the one that's right.
+
+** TODO E10.5 — Tally HTTP status codes (track 3, again)
+Count each status code in access.log and print them most-frequent first.
+You'll meet: =search=, =parse-integer :junk-allowed=, alists, =sort :key=.
+*** Hint
+The status is the number right after the last =" = (quote-space) on each
+line. =(search "\" " line :from-end t)= finds it; =parse-integer= with
+=:junk-allowed t= stops at the next space. Collect the table into
+=(code . count)= pairs, then =(sort pairs #'> :key #'cdr)=.
+*** Solution
+#+begin_src lisp :results output
+(defun status-code (line)
+  (let ((quote-end (search "\" " line :from-end t)))
+    (parse-integer line :start (+ quote-end 2) :junk-allowed t)))
+
+(let ((tally (make-hash-table)))
+  (with-open-file (in "/root/corpus/access.log")
+    (loop for line = (read-line in nil)
+          while line
+          do (incf (gethash (status-code line) tally 0))))
+  (let (pairs)
+    (maphash (lambda (code n) (push (cons code n) pairs)) tally)
+    (dolist (p (sort pairs #'> :key #'cdr))
+      (format t "~a ~a~%" (car p) (cdr p)))))
+#+end_src
+Check it against =awk '{print $9}' access.log | sort | uniq -c | sort -rn=.
+
+** TODO E10.6 — Word frequency, in Lisp
+The top 10 words in sherlock.txt, lowercase, letters only — the same problem
+you solved in grep, awk, perl, python and elisp.
+You'll meet: reading a whole file, =alpha-char-p=, string output streams,
+=flet=, destructuring in =loop=.
+*** Hint
+Read the file into one string (=make-string= of =file-length=, then
+=read-sequence=). Walk it a character at a time: letters go into the current
+word (a =make-string-output-stream=), anything else ends the word. Count in an
+=equal= hash table, sort pairs, take 10 with =repeat 10=.
+*** Solution
+#+begin_src lisp :results output
+(defun words (string)
+  (let (words (word (make-string-output-stream)))
+    (flet ((flush ()
+             (let ((w (get-output-stream-string word)))
+               (when (plusp (length w)) (push w words)))))
+      (loop for c across string
+            do (if (alpha-char-p c)
+                   (write-char (char-downcase c) word)
+                   (flush)))
+      (flush))
+    (nreverse words)))
+
+(defun file-string (path)
+  (with-open-file (in path)
+    (let ((s (make-string (file-length in))))
+      (subseq s 0 (read-sequence s in)))))
+
+(let ((counts (make-hash-table :test #'equal)) pairs)
+  (dolist (w (words (file-string "/root/corpus/sherlock.txt")))
+    (incf (gethash w counts 0)))
+  (maphash (lambda (w n) (push (cons w n) pairs)) counts)
+  (loop for (w . n) in (sort pairs #'> :key #'cdr)
+        repeat 10
+        do (format t "~7d ~a~%" n w)))
+#+end_src
+
+** TODO E10.7 — Structs: the five best-paid employees
+Load employees.csv into a list of =employee= structs and print the top five by
+salary, with thousands separators.
+You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
+=copy-list=, =~:d=.
+*** Hint
+=(defstruct employee id first last dept salary hired)= gives you
+=make-employee= and accessors like =employee-salary= for free.
+=destructuring-bind= unpacks the list from =split-on= into named variables.
+=sort= is destructive — sort a =copy-list=.
+*** Solution
+#+begin_src lisp :results output
+(defstruct employee id first last dept salary hired)
+
+(defun line->employee (line)
+  (destructuring-bind (id first last dept salary hired) (split-on #\, line)
+    (make-employee :id (parse-integer id) :first first :last last
+                   :dept dept :salary (parse-integer salary) :hired hired)))
+
+(defparameter *employees*
+  (with-open-file (in "/root/corpus/employees.csv")
+    (read-line in)
+    (loop for line = (read-line in nil)
+          while line
+          collect (line->employee line))))
+
+(loop for e in (subseq (sort (copy-list *employees*) #'> :key #'employee-salary) 0 5)
+      do (format t "~a ~a (~a) ~:d~%" (employee-first e) (employee-last e)
+                 (employee-dept e) (employee-salary e)))
+#+end_src
+Now press =SPC l i= and enter =(first *employees*)=: the inspector lets you
+poke around a live object (=RET= on a slot dives in, =l= goes back, =q= quits).
+
+** TODO E10.8 — A macro that writes code for you
+Write =with-timing= so that =(with-timing body...)= runs the body, prints how
+long it took, and still returns the body's value. Then look at what it expands
+into.
+You'll meet: =defmacro=, backquote/comma, =gensym=, =macroexpand-1=,
+=SPC l m=.
+*** Hint
+A macro returns /code/. Backquote builds a template, =,x= inserts a value,
+=,@body= splices a list of forms. Use =gensym= for the start-time variable so
+it can't clash with the user's names. =multiple-value-prog1= returns the
+first form's values after running the rest.
+*** Solution
+#+begin_src lisp :results output
+(defmacro with-timing (&body body)
+  (let ((start (gensym "START")))
+    `(let ((,start (get-internal-real-time)))
+       (multiple-value-prog1 (progn ,@body)
+         (format t "~&took ~,3f s~%"
+                 (/ (- (get-internal-real-time) ,start)
+                    internal-time-units-per-second))))))
+#+end_src
+
+#+begin_src lisp :results output
+(with-timing (loop repeat 10000000 sum 1))
+(print (macroexpand-1 '(with-timing (sleep 1))))
+#+end_src
+Two blocks, on purpose: Babel sends a whole block to Lisp as one form, and a
+macro must already be defined when the code that uses it is compiled. Define
+first, use second — the same reason =defmacro= goes near the top of a file.
+Interactive version: =SPC c e= to open this block in a Lisp buffer, put the
+cursor on =(with-timing ...)=, and press =SPC l m=.
+
+** TODO E10.9 — Conditions and restarts
+Make a salary parser that survives bad input two ways: by catching the error,
+and by offering /restarts/ that the caller (or you, in the debugger) chooses.
+You'll meet: =handler-case=, =restart-case=, =handler-bind=,
+=invoke-restart=, the SLIME debugger.
+*** Hint
+=handler-case= is try/catch: the stack unwinds to it. =restart-case= declares
+recovery options /at the point of the error/; =handler-bind= can pick one
+without unwinding. If nobody picks one, SLIME's debugger shows them as numbered
+choices.
+*** Solution
+#+begin_src lisp :results output
+(defun safe-salary (text)
+  (handler-case (parse-integer text)
+    (parse-error () 0)))
+
+(format t "~a ~a~%" (safe-salary "52000") (safe-salary "n/a"))
+
+(defun parse-salary (text)
+  (restart-case (parse-integer text)
+    (use-zero () :report "Treat the salary as 0." 0)
+    (use-value (v)
+      :report "Supply a salary."
+      :interactive (lambda ()
+                     (format *query-io* "Salary: ")
+                     (force-output *query-io*)
+                     (list (read *query-io*)))
+      v)))
+
+(format t "~a~%"
+        (handler-bind ((parse-error (lambda (c) (declare (ignore c)) (invoke-restart 'use-zero))))
+          (mapcar #'parse-salary '("100" "oops" "300"))))
+#+end_src
+Now in the REPL, run =(mapcar #'parse-salary '("100" "oops" "300"))= with no
+handler. The debugger lists =USE-ZERO= and =USE-VALUE=: pick =USE-VALUE=, type
+=200=, and the =mapcar= /continues/ as if nothing happened — =(100 200 300)=.
+Few languages can do that.
+
+** TODO E10.10 — From REPL to program
+Turn a Lisp function into (a) a script you run with =./=, and (b) a
+standalone executable that needs no SBCL installed.
+You'll meet: =sbcl --script=, =sb-ext:*posix-argv*=, =save-lisp-and-die=.
+*** Hint
+A file starting with =#!/usr/bin/env -S sbcl --script= runs like any script.
+For a binary, load your code into a fresh SBCL and call
+=(sb-ext:save-lisp-and-die "name" :executable t :toplevel #'main)= — it
+writes the whole image, your code included, to disk.
+*** Solution
+#+begin_src bash :dir /root/workbook-data :results output
+mkdir -p lisp && cd lisp
+cat > hello-script <<'LISP'
+#!/usr/bin/env -S sbcl --script
+(format t "hello from ~a~%" (lisp-implementation-type))
+LISP
+chmod +x hello-script && ./hello-script
+
+cat > count-lines.lisp <<'LISP'
+(defun main ()
+  (let ((path (second sb-ext:*posix-argv*)))
+    (with-open-file (in path)
+      (format t "~a~%" (loop while (read-line in nil) count t)))))
+LISP
+sbcl --noinform --non-interactive --load count-lines.lisp \
+  --eval '(sb-ext:save-lisp-and-die "count-lines" :executable t :toplevel (function main))' >/dev/null 2>&1
+ls -lh count-lines | awk '{print $5, $9}'
+./count-lines /root/corpus/access.log
+#+end_src
+The binary is large because it carries the whole Lisp with it — compiler and
+all.
+
+* 11. Debuggers
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Stop guessing, start looking. A debugger freezes a running program so you can
+walk its call stack, read every variable, and watch the moment a value goes
+wrong. You'll use five of them — gdb for C, pdb for Python, Delve for Go, the
+Emacs debugger and Edebug for Elisp, and SLIME's debugger for Common Lisp — on
+small programs with real bugs, then drive the same sessions from Neovim and
+Emacs.
+
+Each language has its own dialect, but the ideas are the same everywhere:
+/breakpoint/ (stop here), /step/ (into a call), /next/ (over it), /finish/ or
+/out/ (to the caller), /print/ (look), /backtrace/ (how did I get here?), and
+/frames/ (move up and down the stack). Learn them once, use them in every
+language.
+
+The buggy programs live in =/root/workbook-data/debug=. Each exercise asks you
+to find the bug with the debugger, not by reading the source — resist peeking.
+Solution blocks run the debugger non-interactively so you can compare notes;
+the real exercise is typing those commands yourself.
+
+** TODO E11.1 — gdb: break, run, look
+=debug/c/avg.c= averages five scores and prints something absurd. Compile it
+for debugging, stop inside =sum=, and find out where the absurd number comes
+from.
+You'll meet: =gcc -g=, =gdb ./prog=, =break=, =run=, =next=, =print=,
+=info args= / =info locals=, =print *ptr@len=.
+*** Hint
+=-g= adds line and variable information; =-O0= keeps the code close to the
+source. In gdb: =break sum=, =run=, then =next= (=n=) line by line and =print=
+(=p=) anything. =info locals= shows every local. =p *xs@n= prints /n/ elements
+of the array =xs= points to. What is =i= on the last trip round the loop, and
+what is =xs[i]= then?
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+gcc -g -O0 -Wall avg.c -o avg && ./avg
+gdb -q -batch -ex 'break sum' -ex run -ex 'info args' -ex 'print *xs@n' \
+    -ex 'print xs[n]' ./avg </dev/null 2>&1 | grep -v -E '^\[|libthread|disabling'
+#+end_src
+The array holds exactly the five scores, yet the loop runs while =i <= n=, so
+it also adds =xs[5]= — whatever garbage sits past the end. Fix: =i < n=.
+
+** TODO E11.2 — gdb: watchpoints, conditions, and return values
+Fix the loop from E11.1 and run again: the answer is now /close/ but still
+wrong. Use gdb to prove where the precision disappears, without adding a
+single =printf=.
+You'll meet: =watch=, =break FILE:LINE if COND=, =finish=, =display=,
+=continue=.
+*** Hint
+=watch total= stops every time =total= changes and shows old and new values.
+=break 6 if i == 4= stops only on the iteration you care about. =finish= runs
+until the current function returns and prints the value it returned — try it
+inside =sum=, then look at what =average= does with that value.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+sed 's/i <= n/i < n/' avg.c > avg_fixed.c && gcc -g -O0 avg_fixed.c -o avg_fixed && ./avg_fixed
+gdb -q -batch -ex 'break 6 if i == 4' -ex run -ex 'print i' -ex 'print total' \
+    -ex 'delete' -ex 'finish' ./avg_fixed </dev/null 2>&1 | grep -v -E '^\[|libthread|disabling'
+#+end_src
+=sum= correctly returns 416, but =416 / 5= is /integer/ division — 83, not
+83.2. Fix: =return (double)sum(xs, n) / n;=. The debugger showed the right
+value leaving =sum=, which pins the bug to the one line after it.
+
+** TODO E11.3 — gdb: a crash and its backtrace
+=debug/c/crash.c= segfaults. Find which employee crashes it and why, using
+only the debugger.
+You'll meet: running until a signal, =bt= (backtrace), =frame N=, =up= /
+=down=, printing structs and pointers.
+*** Hint
+Just =run= it under gdb — it stops at the faulting line. =bt= lists the call
+stack, innermost first. =frame 1= (or =up=) moves into the caller, where =i=
+and =team= are visible. =p *team[i]= prints a whole struct.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+gcc -g -O0 -Wall crash.c -o crash
+gdb -q -batch -ex run -ex bt -ex 'frame 1' -ex 'print i' -ex 'print *team[i]' \
+    ./crash </dev/null 2>&1 | grep -v -E '^\[|libthread|disabling'
+#+end_src
+Ada has no manager (=manager = 0x0=), and =manager_name= dereferences it
+anyway. Guard it: =return e->manager ? e->manager->name : "nobody";=.
+
+Notice the block above prints no "reports to" lines, though two employees
+succeed first: into a pipe, =printf= output is buffered and dies with the
+crash. Run =./crash= in a terminal and you'll see them — a classic trap when
+"debugging with printf".
+
+** TODO E11.4 — The same session, inside your editor
+Debug =avg.c= again, but from Neovim and then from Emacs: set a breakpoint by
+pointing at a line, step with keys, and read variables without typing =print=.
+You'll meet: nvim-dap (=<leader>d…=), Emacs GUD (=M-x gdb=,
+=gdb-many-windows=).
+*** Hint
+Neovim: open =avg.c=, put the cursor on the =total += xs[i];= line,
+=<leader>db= sets a breakpoint, =<leader>dc= starts — pick "Launch (gdb)" and
+give the path to =avg=. The lab's setup pauses at =main= first; =<leader>dc=
+again runs to your breakpoint. Then =<leader>dO= steps over, =<leader>di=
+into, =<leader>do= out, =<leader>du= toggles the UI panes, =<leader>de=
+evaluates the expression under the cursor, =<leader>dt= stops.
+
+Emacs: =SPC SPC gdb=, complete the prompt as =gdb -i=mi avg=, then
+=SPC SPC gdb-many-windows=. Type gdb commands (=break sum=, =run=, =next=) in
+the gdb buffer; the source window follows along with an arrow, and the other
+panes show locals, the stack, and breakpoints.
+*** Solution
+No code — this is muscle memory. The takeaway: an editor front-end speaks the
+same debugger underneath (gdb, via the Debug Adapter Protocol in Neovim and via
+gdb's machine interface in Emacs); it just saves you from typing =print=.
+
+** TODO E11.5 — pdb: step into the call that goes wrong
+=debug/py/tally.py= counts ticket statuses in two halves and reports 400
+tickets out of 200. Find the bug by stopping on the /second/ call to =tally=.
+You'll meet: =python3 -m pdb=, =b LINE=, =c=, =s= vs =n=, =p=, =w=,
+=breakpoint()=.
+*** Hint
+=b 18= breaks on the line that makes the second call; =c= runs to it; =s=
+steps /into/ =tally=. What does =counts= hold the instant the function starts?
+Compare it with =tally.__defaults__=. (Alternatively, put =breakpoint()= on
+any line and run the script normally.)
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/py :results output
+printf 'b 18\nc\ns\np counts\np counts is tally.__defaults__[0]\nq\n' | python3 -m pdb tally.py
+#+end_src
+The default ={}= is created /once/, when =def= runs, and every call that omits
+=counts= shares it. Fix: =counts=None=, then =counts = {} if counts is None
+else counts=.
+
+** TODO E11.6 — pdb: post-mortem debugging
+=debug/py/report.py= dies with a =KeyError=. Instead of re-running with
+prints, let it crash /inside/ the debugger and inspect the wreckage.
+You'll meet: =python3 -m pdb -c continue=, post-mortem mode, =w=, =u= / =d=,
+=pp=.
+*** Hint
+=-c continue= runs the script immediately; on an uncaught exception pdb stops
+right where it was raised, with every variable intact. Print the key that
+failed and the keys that exist.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/py :results output
+printf 'p name\npp sorted(depts)\nq\n' | python3 -m pdb -c continue report.py 2>&1 | grep -E "Error|^> |^\(Pdb\) ['\[]"
+#+end_src
+There is no "marketing" department in the data. Fix: skip or report missing
+names, e.g. =if name not in depts: print(f"{name:10} (no data)"); continue=.
+In your own scripts, =python3 -m pdb -c continue script.py= is the fastest way
+to see a crash from the inside.
+
+** TODO E11.7 — Python debugging in the editor
+Repeat E11.5 from Neovim and from Emacs.
+You'll meet: nvim-dap-python, Emacs =M-x pdb=.
+*** Hint
+Neovim: in =tally.py=, =<leader>db= on line 18, =<leader>dc=, choose =file=.
+When it stops, =<leader>di= steps into =tally=; hover =counts= and
+=<leader>de=. Emacs: =SPC SPC pdb=, accept =python -m pdb tally.py=, and use
+the same pdb commands as E11.5 — the source follows in the other window.
+*** Solution
+No code. nvim-dap talks to =debugpy= (installed in the lab), Emacs talks to
+plain pdb; the stops, steps and values are identical.
+
+** TODO E11.8 — Delve: debugging Go
+=debug/go= prints the /least/ common words in sherlock.txt instead of the most
+common. Stop at the end of =topN= and prove which way the slice is sorted.
+You'll meet: =dlv debug=, =break FUNC= / =break FILE:LINE=, =continue=,
+=print=, =locals=, =stepout=.
+*** Hint
+From the =debug/go= directory, =dlv debug= builds and starts the program
+paused. =break main.topN=, =continue=, then =break main.go:32= (the =return=)
+and =continue=. Print =out[0]= and =out[len(out)-1]=. =stepout= finishes the
+function and shows what it returned.
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/go :results output
+printf 'break main.go:32\ncontinue\nprint out[0].word\nprint out[0].n\nprint out[len(out)-1].word\nprint out[len(out)-1].n\nexit\n' > /tmp/dlv-topn
+dlv debug --init /tmp/dlv-topn --allow-non-terminal-interactive=true 2>&1 \
+  | sed 's/\x1b\[[0-9;]*m//g' | grep -v -E '^\s+[0-9]+:|^=>'
+#+end_src
+=out[0]= has the smallest count: the =sort.Slice= comparator uses =<=, which
+sorts ascending. Fix: =out[i].n > out[j].n=.
+
+** TODO E11.9 — Delve: conditional breakpoints, stacks, goroutines
+Stop inside the counting loop only when the word is "holmes", then look at the
+stack and every goroutine. Finally, debug the same program from Neovim.
+You'll meet: =cond=, =bt=, =goroutines=, nvim-dap-go.
+*** Hint
+=break main.go:25= then =cond 1 w == "holmes"= (1 is the breakpoint's
+number). Map lookups of missing keys are errors in Delve's =print=, so print
+=len(tally)= rather than =tally["holmes"]= on the first hit. In Neovim, open
+=main.go=, =<leader>db= on a line, =<leader>dc=, choose "Debug".
+*** Solution
+#+begin_src bash :dir /root/workbook-data/debug/go :results output
+printf 'break main.go:25\ncond 1 w == "holmes"\ncontinue\nprint w\nprint len(tally)\nbt\ngoroutines\nexit\n' > /tmp/dlv-holmes
+dlv debug --init /tmp/dlv-holmes --allow-non-terminal-interactive=true 2>&1 \
+  | sed 's/\x1b\[[0-9;]*m//g' | grep -v -E '^\s+[0-9]+:'
+#+end_src
+Even this single-threaded program has several goroutines — the Go runtime's
+garbage collector and finalizer run alongside =main=.
+
+** TODO E11.10 — Elisp: read a backtrace
+Load =debug/elisp/salary.el= and call =(nixlab-average-salary "eng")=. It
+fails. Turn on the debugger for errors, trigger it again, and read the
+=*Backtrace*= buffer to find the bad value.
+You'll meet: =load-file=, =toggle-debug-on-error=, =M-:=, the =*Backtrace*=
+buffer, =e= and =q= in it.
+*** Hint
+=SPC SPC load-file= the file. =SPC SPC toggle-debug-on-error=. Then =M-:=
+(=ESC := in a terminal) and evaluate the call. In =*Backtrace*= the top frame
+is where it failed; =e= evaluates an expression in that context (try
+=fields=), =q= quits.
+*** Solution
+#+begin_src elisp :results value
+(load-file "/root/workbook-data/debug/elisp/salary.el")
+(format "%S" (condition-case err
+                 (nixlab-average-salary "eng")
+               (error err)))
+#+end_src
+=(wrong-type-argument number-or-marker-p "134950")=: =+= got a /string/.
+=split-string= returns strings; wrap it: =(string-to-number (nth 4 fields))=.
+
+** TODO E11.11 — Elisp: Edebug, step by step
+Fix E11.10's bug, then /instrument/ the function with Edebug and step through
+one call. You'll find two more bugs: a wrong average for "eng", and a crash for
+"marketing".
+You'll meet: =C-u C-M-x= (=edebug-defun=), =SPC=, =n=, =i=, =o=, =b=, =g=,
+=e=, =q=.
+*** Hint
+Put the cursor inside the =defun= and press =C-u C-M-x= (or
+=SPC SPC edebug-defun=). The next call stops at the start: =SPC= steps one
+expression, =n= to the next, =b= sets a breakpoint, =g= runs to it, =e=
+evaluates =total= or =count=, =q= quits. Edebug overrides the Evil keys while
+it's active, so these single letters work in Normal mode. Watch the very last
+expression of the function.
+*** Solution
+#+begin_src elisp :results value
+(let ((file "/root/workbook-data/debug/elisp/salary.el"))
+  (with-temp-buffer
+    (insert-file-contents file)
+    (while (search-forward "(+ total (nth 4 fields))" nil t)
+      (replace-match "(+ total (string-to-number (nth 4 fields)))" t t))
+    (eval-buffer))
+  (list (nixlab-average-salary "eng")
+        (condition-case err (nixlab-average-salary "marketing") (error err))))
+#+end_src
+=(/ total count)= is integer division when both are integers (92860, not
+92860.90), and =count= is 0 for a missing department. Fix:
+=(if (zerop count) 0.0 (/ (float total) count))=.
+
+** TODO E11.12 — SLIME: fix a bug without restarting
+Load =debug/lisp/means.lisp= and run =(dept-means '(("eng" 100 200) ("ops")))=.
+In the debugger, find the failing frame, look at its locals, fix =mean= in the
+source, and /resume the original call/ from the broken frame.
+You'll meet: =SPC l k=, the SLIME debugger: =n= / =p=, =v=, =t=, =e=, =r=
+(restart frame), =a=.
+*** Hint
+=SPC l k= compiles and loads the file. Evaluate the call in the REPL: the
+debugger opens. Move to the =MEAN= frame (=n= / =p=, or click), =t= shows its
+locals, =v= jumps to its source. Edit =mean= to return 0 for an empty list,
+compile just that definition (=SPC l d=), go back to the debugger, put the
+cursor on the =MEAN= frame and press =r=.
+*** Solution
+The same session in SBCL's own debugger, which SLIME wraps:
+#+begin_example
+0] backtrace 4
+0: (SB-KERNEL::INTEGER-/-INTEGER 0 0)
+1: (MEAN NIL)
+2: (DEPT-MEANS (("eng" 100 200) ("ops")))
+0] (defun mean (xs) (if xs (/ (reduce #'+ xs) (length xs)) 0))
+0] down
+(MEAN NIL)
+1] restart-frame
+(("eng" . 150) ("ops" . 0))
+#+end_example
+The call finished with the /new/ =mean=, without re-running from the top.
+=(declaim (optimize (debug 3)))= at the top of the file is what makes frames
+restartable.
+
+** TODO E11.13 — SLIME: stepping and tracing
+Watch =(fact 3)= compute step by step, then trace every call to =fact= for
+=(fact 5)=.
+You'll meet: =step=, the stepper keys =s= / =x= / =o= / =c=, =trace= /
+=untrace=.
+*** Hint
+With =means.lisp= loaded, evaluate =(step (fact 3))= in the REPL: the debugger
+opens as a stepper. =s= steps into the next call, =x= steps over it, =o= steps
+out of the current function, =c= continues normally. For tracing,
+=(trace fact)= then =(fact 5)=; =(untrace fact)= turns it off.
+*** Solution
+#+begin_src lisp :results output
+(load "/root/workbook-data/debug/lisp/means.lisp")
+(trace fact)
+(let ((*trace-output* *standard-output*))
+  (fact 5))
+(untrace fact)
+#+end_src
+Tracing shows each call's arguments and return value, nested by depth — often
+all you need to understand recursion, without stopping anything.
+
+* Capstone — one question, nine ways
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+You now have every tool. Answer this with as many of them as you can, then
+compare the solutions side by side:
+
+#+begin_quote
+"Which five words longer than six letters appear most often across *all* the
+prose books, and how many times?"
+#+end_quote
+
+Do it with: (1) a =grep -oE | sort | uniq -c | sort= pipeline, (2) one =awk=
+program, (3) one =perl= one-liner, (4) a =python= script, (5) an =elisp=
+command, (6) a Common Lisp function, and — for fun — (7) wrap your favourite as
+a =writeShellScriptBin= Nix package called =topwords=.
+
+They should all print the same five words. When they do, you'll have felt, in
+your hands, exactly what each tool is *for*: the pipeline for quick answers, awk
+for fields, perl for regex-dense text, python for structure and reuse, elisp for
+living inside the editor, Lisp for growing a program interactively, and Nix for
+making any of it permanent.
+
+** Hint — the shared shape
+Lowercase, split on non-letters, keep tokens with =length > 6=, count in a
+map/hash/array, rank descending, take five. Every language above expresses that
+same five-step shape differently — that's the point.
+** Solution — the pipeline version (write the others yourself)
+#+begin_src bash :dir /root/corpus :results output
+cat *.txt | grep -oE '[A-Za-z]{7,}' | tr 'A-Z' 'a-z' \
+  | sort | uniq -c | sort -rn | head -5
+#+end_src

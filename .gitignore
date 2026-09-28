@@ -1,0 +1,10 @@
+.DS_Store
+*~
+*.un~
+\#*\#
+.\#*
+*.elc
+*.swp
+result
+result-*
+.direnv/
