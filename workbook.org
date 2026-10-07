@@ -12,8 +12,8 @@
 This is a set of *tasks*, not a textbook. Each exercise hands you a concrete
 thing to accomplish against real data. You will not have been told the flag,
 function, or syntax you need — reaching for it (=man=, =--help=, =SPC h f=, a
-guess) *is* the exercise. Only after trying should you open the folded /Hint/
-and /Solution/ under each task.
+guess) *is* the exercise. Work it out in the /Scratch/ block under the task,
+and only after trying should you open the folded /Hint/ and /Solution/.
 
 Never used Emacs or Vim? Start with track 0. Everything below assumes it.
 New to the command line? Track 2 starts from zero. The tracks run from the
@@ -27,8 +27,11 @@ The bare minimum to read this file right now:
 
 Everything folds. The file opens showing only the tracks.
 - =TAB= on a track  → reveals its exercises (still folded).
-- =TAB= on an exercise → reveals the task, plus a folded /Hint/ and /Solution/.
-- =TAB= again on /Solution/ → the answer.
+- =TAB= on an exercise → reveals the task, plus folded /Scratch/, /Hint/ and /Solution/.
+- =TAB= on /Scratch/ → an empty source block for your attempt. Type your
+  answer between its =#+begin_src= and =#+end_src= lines and run it with =SPC c c=.
+  It runs in the same directory as the solution, so the same file names work.
+- =TAB= on /Solution/ → the answer, to compare with yours.
 
 Where you see a source block, run it in place with =SPC c c= (or =C-c C-c=).
 It executes right here in the lab, in =/root/corpus=, and prints its output
@@ -256,6 +259,10 @@ In playground.org, create a bash block that counts the lines of
 the first 3 lines and run it again.
 You'll meet: =<s TAB=, =SPC c c=, =#+RESULTS:=, =SPC c k=, =SPC c e= / =C-c '=,
 header args (=:results=, =:dir=, =:var=).
+*** Scratch
+#+begin_src bash :results output :var file="/root/corpus/employees.csv"
+
+#+end_src
 *** Hint
 In Insert mode on an empty line, type =<s= then =TAB=: a source block appears.
 Type the language (=bash=) after =#+begin_src=. =SPC c c= runs the block under
@@ -275,6 +282,10 @@ directory, =:var= passes values in. Every block in this workbook is just this.
 Below the bash block, add a =python= block and a =lisp= block that each compute
 2 to the power 100. Run both.
 You'll meet: Babel language names, =:results value=, SLIME starting on demand.
+*** Scratch
+#+begin_src python
+
+#+end_src
 *** Hint
 Change the word after =#+begin_src=: =python=, =perl=, =C=, =go=, =awk=, =sed=,
 =lisp=, =elisp=. A Python block's value is whatever it =return=s; a Lisp
@@ -460,6 +471,10 @@ right, both in the corpus) and a =repl= window running =python3=. Run it, then
 attach.
 You'll meet: =tmux new-session -d=, =split-window -t -c=, =send-keys=,
 =new-window=, =select-window= / =select-pane=, =list-panes -F=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 Everything you did by hand has a command. =new-session -d -s NAME -n WINDOW=
 starts a session /detached/, so the script can keep going. =-t= targets a
@@ -490,6 +505,10 @@ to, change the colour of the current window in the status bar, and reload
 without restarting tmux.
 You'll meet: =tmux list-keys=, =tmux show-options -g=, =source-file=,
 =C-b ?=, sending a literal =C-b= to a program.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =C-b ?= lists every binding (=q= to close); =tmux list-keys | grep split= finds
 specific ones. =tmux show-options -g= shows current settings. Edit
@@ -523,6 +542,10 @@ sizes and permissions. Find the hidden treasure and read it. Then jump back to
 where you started in one command.
 You'll meet: =pwd=, =cd=, =cd -=, =cd ~=, =ls -la=, =tree -a=, absolute vs
 relative paths, =.= and =..=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =ls= hides names starting with a dot; =-a= shows them. =-l= is the long
 listing, =-h= makes sizes human-readable. =cd -= returns to the previous
@@ -545,6 +568,10 @@ is running, what is the full command line of your current shell, and where does
 the =bash= you are running actually live? Why is =/usr/bin= almost empty?
 You'll meet: =/etc=, =/proc=, =/usr=, =/var=, =/tmp=, =/home=, =/opt=,
 =/nix/store=, =man hier=, =readlink -f=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =/etc= holds configuration (=os-release=), =/proc= is a live window into the
 kernel and every process (=/proc/version=, =/proc/$$/cmdline=, where =$$= is
@@ -571,6 +598,10 @@ recursively to =docs-backup= preserving timestamps, rename =docs-backup= to
 =old-docs=, then delete =old-docs= safely.
 You'll meet: =mkdir -p=, brace expansion ={a,b}=, =touch=, =cp -a=, =mv=,
 =rm -i=, =rm -r=, =rmdir=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =mkdir -p= makes parents as needed and doesn't complain if they exist.
 =project/src/{lib,bin}= expands to two words before =mkdir= ever runs.
@@ -594,6 +625,10 @@ In =/tmp/links=, make a file, a hard link to it and a symbolic link to it.
 Compare their inode numbers. Delete the original: which link still works, and
 why? Then find where =playground/current= points.
 You'll meet: =ln=, =ln -s=, =ls -li=, =stat=, =readlink=, dangling links.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 A /hard link/ is a second name for the same inode (the file's data), so the
 data survives until the last name is gone. A /symbolic link/ is a small file
@@ -622,6 +657,10 @@ differ. Finally, deal with the file called =-i= without letting it become an
 option.
 You'll meet: =*=, =?=, =[...]=, ={a,b}= vs globs, single vs double quotes,
 backslash escapes, =--= to end options.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/shell/playground/notes :results output
+
+#+end_src
 *** Hint
 =*= matches any run of characters, =?= exactly one, =[3-6]= one character from
 a set. The shell expands globs /before/ the command runs; quote them to stop
@@ -647,6 +686,10 @@ exit code of each attempt, use =&&= and =||= to react to success or failure,
 and find out which command in a pipeline failed.
 You'll meet: =>=, =>>=, =2>=, =2>&1=, =&>=, =<=, =<<<=, =/dev/null=, =|=,
 =tee=, =$?=, =&&=, =||=, =PIPESTATUS=, =set -o pipefail=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 Every program has three streams: stdin (0), stdout (1), stderr (2). =2>= sends
 stderr somewhere, =2>&1= points it wherever stdout currently goes (order
@@ -674,6 +717,10 @@ runnable by name from anywhere, and give one command a variable that no other
 command sees.
 You'll meet: =env=, =export=, =VAR=value cmd=, =PATH=, =type=, =command -v=,
 =which=, =hash -r=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =PATH= is a colon-separated list searched in order. =type= tells you whether a
 name is an alias, function, builtin or file (=which= only knows about files).
@@ -747,6 +794,10 @@ command that can "convert tabs to spaces" without knowing its name. Then get
 help for the =cd= builtin.
 You'll meet: =man N page=, manual sections, =man -k= / =apropos=, =--help=,
 =help=, =whatis=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 The manual is split into sections: 1 commands, 2 system calls, 3 library
 functions, 5 file formats, 7 overviews, 8 admin commands. =man 5 passwd= picks
@@ -783,6 +834,10 @@ directory and login shell, and the group that lets alice use =sudo=. Where are
 passwords actually stored, and who can read that file?
 You'll meet: =id=, =whoami=, =groups=, =getent=, =/etc/passwd=, =/etc/group=,
 =/etc/shadow=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =/etc/passwd= has one line per user: =name:x:UID:GID:comment:home:shell=.
 =/etc/group= lists group members. The =x= means the password hash lives in
@@ -803,6 +858,10 @@ it: list it, enter it, and read the file inside. Explain the difference between
 =listonly= and =enteronly=.
 You'll meet: =ls -l=, =stat -c=, =r= / =w= / =x= on files vs directories,
 "Permission denied".
+*** Scratch
+#+begin_src bash :dir /srv/lab/perms :results output
+
+#+end_src
 *** Hint
 The ten characters in =ls -l= are: type, then =rwx= for the owner, the group,
 and everyone else. On a /file/, =r= reads, =w= writes, =x= runs it. On a
@@ -828,6 +887,10 @@ Make =report.txt= readable by the =devs= group so bob can read it, but still
 not writable by him. Make a script executable only by its owner. Use both
 symbolic (=g+r=) and octal (=640=) forms.
 You'll meet: =chmod= symbolic and octal, =chown user:group=, =chgrp=.
+*** Scratch
+#+begin_src bash :dir /srv/lab/perms :results output
+
+#+end_src
 *** Hint
 Octal digits add up: read 4, write 2, execute 1, so =6= is =rw-= and =5= is
 =r-x=. =chmod 640 f= sets all three groups at once; =chmod g+r,o-rwx f= changes
@@ -849,6 +912,10 @@ rules that allowed one and refused the other, and check that the rule file is
 valid.
 You'll meet: =sudo=, =sudo -u=, =sudo -iu=, =sudo -l=, =/etc/sudoers=,
 =visudo -c=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =sudo CMD= runs one command as root if =/etc/sudoers= allows it. =%wheel= in
 that file means "members of group wheel". =sudo -l= lists what you may run.
@@ -868,6 +935,10 @@ machine =sudo= asks for /your/ password, not root's, and logs every use.
 Find your umask. Create a file and a directory and predict their modes from it.
 Change the umask to =077=, create them again, and compare.
 You'll meet: =umask=, =umask -S=, default modes 666 and 777.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 New files start from 666 and directories from 777; the umask's bits are then
 switched off. With umask =022=, files get =644= and directories =755=.
@@ -888,6 +959,10 @@ files there, and every new file automatically belongs to =devs=. Then look at
 =sticky=: bob can write there but can't delete alice's file. Why?
 You'll meet: =chgrp=, =chmod 2770= (setgid on a directory), the sticky bit
 =1777=, =/tmp=.
+*** Scratch
+#+begin_src bash :dir /srv/lab/perms :results output
+
+#+end_src
 *** Hint
 The setgid bit (=g+s=, shown as =s= in the group =x= slot) on a directory makes
 new files inherit the directory's group. The sticky bit (=+t=, shown as =t=)
@@ -909,6 +984,10 @@ setuid bit and run it as alice again: what changed? Find every setuid program
 on the system and explain why each is a security risk.
 You'll meet: =chmod u+s= / =4755=, real vs effective UID, =find -perm -4000=,
 =NoNewPrivs=.
+*** Scratch
+#+begin_src bash :dir /srv/lab/perms :results output
+
+#+end_src
 *** Hint
 A setuid program runs with its /owner's/ privileges, whoever starts it: that is
 how =sudo= and =passwd= get root. The kernel keeps the real UID (who you are)
@@ -933,6 +1012,10 @@ mode bits. Then look at the capabilities your shell holds, the fine-grained
 pieces root's power is split into.
 You'll meet: =setfacl=, =getfacl=, the =+= in =ls -l=, =capsh --print=,
 =getpcaps=.
+*** Scratch
+#+begin_src bash :dir /srv/lab/perms :results output
+
+#+end_src
 *** Hint
 An access control list adds extra per-user or per-group entries to a file:
 =setfacl -m u:bob:r FILE=. =ls -l= shows a =+= when a file has one. Root's
@@ -965,6 +1048,10 @@ List every process with its owner, PID, parent PID, CPU and memory. Find PID 1
 and what it is. Show your own shell's ancestry up to PID 1.
 You'll meet: =ps aux=, =ps -ef=, =ps -o=, =ps --forest=, =pstree=, =$$=,
 =$PPID=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =ps aux= (BSD style) and =ps -ef= (System V style) both list everything.
 =ps -o pid,ppid,user,stat,cmd= chooses columns. =pstree -p= draws the tree.
@@ -984,6 +1071,10 @@ Start =hog.sh= in the background, then find it in =top= and in =htop=: sort by
 CPU, then by memory, kill it from inside =htop=.
 You'll meet: =top= (=P=, =M=, =k=, =q=), =htop= (=F6= sort, =F9= kill, =F5=
 tree, =/= search), =top -b=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 =top= updates every few seconds; inside it =P= sorts by CPU, =M= by memory,
 =k= kills a PID, =q= quits. =htop= is friendlier: arrows select, =F9= sends a
@@ -1003,6 +1094,10 @@ Run =sleeper.sh= and send it =INT=, =HUP=, =USR1=, =STOP=, =CONT= and finally
 different?
 You'll meet: =kill -l=, =kill -SIGNAL PID=, =pkill=, =killall=, =trap=,
 TERM vs KILL, =C-c= = INT, =C-z= = TSTP.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 =kill= sends a signal, not necessarily death. =TERM= (the default) politely
 asks a process to exit and can be caught; =KILL= (9) and =STOP= can never be
@@ -1029,6 +1124,10 @@ Pin two copies of =hog.sh= to the same CPU core, one at normal priority and one
 at =nice 15=. After a few seconds, compare their CPU share. Then =renice= the
 nice one back.
 You'll meet: =nice -n=, =renice=, the =NI= column, =taskset -c=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 Niceness runs from -20 (greedy) to 19 (generous); only root may go below 0.
 It only matters when processes compete, so =taskset -c 0= forces both onto
@@ -1049,6 +1148,10 @@ find its full command line, its working directory, the files it has open, its
 environment, its memory use, and its limits.
 You'll meet: =/proc/PID/cmdline=, =cwd=, =fd/=, =environ=, =status=,
 =limits=, =/proc/loadavg=, =/proc/meminfo=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 Each process has a directory =/proc/PID=. =cmdline= and =environ= are
 NUL-separated, so pipe them through =tr '\0' ' '=. =cwd= is a symlink, =fd/=
@@ -1073,6 +1176,10 @@ Create a 200 MB file, keep it open with a background =tail -f=, and delete it.
 Did =df= report the space back? Find the culprit with =lsof=, then free the
 space.
 You'll meet: =lsof -p=, =lsof +L1=, =lsof -i=, =fuser=, "deleted" files.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 Deleting a file removes its /name/; the data is only freed once no process
 still has it open. =lsof +L1= lists open files with no names left. =lsof -i
@@ -1096,6 +1203,10 @@ writes to it keeps filling the disk invisibly until the service is restarted.
 greet you by name without reading its binary: watch what files it tries to
 open.
 You'll meet: =strace=, =-e trace=openat=, =-e trace=%file=, =-f=, =-o=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 =strace CMD= prints every system call the program makes and what the kernel
 answered. =-e trace=openat= shows only file opens; failed ones end in =ENOENT=
@@ -1117,6 +1228,10 @@ Count which system calls =ls -R /root/corpus= makes most. Trace a shell
 pipeline including every child process. Attach to your running =sleeper.sh= to
 watch it live, then detach.
 You'll meet: =strace -c=, =-f=, =-p PID=, =-t= / =-T=, =ltrace=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 =-c= prints a summary table instead of each call. =-f= follows child processes
 (every command in a pipeline is one). =-p PID= attaches to something already
@@ -1152,6 +1267,10 @@ empty files; files not modified in 30 days; and markdown files whose names
 contain spaces.
 You'll meet: =-name= / =-iname=, =-type f= / =d=, =-size=, =-empty=,
 =-mtime=, =-maxdepth=, =-newer=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/toolbox/tree :results output
+
+#+end_src
 *** Hint
 =find WHERE TESTS...= walks the tree and prints matches. Quote patterns
 (=-name '*.c'=) so the shell doesn't expand them first. =-size +500k= means
@@ -1173,6 +1292,10 @@ empty =.tmp= files (preview first), and pipe a list of names that contain
 spaces into another command without breaking them.
 You'll meet: =-exec cmd {} \;= vs =-exec cmd {} +=, =-delete=, =-print0=,
 =xargs -0=, =-prune=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/toolbox/tree :results output
+
+#+end_src
 *** Hint
 =-exec ... {} \;= runs once per file; =-exec ... {} += passes many files to one
 run, like =xargs=. Always run a =find= without =-delete= first to see what it
@@ -1192,6 +1315,10 @@ Count words in each book with a single =wc= call built by =xargs=. Then
 compress copies of every log in parallel, four at a time. Finally, run one
 command per input line with the value in the middle of the command.
 You'll meet: =xargs=, =-n=, =-P=, =-I{}=, =-t=.
+*** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 *** Hint
 =xargs CMD= reads words from stdin and appends them to =CMD=. =-n 1= runs once
 per word, =-P 4= runs up to four at a time, =-I{}= puts each line where =={}==
@@ -1211,6 +1338,10 @@ common first names; every distinct HTTP method in the access log; and the log
 converted to upper case with runs of spaces squeezed.
 You'll meet: =cut -d -f=, =sort -t -k -n -r=, =uniq -c=, =tr= (=-s=, =-d=,
 ranges), =head=, =tail -n +2=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =cut -d, -f4= takes field 4 of comma-separated lines. =uniq= only collapses
 /adjacent/ duplicates, so =sort= first; =uniq -c= counts them. =sort -rn= sorts
@@ -1233,6 +1364,10 @@ aligned as a table. Paste two columns side by side. Find people who appear in
 both the =eng= and =ops= rosters, and people only in =eng=.
 You'll meet: =join -t, -1 -2=, =sort -t, -k=, =paste=, =comm -12= / =-23=,
 =column -t -s,=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/toolbox :results output
+
+#+end_src
 *** Hint
 =join= merges two files on a common field, like a database join, but both
 inputs must be sorted on that field. =comm= compares two sorted files and
@@ -1256,6 +1391,10 @@ it grows; save a pipeline's intermediate results while still passing them on;
 split the access log into 500-line pieces and check the pieces add up.
 You'll meet: =head -n=, =tail -n=, =tail -n +N=, =tail -f=, =tee=, =wc -l=,
 =split -l=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =tail -n +100= starts /at/ line 100. =tail -f= keeps printing new lines as a
 file grows (=C-c= to stop). =tee FILE= copies stdin to a file and to stdout, so
@@ -1274,6 +1413,10 @@ Make a unified diff between =app.conf= and =app.conf.new=, save it as a patch,
 apply it to a copy of =app.conf=, confirm the result matches, then undo it.
 You'll meet: =diff -u=, reading hunks (=@@=, =-=, =+=), =patch=,
 =--dry-run=, =-R=, =diff -r=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =diff -u OLD NEW= prints only what changed, with a few lines of context: lines
 starting =-= are removed, =+= added. That output /is/ a patch: =patch FILE <
@@ -1294,6 +1437,10 @@ priority 4 or higher; count tickets per status; list each assignee once with
 their ticket count, busiest first; and output the high-priority ones as CSV.
 You'll meet: =jq '.'=, =length=, =.[]=, =select()=, =map()=, =group_by()=,
 =sort_by()=, =-r=, =@csv=, =-c=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =.= is the whole input, =.[]= iterates an array, =|= pipes inside jq.
 =select(COND)= keeps matching items. =group_by(.status)= makes arrays of
@@ -1321,6 +1468,10 @@ have outgrown it (that is tracks 7 and 8).
 ** TODO E6.1 — Is Watson mentioned more than Holmes?
 Count, don't eyeball. Get a number for each in =sherlock.txt=.
 You'll meet: a counting flag, and case-insensitivity.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 There is a flag that prints the count instead of the lines. Names get
 capitalised mid-sentence and not — fold case.
@@ -1333,6 +1484,10 @@ grep -ci watson sherlock.txt
 ** TODO E6.2 — Lines where BOTH Holmes and Watson appear
 One grep matches one pattern. You want the intersection.
 You'll meet: grep as a filter you can chain; order-independence.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 grep reads stdin. What happens if you pipe one grep into another?
 *** Solution
@@ -1344,6 +1499,10 @@ Chaining = logical AND. (A single-pass AND needs =awk=, later.)
 ** TODO E6.3 — Every 404 in the access log — exactly
 =grep -c '404' access.log= is wrong. Prove it, then get the true count.
 You'll meet: false matches, and why fields beat substrings.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =404= also appears inside byte counts and paths. The status code is the *9th
 whitespace field*. grep sees a line, not fields — so anchor the pattern to the
@@ -1358,6 +1517,10 @@ The gap is the lesson: grep matches text, not structure. Track 8 does this right
 ** TODO E6.4 — Pull out every IP address
 Not the lines containing IPs — the IPs themselves, one per line.
 You'll meet: extended regex (=-E=), quantifiers, and =-o=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-o= prints only the matched text. A dotted quad is "1–3 digits, a dot, three
 times, then 1–3 digits". Repetition =\{1,3\}= is clumsy in basic regex; =-E=
@@ -1370,6 +1533,10 @@ grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' access.log | head
 ** TODO E6.5 — The 20 longest words in Moby Dick
 Words of 12+ letters, ranked by how often they occur.
 You'll meet: the =-o= → =sort= → =uniq -c= → =sort -rn= pipeline (memorise it).
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =grep -oE '[A-Za-z]{12,}'= gets the words. Downcase them (=tr=) so /Whale/ and
 /whale/ merge, then the classic frequency pipeline.
@@ -1383,6 +1550,10 @@ grep -hoE '[A-Za-z]{12,}' moby-dick.txt | tr 'A-Z' 'a-z' \
 ** TODO E6.6 — Which corpus files mention "London"?
 The filenames, not the matching lines.
 You'll meet: =-l=, =-r=, and =-i= together.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 There is a flag that prints only names of files with a match.
 *** Solution
@@ -1393,6 +1564,10 @@ grep -rilE 'london' /root/corpus
 ** TODO E6.7 — Lines with a doubled word ("the the")
 Find accidental repeats. Pure grep can do it — barely.
 You'll meet: back-references, and =-P= (the moment egrep isn't enough).
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Extended regex has no back-reference to a captured group /within the match/.
 GNU grep's Perl mode (=-P=) does: =\b(\w+)\s+\1\b=.
@@ -1415,6 +1590,10 @@ its power ends where "understand the data as fields/records" begins.
 ** TODO E7.1 — Print only lines 40–60 of a book
 Without opening it in a pager.
 You'll meet: =-n=, the =p= command, address ranges.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 By default sed prints every line. =-n= silences that; then =p= prints only what
 you ask. Addresses can be line numbers: =40,60=.
@@ -1425,6 +1604,10 @@ sed -n '40,60p' moby-dick.txt
 
 ** TODO E7.2 — Strip all blank lines from a book
 You'll meet: regex addresses, the =d= command.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =/regex/d= deletes matching lines. A blank line is =^$=.
 *** Solution
@@ -1435,6 +1618,10 @@ sed '/^$/d' moby-dick.txt | head
 ** TODO E7.3 — Show only the substitutions you made
 Replace "Holmes" with "Poirot", but print *only* the changed lines.
 You'll meet: the =s///= command, its =p= flag, and =-n=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =s/old/new/= substitutes. Add the =p= flag to print lines where it fired, and
 =-n= so nothing else prints.
@@ -1446,6 +1633,10 @@ sed -n 's/Holmes/Poirot/gp' sherlock.txt
 ** TODO E7.4 — Reformat every hire date YYYY-MM-DD → MM/DD/YYYY
 In =employees.csv=. The output has slashes.
 You'll meet: =-E=, capture groups & back-refs, and picking a new delimiter.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 With slashes in the /replacement/, using =s/.../.../= means escaping them all.
 sed lets you choose any delimiter: =s#...#...#=. Capture the three date parts
@@ -1460,6 +1651,10 @@ Counting fields by hand to reach the date is annoying — foreshadowing =awk -F,
 ** TODO E7.5 — Edit a file in place, but survive your own mistakes
 Uppercase the CSV header row, saving a backup first.
 You'll meet: =-i= with a backup suffix.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-i.bak= edits in place *and* keeps =file.bak=. Target only line =1= with the
 address =1=. =\U= (GNU) uppercases in the replacement.
@@ -1473,6 +1668,10 @@ head -1 /tmp/emp.csv; echo "backup:"; head -1 /tmp/emp.csv.bak
 ** TODO E7.6 — g or not g?
 On a line with a word repeated several times, replace only the *first* vs *all*.
 You'll meet: the difference the =g= flag makes, per line.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Without =g=, =s= changes only the first match on each line.
 *** Solution
@@ -1484,6 +1683,10 @@ echo "na na na na batman" | sed 's/na/NA/g'
 ** TODO E7.7 — Extract the assignee numbers from tickets.json
 Just the integers after ="user"=, one per line — using sed.
 You'll meet: match-whole-line-then-capture, and sed's limits on structured data.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Match the entire line with =.*"assignee":"user\([0-9]\+\)".*= and replace it
 with just the capture =\1= (add =-n ... p= so non-matching lines vanish). Under
@@ -1507,6 +1710,10 @@ discover =$1..$NF=, associative arrays (the workhorse), =BEGIN/END=, and that a
 ** TODO E8.1 — Just the full names from employees.csv
 Print "First Last" for every employee, no header.
 You'll meet: =-F=, fields =$2 $3=, skipping a record with =NR=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-F,= splits on commas. =$2= and =$3= are first/last. =NR>1= skips the header
 row.
@@ -1518,6 +1725,10 @@ awk -F, 'NR>1{print $2, $3}' employees.csv | head
 ** TODO E8.2 — Company-wide average salary
 One number.
 You'll meet: accumulation across records, the =END= block.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Add =$5= into a running total as awk streams each record; divide in =END= by a
 counter.
@@ -1528,6 +1739,10 @@ awk -F, 'NR>1{s+=$5; n++} END{printf "avg %.0f over %d people\n", s/n, n}' emplo
 
 ** TODO E8.3 — Average salary *per department*
 You'll meet: associative arrays keyed by a string, =for (k in arr)=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =sum[$4]+=$5= and =n[$4]++= build per-dept totals. Loop the keys in =END=.
 *** Solution
@@ -1541,6 +1756,10 @@ END — is the single most useful thing awk does.
 ** TODO E8.4 — Tally HTTP status codes in the access log
 How many 200s, 404s, 500s…?
 You'll meet: whitespace field-splitting (no =-F= needed), =$9=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Default field separator is whitespace, so the status code is =$9=. Count into
 an array keyed by =$9=.
@@ -1552,6 +1771,10 @@ Compare this to the grep gymnastics in E6.3 — awk got the field for free.
 
 ** TODO E8.5 — Top 5 IPs by bytes transferred
 You'll meet: =$NF= (last field), and piping awk's output onward.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Bytes are the *last* field: =$NF=. Sum per =$1= (the IP), then =sort -rn | head=.
 *** Solution
@@ -1562,6 +1785,10 @@ awk '{b[$1]+=$NF} END{for (ip in b) print b[ip], ip}' access.log | sort -rn | he
 ** TODO E8.6 — Word frequency, in awk alone
 Top 15 words of any book — no grep/sort pipeline, do it inside awk.
 You'll meet: =gsub=, =tolower=, =split=, and sorting an array by hand-ish.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 Lowercase =$0= (=tolower=), turn non-letters into spaces (=gsub(/[^a-z]+/," ")=),
 =split= into words, count into a hash. For the top-N, it's easiest to =print
@@ -1576,6 +1803,10 @@ awk '{ $0=tolower($0); gsub(/[^a-z]+/," ");
 ** TODO E8.7 — Lines per file, across all books
 Report each filename with its line count — using awk, not =wc=.
 You'll meet: =FILENAME=, and =FNR= vs =NR=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =FILENAME= is the current file; =FNR= resets per file while =NR= keeps climbing.
 Count into =c[FILENAME]=.
@@ -1587,6 +1818,10 @@ awk '{c[FILENAME]++} END{for(f in c) print c[f], f}' /root/corpus/*.txt
 ** TODO E8.8 — A formatted salary-band report
 Add a computed column: LOW (<70k), MID, HIGH (>=110k). Print a tidy table.
 You'll meet: =BEGIN=, =printf= column widths, rebuilding =$0=/=OFS=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =BEGIN{print header}=. Compute a band from =$5= with nested ternaries or ifs.
 =printf "%-4d %-9s %-6s %8d\n"= aligns columns.
@@ -1612,6 +1847,10 @@ Write these as real files (=script.sh=, =chmod +x=), not one-liners.
 ** TODO E9.1 — Top 5 biggest files under a directory
 A script =bigfiles.sh DIR= that prints the five largest files beneath DIR.
 You'll meet: command substitution, =find=, =du=/=sort=, quoting =$1=.
+*** Scratch
+#+begin_src bash :dir /root
+
+#+end_src
 *** Hint
 =find "$1" -type f -printf '%s %p\n'= gives size + path; =sort -rn | head -5=.
 Quote =$1= so a spacey directory still works.
@@ -1627,6 +1866,10 @@ block to a file when you =C-c C-v t=.)
 ** TODO E9.2 — Line/word/char counts for every book
 Loop the =*.txt= files; print a row per file plus a total.
 You'll meet: =for= over a glob, capturing =wc= output, arithmetic.
+*** Scratch
+#+begin_src bash :dir /root
+
+#+end_src
 *** Hint
 =for f in /root/corpus/*.txt; do ... done=. =read l w c < <(wc -l -w -c < "$f")=
 splits wc's three numbers. Keep running totals with =$(( ))=.
@@ -1646,6 +1889,10 @@ printf "%6d %6d %8d  TOTAL\n" "$tl" "$tw" "$tc"
 =search.sh PATTERN= greps every corpus file, case-insensitive, with filenames,
 and exits nonzero if nothing matched.
 You'll meet: =$#=/=$1=, a usage message, ="$@"=, exit status.
+*** Scratch
+#+begin_src bash :dir /root
+
+#+end_src
 *** Hint
 Guard =[ $# -eq 1 ]= or print usage to stderr and =exit 2=. grep already
 returns 1 on no-match — let it be the script's exit code.
@@ -1660,6 +1907,10 @@ grep -rinE "$*" /root/corpus
 In =/root/workbook-data/messy=, lowercase every =.JPG= to =.jpg=. The filenames
 contain spaces and punctuation — do it without corrupting anything.
 You'll meet: THE quoting lesson — =-print0=, =read -d ''=, ="$var"= everywhere.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/messy
+
+#+end_src
 *** Hint
 Never =for f in $(ls)=. Use =find ... -print0= piped into
 =while IFS= read -r -d '' f=. Build the new name with parameter expansion and
@@ -1681,6 +1932,10 @@ space-containing names. That contrast is the whole lesson.
 Write a two-command pipeline where the first command fails, and show that the
 script *doesn't* notice — then make it notice.
 You'll meet: =set -euo pipefail=, and why every serious script starts with it.
+*** Scratch
+#+begin_src bash :dir /root
+
+#+end_src
 *** Hint
 =false | wc -l= "succeeds" (exit 0) because only the last command's status
 counts — until =set -o pipefail=. =set -u= turns a typo'd =$varr= into an error
@@ -1695,6 +1950,10 @@ bash -c 'set -o pipefail; false | wc -l; echo "exit=$?  (now the failure shows)"
 Write =count_matches PATTERN FILE= as a function, and have the script stage work
 in a =mktemp= file that is removed even if the script dies.
 You'll meet: functions, =local=, =mktemp=, =trap ... EXIT=.
+*** Scratch
+#+begin_src bash :dir /root
+
+#+end_src
 *** Hint
 =trap 'rm -f "$tmp"' EXIT= fires on any exit. =local= keeps function vars from
 leaking. A function "returns" data by =echo=, status by =return=.
@@ -1713,6 +1972,10 @@ echo "Holmes count: $(count_matches Holmes /root/corpus/sherlock.txt)"
 Produce the sorted list of employees in =eng= and in =sales=, and diff them —
 using no intermediate files.
 You'll meet: process substitution =<(...)=.
+*** Scratch
+#+begin_src bash :dir /root/corpus
+
+#+end_src
 *** Hint
 =diff <(cmd1) <(cmd2)=. Each =<(...)= looks like a filename to =diff= but is a
 live pipe.
@@ -1743,6 +2006,10 @@ commit on =main= change? Which branch isn't merged? Which files exist in the
 very first commit?
 You'll meet: =git log --oneline --graph --all=, =git show=, =git status=,
 =git branch -a=, =git ls-tree=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/git/project :results output
+
+#+end_src
 *** Hint
 =git log= shows history newest first; =--oneline --graph --all --decorate=
 draws branches. =git show COMMIT= shows one commit's message and diff; =HEAD=
@@ -1763,6 +2030,10 @@ look at the difference before and after staging. Ignore =*.log= files. Undo an
 unwanted edit to a file you haven't staged.
 You'll meet: =git init=, =add=, =commit=, the staging area, =diff= vs
 =diff --staged=, =.gitignore=, =git restore=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 Git has three places: your working files, the /staging area/ (what the next
 commit will contain), and history. =git add= stages, =git commit= records.
@@ -1786,6 +2057,10 @@ will be a conflict in =README.md=: resolve it by keeping both ideas, finish the
 merge, and look at the resulting graph.
 You'll meet: =git switch=, =git merge=, conflict markers (=<<<<<<<=, ======,
 =>>>>>>>=), =git add= to mark resolved, merge commits.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =git merge BRANCH= brings its commits into the current branch. When both
 changed the same lines, git stops and writes both versions into the file
@@ -1807,6 +2082,10 @@ Start again from a fresh copy and this time /rebase/ =feature/greeting= onto
 an interactive rebase.
 You'll meet: =git rebase=, conflicts during a rebase, =git rebase --continue=,
 =git rebase -i=, =pick= / =squash=, rewriting history.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =git rebase main= (while on the feature branch) replays its commits on top of
 =main=, one by one; conflicts are resolved the same way, then =git rebase
@@ -1836,6 +2115,10 @@ each line of =calc.sh=; the commit that first added the word =pow=; and what
 =README.md= looked like three commits ago.
 You'll meet: =git log -p FILE=, =git log --follow=, =git blame=, =git log -S=,
 =git show COMMIT:PATH=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/git/project :results output
+
+#+end_src
 *** Hint
 =git log -p -- FILE= shows each commit's patch for that file. =git blame FILE=
 annotates every line with the commit that last changed it. =git log -S word=
@@ -1855,6 +2138,10 @@ check the tree is clean, bring the work back. Then compare =git reset --soft=,
 =--mixed= and =--hard= on a throwaway commit.
 You'll meet: =git stash push / list / pop=, =git reset --soft / --mixed /
 --hard=, =git restore --staged=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =git stash= shelves uncommitted changes and cleans the tree; =git stash pop=
 brings them back. =reset= moves the branch pointer: =--soft= keeps your changes
@@ -1878,6 +2165,10 @@ get rid of it. It isn't in =git log=. Find it anyway and restore it on a new
 branch.
 You'll meet: =git reflog=, =HEAD@{n}=, =git branch NAME COMMIT=,
 =git cherry-pick=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 The reflog records every place =HEAD= has pointed, including commits no branch
 points to any more. Commits stay recoverable for weeks after they seem gone.
@@ -1896,6 +2187,10 @@ git show --stat rescued | head -5
 exact commit that broke it, automatically.
 You'll meet: =git bisect start / good / bad=, =git bisect run=,
 =git bisect reset=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 Bisect is a binary search through history: mark one commit bad and an older
 one good, and git checks out the middle for you to test. =git bisect run CMD=
@@ -1919,6 +2214,10 @@ there and push it. Back in =project=, pull it. Then reproduce the classic "the
 remote has work you don't have" rejection and fix it with =pull --rebase=.
 You'll meet: =git clone=, =git remote -v=, =git push=, =git fetch=,
 =git pull --rebase=, upstream tracking (=-u=), non-fast-forward rejections.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 A remote is just another repository; =origin= is the default name. =git push=
 sends your commits, =git fetch= downloads theirs without changing your files,
@@ -1957,6 +2256,10 @@ it into =/tmp/restore=, and extract just the CSS file somewhere else. Then make
 an archive that leaves out the images.
 You'll meet: =tar -c= / =-t= / =-x=, =-z= / =-J= / =--zstd=, =-f=, =-v=,
 =-C=, =--exclude=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/archive :results output
+
+#+end_src
 *** Hint
 =c= creates, =t= lists, =x= extracts, =f FILE= names the archive, =v= is
 verbose. =z= gzips (=J= xz, =--zstd= zstd); modern tar also guesses from the
@@ -1979,6 +2282,10 @@ times, then find out how much zstd's highest levels and multithreading change
 things.
 You'll meet: =gzip=, =bzip2=, =xz=, =zstd=, levels (=-1= … =-19=), =-T0=,
 =-k=, =zcat= / =zstdcat=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 They trade speed for size: gzip is everywhere, xz compresses hardest and
 slowest, zstd is fast at every level and very good at high ones. =-k= keeps the
@@ -1999,6 +2306,10 @@ zstd -q -19 -T0 -f corpus.tar -o corpus.19.tar.zst && ls -l corpus.19.tar.zst | 
 Make a zip of =site/= that Windows and macOS users can open, list it, test it,
 and extract it.
 You'll meet: =zip -r=, =unzip -l=, =unzip -t=, =unzip -d=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/archive :results output
+
+#+end_src
 *** Hint
 =zip -r OUT.zip DIR= recurses. =unzip -l= lists, =-t= tests integrity, =-d DIR=
 extracts somewhere. Unlike tar, zip compresses each file separately, so you
@@ -2016,6 +2327,10 @@ The =release/= folder came with a =SHA256SUMS= file. Verify the release. Which
 file was tampered with, and which line? Then make your own checksum list for
 =site/=.
 You'll meet: =sha256sum=, =sha256sum -c=, =--quiet=, =cmp=, =b2sum=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/archive/release :results output
+
+#+end_src
 *** Hint
 =sha256sum FILES > SUMS= records a fingerprint per file; =sha256sum -c SUMS=
 recomputes and compares them. Changing a single bit changes the whole hash. To
@@ -2038,6 +2353,10 @@ compressed backup of your =workbook-data= in one command, and check it. (Track
 12 streams the same way to another lab over SSH.)
 You'll meet: =tar -c ... | tar -x=, =-= as stdin/stdout, =$(date +%F)=,
 =zstd -dc | tar -t=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 With =-f -= (or no =-f=), tar writes to stdout or reads stdin, so it composes
 with pipes: =tar -C SRC -cf - . | tar -C DEST -xf -=. =date +%F= prints
@@ -2070,6 +2389,10 @@ Find this lab's IP address, its network interfaces, its default gateway, the
 DNS server it uses, and its hostname. Do the same in =peer=.
 You'll meet: =ip -br addr=, =ip route=, =/etc/resolv.conf=, =/etc/hosts=,
 =hostname=, =getent hosts=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =ip -br addr= (brief) lists interfaces with their addresses; =lo= is the
 loopback, =127.0.0.1=, which never leaves the machine. =ip route= shows the
@@ -2091,6 +2414,10 @@ IPv6 address. Ask a specific DNS server directly. Then give =peer= a name in
 this lab so =ping peer= works.
 You'll meet: =dig=, =+short=, record types (=A=, =AAAA=, =MX=, =NS=, =TXT=),
 =@server=, =/etc/hosts=, =ping -c=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =dig NAME TYPE= asks DNS directly and shows the whole answer; =+short= prints
 just the data. =dig @1.1.1.1 NAME= bypasses your configured resolver. For
@@ -2114,6 +2441,10 @@ name; print just the status code and total time; and talk to a web server you
 start yourself.
 You'll meet: =curl -I=, =-L=, =-O= / =-o=, =-s= / =-S=, =-w=, =-v=,
 =python3 -m http.server=.
+*** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 *** Hint
 =curl URL= prints the body. =-I= fetches headers only, =-L= follows
 redirects, =-o FILE= / =-O= save, =-sS= is quiet but still shows errors, =-w
@@ -2134,6 +2465,10 @@ List every listening TCP port and the program behind it. Open a raw TCP "chat"
 with =nc= between two terminals (two tmux panes), then between this lab and
 =peer=.
 You'll meet: =ss -tlnp=, =ss -tnp=, =lsof -i=, =nc -l=, =nc HOST PORT=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =ss -tlnp= shows TCP (=t=) listening (=l=) sockets numerically (=n=) with the
 process (=p=). =sshd= on port 22 should be there. =nc -l 9000= waits for a
@@ -2244,6 +2579,10 @@ Capture the packets of a single HTTP request to your local web server and read
 the TCP handshake. Then push a git repository to =peer= over SSH.
 You'll meet: =tcpdump -i -n -c=, TCP flags (=S=, =S.=, =.=), =git remote add=
 with an SSH URL.
+*** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 *** Hint
 =tcpdump -i lo -n -c 10 port 8000= prints ten packets on the loopback
 interface to or from port 8000. A TCP connection opens with =[S]= (SYN),
@@ -2303,6 +2642,10 @@ Search the corpus for "Holmes" with line numbers; case-insensitive whole-word
 context; and search for a literal =.*= without it being a regex.
 You'll meet: =rg=, =-n=, =-i=, =-w=, =-t=, =-l=, =-C=, =-F=, =--files=,
 =.gitignore= awareness.
+*** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 *** Hint
 =rg PATTERN [PATH]= searches recursively by default, skips hidden files and
 anything in =.gitignore=, and is very fast. Most flags match grep's. =-t py=
@@ -2326,6 +2669,10 @@ each result. With =bat=: page through a file with syntax highlighting and line
 numbers, and use it to colour man pages.
 You'll meet: =fd PATTERN=, =-e=, =-t d=, =-H=, =--changed-within=, =-x=,
 =bat=, =-p=, =-l LANG=, =MANPAGER=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data :results output
+
+#+end_src
 *** Hint
 =fd= is =find= with sensible defaults: the pattern is a regex matched against
 names, hidden and ignored files are skipped unless you ask (=-H=, =-I=). =-x
@@ -2346,6 +2693,10 @@ bat -p --color=never -r 1:3 toolbox/app.conf
 List the playground as a tree with git status and icons, sorted by size. Then
 visit a few deep directories and jump back to them with two letters.
 You'll meet: =eza -l=, =--tree=, =--git=, =--icons=, =-s size=, =z=, =zi=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data :results output
+
+#+end_src
 *** Hint
 =eza= is a modern =ls=: =eza -l --git --icons=, =eza --tree -L 2=, =eza -s
 size=. =zoxide= learns the directories you =cd= into; after that, =z word=
@@ -2430,6 +2781,10 @@ Time =sleep 1=, a CPU-bound loop, and =find /nix/store -name '*.so' | wc -l=.
 Explain the three numbers for each. Then get the peak memory of a command.
 You'll meet: the =time= keyword, GNU =/usr/bin/time -v= (here
 =command time -v=), real vs user vs sys, maximum resident set size.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 /real/ is wall-clock time; /user/ is CPU time spent in the program's own code;
 /sys/ is CPU time the kernel spent on its behalf (system calls, I/O). Sleeping
@@ -2450,6 +2805,10 @@ How much memory does the lab have, how much is in use, and how much is really
 available? Which processes use the most? Watch a program's memory grow.
 You'll meet: =free -h=, =/proc/meminfo=, "available" vs "free", buffers and
 cache, =ps --sort=-rss=, RSS vs VSZ.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 Linux uses spare memory as disk cache, so "free" is always small; "available"
 estimates what programs could get without swapping. RSS is the memory a
@@ -2470,6 +2829,10 @@ Which filesystems are how full? What are the ten biggest directories under
 interactively.
 You'll meet: =df -h=, =df -i=, =du -sh=, =du -h -d 1 | sort -h=,
 =find -size=, =ncdu=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =df= reports per filesystem, =du= adds up files under a directory. =du -h -d 1
 DIR | sort -h= ranks subdirectories by size. =df -i= shows inodes: a disk can
@@ -2490,6 +2853,10 @@ average, per-CPU usage, run queue, context switches. What does a load of 2.0
 mean on this machine?
 You'll meet: =uptime=, =nproc=, =vmstat 1=, =mpstat -P ALL=, the columns
 =r=, =us=, =sy=, =id=, =wa=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/procs :results output
+
+#+end_src
 *** Hint
 Load average is the average number of processes running or waiting to run,
 over 1, 5 and 15 minutes; compare it with =nproc=. =vmstat 1 5= prints a line
@@ -2511,6 +2878,10 @@ Write 500 MB straight to disk, bypassing the cache, while =iostat= watches.
 Then read it back twice and explain why the second read is so much faster.
 You'll meet: =dd bs= =count= =oflag=direct=, =iostat -x 1=, =%util=,
 =await=, the page cache, =sync=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =dd if=/dev/zero of=FILE bs=1M count=500 oflag=direct= writes 500 MiB without
 the page cache, so you measure the disk. =iostat -x 1 3= shows per-device
@@ -2532,6 +2903,10 @@ Python. Benchmark them properly, with warm-up runs, and export the results as a
 Markdown table.
 You'll meet: =hyperfine=, =--warmup=, =-N=, =--export-markdown=, mean ± σ,
 "x times faster".
+*** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 *** Hint
 Timing one run is noise. =hyperfine CMD1 CMD2= runs each many times and
 reports the mean, spread and relative speed. =--warmup 3= fills caches first.
@@ -2555,6 +2930,10 @@ Count cycles, instructions and cache misses for a C program and compare two
 versions of a loop. Then see which functions a program spends its time in.
 You'll meet: =perf stat=, =perf record= / =perf report=, instructions per
 cycle, =<not supported>=.
+*** Scratch
+#+begin_src bash :dir /tmp :results output
+
+#+end_src
 *** Hint
 =perf stat CMD= reads the CPU's hardware counters while =CMD= runs. =perf
 record -g CMD= samples where the program is, and =perf report --stdio= shows
@@ -2604,6 +2983,10 @@ collecting events. Start =auditd=, enable auditing, and confirm events are
 being written.
 You'll meet: =auditctl -s=, =auditctl -e 1=, =auditd -c=, =pid=,
 =/var/log/audit/audit.log=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =auditctl -s= shows the kernel's status: =enabled 1= means on, =pid= is the
 daemon receiving events (0 means nobody). There's no service manager in a lab,
@@ -2623,6 +3006,10 @@ key. Add a user =carol= (and remove her again). Then find exactly which
 programs touched the file, when, and as whom.
 You'll meet: =auditctl -w PATH -p wa -k KEY=, =auditctl -l=, =ausearch -k=,
 =-i= (interpret), =--start recent=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =-w= watches a path; =-p= picks the access types: =r= read, =w= write, =x=
 execute, =a= attribute change. =-k= tags matching events with a key you can
@@ -2644,6 +3031,10 @@ reads, and show that the log names alice even though =sudo= made her root: the
 /audit UID/ (=auid=) survives =sudo=. Why is bob's attempt missing?
 You'll meet: =-p r=, =success=yes/no=, =uid= vs =auid=, =ausearch -ui=,
 =--success=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 Every audit event carries =uid= (who the process runs as now) and =auid= (who
 originally logged in). Login programs write your UID to =/proc/self/loginuid=
@@ -2670,6 +3061,10 @@ exactly which ones ran with their full command lines, and get a summary of the
 most-run executables.
 You'll meet: =auditctl -a always,exit -F arch=b64 -S execve -k KEY=,
 =PROCTITLE= / =EXECVE= records, =aureport -x --summary=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 Syscall rules have the form =-a always,exit -F FIELD=VALUE -S SYSCALL=.
 =arch=b64= matches 64-bit programs (both amd64 and arm64). Every =execve= is a
@@ -2691,6 +3086,10 @@ Record every file open that fails with "Permission denied", whoever tries it.
 Let bob poke around =/srv/lab/perms=, then report the denials by user and file.
 You'll meet: =-S openat -F exit=-EACCES=, =-F auid>=1000=, =aureport -f
 --failed=, =ausearch --success no=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 =-F exit=-EACCES= matches only calls that failed with EACCES. Many attacks
 start with a burst of these. =aureport -f --failed -i= summarises failed file
@@ -2710,6 +3109,10 @@ favourite rules to a file and load it in one go, the way a server does at boot.
 Why should you think twice about =-e 2=?
 You'll meet: =auditctl -l=, =-W= (remove a watch), =-d= (remove a rule),
 =-D= (remove all), =auditctl -R FILE=, =/etc/audit/rules.d=, =-e 2=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 Removing a rule means repeating it with =-W= instead of =-w=, or =-d= instead
 of =-a=. =-D= deletes everything. Rule files contain the same arguments,
@@ -2745,6 +3148,10 @@ Create =lab.db=, import =employees.csv= and =depts.csv= as tables, look at the
 schema SQLite inferred, and count the rows.
 You'll meet: =sqlite3 FILE=, dot-commands (=.import --csv=, =.tables=,
 =.schema=, =.mode=, =.headers=), =SELECT count(*)=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/sql :results output
+
+#+end_src
 *** Hint
 =sqlite3 lab.db= opens (or creates) a database. Lines starting with =.= are
 commands to the shell itself; everything else is SQL ending in =;=.
@@ -2772,6 +3179,10 @@ name starts with "T"; and the number of distinct first names. Show results as
 an aligned table.
 You'll meet: =SELECT … FROM … WHERE … ORDER BY … LIMIT=, =LIKE=, =BETWEEN=,
 =DISTINCT=, =.mode box=.
+*** Scratch
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+
+#+end_src
 *** Hint
 Conditions go in =WHERE=; strings use single quotes. =LIKE 'T%'= matches a
 prefix. =hired BETWEEN '2024-01-01' AND '2024-12-31'= works because ISO dates
@@ -2792,6 +3203,10 @@ Average, minimum and maximum salary per department, highest average first, to
 two decimals. Then only departments with more than 170 people. Compare with
 awk (E8.3), Python and Lisp.
 You'll meet: =GROUP BY=, =avg= / =min= / =max= / =count=, =round=, =HAVING=.
+*** Scratch
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+
+#+end_src
 *** Hint
 =GROUP BY dept= makes one output row per department; aggregate functions
 summarise each group. =WHERE= filters rows before grouping, =HAVING= filters
@@ -2810,6 +3225,10 @@ SELECT dept, count(*) AS people FROM employees GROUP BY dept HAVING count(*) > 1
 List each department with its manager, floor and head count. Then find every
 employee on floor 1, and any department in =employees= with no row in =depts=.
 You'll meet: =JOIN … ON=, =LEFT JOIN=, table aliases, =IS NULL=.
+*** Scratch
+#+begin_src sqlite :db /root/workbook-data/sql/lab.db :colnames yes
+
+#+end_src
 *** Hint
 =FROM employees e JOIN depts d ON e.dept = d.dept= pairs each employee with
 their department's row. =LEFT JOIN= keeps every left-hand row even without a
@@ -2834,6 +3253,10 @@ status and bytes. Then find: the top 5 IPs by bytes, status counts, requests per
 hour of the day, and the error rate per path.
 You'll meet: turning text into CSV with awk, =.import= from stdin,
 =substr=, =CASE WHEN=, =sum()=, computed percentages.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/sql :results output
+
+#+end_src
 *** Hint
 awk can split each log line into the fields you need and print CSV; =.import
 --csv /dev/stdin TABLE= reads it from a pipe. In SQL, =sum(status >= 500)=
@@ -2854,6 +3277,10 @@ Time a query that looks up employees by last name, look at its query plan, add
 an index, and compare both.
 You'll meet: =.timer on=, =EXPLAIN QUERY PLAN=, =SCAN= vs =SEARCH … USING
 INDEX=, =CREATE INDEX=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/sql :results output
+
+#+end_src
 *** Hint
 Without an index SQLite reads every row (=SCAN=). An index is a sorted copy of
 one or more columns that lets it jump straight to matches (=SEARCH=). With
@@ -2870,6 +3297,10 @@ Without jq or Python, count =tickets.json= by status and find the assignee with
 the most open tickets, reading the JSON file directly from SQL.
 You'll meet: =readfile()=, =json_each()=, =json_extract()= / =->>=,
 table-valued functions.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
 *** Hint
 The =sqlite3= shell's =readfile(PATH)= returns a file's contents.
 =json_each(JSON)= turns a JSON array into rows, one per element, with the
@@ -2889,6 +3320,10 @@ Use a query's output directly in a pipeline as CSV. Then run the per-department
 query from Python with parameters, never by pasting values into the SQL string.
 You'll meet: =sqlite3 -csv= / =-json=, =sqlite3 DB 'SQL'= one-shots,
 Python's =sqlite3= module, =?= placeholders, SQL injection.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/sql :results output
+
+#+end_src
 *** Hint
 =sqlite3 -csv lab.db 'SELECT …'= prints CSV for other tools; =-json= prints
 JSON for jq. In Python, =con.execute(sql, (value,))= passes values separately
@@ -2922,6 +3357,10 @@ script with a nested data structure.
 ** TODO E17.1 — grep, reimplemented in Perl
 Print lines of =sherlock.txt= matching /Holmes/, using =perl= not =grep=.
 You'll meet: =-n=, =-e=, the implicit =$_=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-n= wraps your =-e= code in a =while (<>){ ... }= loop over lines; the line is
 =$_=; =print if /Holmes/= prints the current line.
@@ -2933,6 +3372,10 @@ perl -ne 'print if /Holmes/' sherlock.txt
 ** TODO E17.2 — sed, reimplemented in Perl
 Substitute Holmes→Poirot across the file.
 You'll meet: =-p= (print each line automatically), and =-i= for in-place.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-p= is =-n= plus "print =$_= at the end of each iteration". So =s/// = on =$_=
 edits the stream.
@@ -2943,6 +3386,10 @@ perl -pe 's/Holmes/Poirot/g' sherlock.txt
 
 ** TODO E17.3 — awk, reimplemented: sum the salary column
 You'll meet: autosplit =-a=, custom split =-F=, =@F=, =-l=, the line number =$.=.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-a= splits each line into =@F=; =-F,= sets the separator; salary is =$F[4]=;
 skip the header with =$. > 1=; sum and print in an =END{}=.
@@ -2954,6 +3401,10 @@ perl -F, -lane '$s += $F[4] if $. > 1; END { print $s }' employees.csv
 ** TODO E17.4 — Word frequency with a hash
 Top 10 words of a book.
 You'll meet: hashes =%c=, a global match =//g= in list context, =lc=, sorting keys.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =for (/([a-z]+)/gi) { $c{lc $1}++ }= counts. Then
 =sort { $c{$b} <=> $c{$a} } keys %c= ranks.
@@ -2967,6 +3418,10 @@ perl -lne 'for (/([A-Za-z]+)/g){ $c{lc $1}++ }
 ** TODO E17.5 — Parse the access log with named captures
 Print "IP CODE BYTES" for each request using one regex with *named* groups.
 You'll meet: =(?<name>...)= and the =%+= hash.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =/^(?<ip>\S+).*" (?<code>\d{3}) (?<bytes>\d+)/= then use =$+{ip}= etc.
 *** Solution
@@ -2978,6 +3433,10 @@ perl -ne 'print "$+{ip} $+{code} $+{bytes}\n"
 ** TODO E17.6 — Collapse accidental doubled words
 Turn "the the game is is afoot" into "the game is afoot".
 You'll meet: back-references *inside a substitution*, word boundaries.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =s/\b(\w+)(\s+\1\b)+/$1/g= — capture a word, then one-or-more repeats of it.
 *** Solution
@@ -2989,6 +3448,10 @@ echo 'the the game is is is afoot' | perl -pe 's/\b(\w+)(\s+\1\b)+/$1/g'
 Read =employees.csv=, build a hash-of-arrays (dept → list of "First Last"), and
 print each department with its members, sorted.
 You'll meet: references, =push @{ $h{$k} }=, nested iteration — Perl's data structures.
+*** Scratch
+#+begin_src perl :results output
+
+#+end_src
 *** Hint
 =push @{ $roster{$F[3]} }, "$F[1] $F[2]"=. Autovivification creates the arrayref
 for you. Then loop =sort keys %roster= and =@{ $roster{$d} }=.
@@ -3014,6 +3477,10 @@ Run with =C-c C-c=, or tangle and =perl /root/workbook-data/roster.pl=.
 Find sentences that span two lines in a book (a lowercase word, newline, more
 words, then a period).
 You'll meet: =-0777= slurp, and the =/s= =/m= regex modifiers.
+*** Scratch
+#+begin_src bash
+
+#+end_src
 *** Hint
 =-0777= reads the whole file into =$_= at once. =/s= makes =.= match newlines.
 =/([a-z]+\n[^.]+\.)/g= grabs cross-line fragments.
@@ -3035,6 +3502,10 @@ the reach. You'll discover the batteries — =json=, =csv=, =re=, =collections=,
 ** TODO E18.1 — Count tickets by status
 Load =tickets.json= properly and tally the statuses.
 You'll meet: =json.load=, =collections.Counter=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =json.load(open(...))= gives a list of dicts. =Counter(t['status'] for t in data)=.
 *** Solution
@@ -3046,6 +3517,10 @@ print(collections.Counter(t['status'] for t in data))
 
 ** TODO E18.2 — Average salary per department, the Python way
 You'll meet: =csv.DictReader=, =collections.defaultdict=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =DictReader= yields dict rows keyed by header. Accumulate salaries into
 =defaultdict(list)= by =row['dept']=.
@@ -3064,6 +3539,10 @@ Same answer as awk E8.3 — three tools, one truth. Diff them.
 ** TODO E18.3 — Top talkers from the log, with regex
 Parse =access.log= with the =re= module; sum bytes per IP; print the top 5.
 You'll meet: =re.compile=, named groups =(?P<name>...)=, =Counter.most_common=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =re.compile(r'^(?P<ip>\S+).*" (?P<code>\d{3}) (?P<bytes>\d+)')=. Use =m['ip']=,
 =m['bytes']=.
@@ -3082,6 +3561,10 @@ for ip, b in tot.most_common(5):
 ** TODO E18.4 — A CLI search tool
 =argparse=-driven: search the corpus for a pattern, optional =--ignore-case=.
 You'll meet: =argparse=, =pathlib=, exit codes.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =argparse.ArgumentParser=; a positional =pattern=; a =store_true= flag;
 =pathlib.Path('/root/corpus').glob('*')= to walk files.
@@ -3110,6 +3593,10 @@ Tangle, then: =python3 /root/workbook-data/search.py -i holmes=.
 ** TODO E18.5 — Stream a big file with a generator
 Yield only the matching lines of =access.log= without loading it all; count 404s.
 You'll meet: generator functions =yield=, lazy iteration.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =def matches(path, needle): for line in open(path): if needle in line: yield line=.
 Consume with =sum(1 for _ in matches(...))=.
@@ -3127,6 +3614,10 @@ print("404s:", n)
 ** TODO E18.6 — Model a ticket with a dataclass
 Load tickets into =Ticket= objects, print the 5 highest-priority open ones.
 You'll meet: =@dataclass=, =sorted(key=...)=, comprehensions.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =@dataclass class Ticket: id:int; status:str; priority:int; assignee:str=.
 Build with =Ticket(**d)= (keys match fields). Filter open, sort by =-priority=.
@@ -3147,6 +3638,10 @@ for t in top: print(t)
 Turn "word frequency" into =wordfreq.py= with a function and a =unittest=, run
 the test.
 You'll meet: =if __name__ == "__main__"=, =unittest=, module structure.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
 *** Hint
 =def top_words(text, n=10): -> list[tuple[str,int]]= using =re.findall= +
 =Counter=. Put a =unittest.TestCase= under the main guard, or in a second file.
@@ -3178,6 +3673,10 @@ did in one line. The broken programs from *Setup* live in =/root/workbook-data/c
 Compile a hello program with =-Wall -Wextra=, then introduce an unused variable
 and a format-mismatch and read what the compiler says.
 You'll meet: warning flags as a feedback loop.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 =printf("%d\n", "oops")= is a format/type mismatch =-Wall= will catch. Fix until
 it compiles clean.
@@ -3199,6 +3698,10 @@ gcc -Wall -Wextra hello.c -o hello && ./hello
 ** TODO E19.2 — Reimplement =wc -l=
 Read a file and count newlines. Match coreutils exactly.
 You'll meet: =FILE*=, =fopen=, =fgetc=, =argv=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 Loop =fgetc= until =EOF=, increment on ='\n'=. Take the filename from =argv[1]=;
 handle the missing-arg and fopen-failure cases.
@@ -3226,6 +3729,10 @@ echo "coreutils: $(wc -l < /root/corpus/employees.csv)"
 Compile =leaky.c= (from Setup), run it under valgrind, read the report, fix both
 problems.
 You'll meet: valgrind's "Invalid write" and "definitely lost".
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 =gcc -g leaky.c -o leaky= (=-g= for line numbers), then
 =valgrind --leak-check=full ./leaky=. The buffer is too small and never freed.
@@ -3255,6 +3762,10 @@ valgrind --leak-check=full --error-exitcode=1 ./leaky_fixed 2>&1 | grep -E 'ERRO
 =offbyone.c= writes one past an array. valgrind often misses stack bugs — use
 AddressSanitizer instead.
 You'll meet: =-fsanitize=address=, and when to prefer it over valgrind.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 =gcc -g -fsanitize=address offbyone.c -o offbyone && ./offbyone=. ASan prints a
 "stack-buffer-overflow" with the exact line.
@@ -3270,6 +3781,10 @@ gcc -g -fsanitize=address offbyone_fixed.c -o offbyone_fixed && ./offbyone_fixed
 ** TODO E19.5 — Sort employees by salary with =qsort=
 Parse =employees.csv= into an array of structs and sort descending by salary.
 You'll meet: =struct=, =qsort=, a comparator function pointer.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 =struct Emp { int id; char first[32], last[32], dept[16]; long salary; };=
 Read with =fscanf(f, "%d,%31[^,],%31[^,],%15[^,],%ld,%*s", ...)=. =qsort= takes
@@ -3311,6 +3826,10 @@ awk did this in E3.x with one line — now you know what it does underneath.
 Turn your growing =c/= directory into a =make=-built project, then do the same
 with cmake and an out-of-source build.
 You'll meet: =make= targets & implicit rules; =cmake= configure/build.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 A minimal Makefile: =CFLAGS = -Wall -Wextra -g= then targets. For cmake:
 =cmake_minimum_required=, =project=, =add_executable=, then
@@ -3340,6 +3859,10 @@ cmake -S . -B build >/dev/null && cmake --build build >/dev/null && echo "cmake 
 Generate =compile_commands.json= so =clangd= (hence Emacs/nvim LSP) knows how
 each file is compiled.
 You'll meet: =bear=, =compile_commands.json= — the bridge to track 20.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/c :results output
+
+#+end_src
 *** Hint
 =bear -- make -B= records the exact compiler invocations. clangd reads the
 resulting =compile_commands.json= automatically.
@@ -3420,6 +3943,10 @@ of track 6.
 In =*scratch*= (or here), type =(+ 1 2)= and =C-x C-e=. Then evaluate
 =(shell-command-to-string "awk 'END{print NR}' /root/corpus/access.log")=.
 You'll meet: =C-x C-e=, the =*Messages*= echo, calling the shell from Lisp.
+*** Scratch
+#+begin_src elisp :results value
+
+#+end_src
 *** Hint
 =C-x C-e= evaluates the sexp *before point*. =shell-command-to-string= returns
 output as a string — Lisp gluing to the tools you already know.
@@ -3434,6 +3961,10 @@ output as a string — Lisp gluing to the tools you already know.
 Define =count-words-region= that reports the word count of the selected region
 in the echo area, and bind it to =C-c w=.
 You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
+*** Scratch
+#+begin_src elisp :results value
+
+#+end_src
 *** Hint
 =(interactive "r")= hands your function =BEG END=. Count with
 =(count-words beg end)= (built-in) and =message= the result.
@@ -3453,6 +3984,10 @@ words in a hash table, and shows the top 15 in a new buffer. You've now done
 this in grep+sort, awk, perl, and python — do it in Lisp.
 You'll meet: =with-temp-buffer=, =insert-file-contents=, =make-hash-table=,
 =maphash=, =sort=.
+*** Scratch
+#+begin_src elisp :results value
+
+#+end_src
 *** Hint
 =with-temp-buffer= + =insert-file-contents= loads the file. Scan words with
 =(while (re-search-forward "[a-z]+" nil t) ...)= after =downcase-region=. Count
@@ -3501,6 +4036,10 @@ Work against your real flake in =~/nixlab= (or =/etc/nixos= on the box).
 Add =hyperfine= (a benchmarking tool) to =toolchain.nix=, rebuild, and use it to
 race =grep= vs =awk= on the 404 count.
 You'll meet: the one true install path on NixOS — edit config, rebuild.
+*** Scratch
+#+begin_src bash :dir /root :results output
+
+#+end_src
 *** Hint
 Add =hyperfine= to the list in =toolchain.nix=, then from your laptop
 =./lab-ctl.sh rebuild=. There is no =apt install=; the file *is* the system.
@@ -3516,6 +4055,10 @@ hyperfine "grep -cE '\" 404 ' /root/corpus/access.log" \
 Open =nix repl=, load nixpkgs, and inspect a package: its version, its store
 path.
 You'll meet: =nix repl=, attribute sets, =:p=.
+*** Scratch
+#+begin_src bash :dir /root :results output
+
+#+end_src
 *** Hint
 =nix repl nixpkgs= (or =:lf .= inside your flake). Then =pkgs.hello.version=,
 =pkgs.ripgrep.outPath=. =:p expr= pretty-prints.
@@ -3528,6 +4071,10 @@ echo ':p builtins.attrNames { a = 1; b = 2; }' | nix repl 2>/dev/null | tail -3 
 ** TODO E21.3 — Which package provides a binary?
 You want =pstree= but don't know its package. Find it.
 You'll meet: =nix search=, and package-vs-binary name mismatches.
+*** Scratch
+#+begin_src bash :dir /root :results output
+
+#+end_src
 *** Hint
 =nix search nixpkgs pstree=. Names of packages and the binaries they ship often
 differ (=pstree= lives in =psmisc=).
@@ -3540,6 +4087,10 @@ nix search nixpkgs pstree 2>/dev/null | head || echo "nix search nixpkgs pstree"
 Make a trivial config change, rebuild, then roll back — and see both generations
 listed.
 You'll meet: system generations, =--rollback=, the profiles directory.
+*** Scratch
+#+begin_src bash :dir /root :results output
+
+#+end_src
 *** Hint
 Every =nixos-rebuild switch= is a numbered generation. List them with
 =nix-env --list-generations -p /nix/var/nix/profiles/system=; undo the last with
@@ -3554,6 +4105,10 @@ nix-env --list-generations -p /nix/var/nix/profiles/system 2>/dev/null | tail -5
 Package your =search.sh= (from track 9) as a proper =corpus-search= binary using
 =writeShellScriptBin=, and add it to =systemPackages=.
 You'll meet: trivial builders — Nix wrapping a script into the PATH.
+*** Scratch
+#+begin_src nix :eval no
+
+#+end_src
 *** Hint
 In =configuration.nix=: =environment.systemPackages = [ (pkgs.writeShellScriptBin
 "corpus-search" '' grep -rinE "$1" /root/corpus '') ];= (merge with your existing
@@ -3574,6 +4129,10 @@ carries its own dependency, so it can't break when PATH changes.
 ** TODO E21.6 — Introspect your own flake
 From =~/nixlab=, show what your flake actually provides and how it's pinned.
 You'll meet: =nix flake show=, =nix flake metadata=, =flake.lock=.
+*** Scratch
+#+begin_src bash :dir /root :results output
+
+#+end_src
 *** Hint
 =nix flake show= lists outputs (your =nixosConfigurations.nixlab= and the
 devShells). =nix flake metadata= shows the locked inputs.
@@ -3604,6 +4163,10 @@ real Lisp buffer where =SPC l= and =SPC k= work.
 Compute =1/3 * 3=, =2^100=, and =22/7= as a decimal. Compare with what Python or
 awk give you.
 You'll meet: prefix notation, ratios, bignums, =float=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 Everything is =(function args...)=. Division of integers gives an exact
 /ratio/; integers grow as large as needed; =float= converts on request.
@@ -3622,6 +4185,10 @@ ask it to.
 ** TODO E22.2 — Count the lines of access.log
 Open the file, read it line by line, count. No shelling out.
 You'll meet: =with-open-file=, =read-line=, =loop=.
+*** Scratch
+#+begin_src lisp
+
+#+end_src
 *** Hint
 =with-open-file= opens and always closes. =(read-line stream nil)= returns
 =nil= at end of file instead of signalling an error. =loop= has clauses for
@@ -3638,6 +4205,10 @@ exactly this: =for line = ... while line count t=.
 Standard Common Lisp has no string-split. Write =split-on= so that
 =(split-on #\, "a,b,c")= returns =("a" "b" "c")=. Test it on the CSV header.
 You'll meet: =defun=, =position=, =subseq=, characters (=#\,=).
+*** Scratch
+#+begin_src lisp
+
+#+end_src
 *** Hint
 Find each comma with =(position char string :start start)=, take the =subseq=
 between commas, and continue after it. =position= returns =nil= when there are
@@ -3660,6 +4231,10 @@ Same question as E8.3, in Lisp. Print each department with its average to two
 decimals.
 You'll meet: hash tables, =gethash= / =incf=, =parse-integer=, =maphash=,
 =format= directives.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 Two hash tables with =:test #'equal= (string keys): totals and counts.
 =(incf (gethash key table 0) n)= adds to an entry that starts at 0. Skip the
@@ -3688,6 +4263,10 @@ the one that's right.
 ** TODO E22.5 — Tally HTTP status codes (track 8, again)
 Count each status code in access.log and print them most-frequent first.
 You'll meet: =search=, =parse-integer :junk-allowed=, alists, =sort :key=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 The status is the number right after the last =" = (quote-space) on each
 line. =(search "\" " line :from-end t)= finds it; =parse-integer= with
@@ -3716,6 +4295,10 @@ The top 10 words in sherlock.txt, lowercase, letters only — the same problem
 you solved in grep, awk, perl, python and elisp.
 You'll meet: reading a whole file, =alpha-char-p=, string output streams,
 =flet=, destructuring in =loop=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 Read the file into one string (=make-string= of =file-length=, then
 =read-sequence=). Walk it a character at a time: letters go into the current
@@ -3754,6 +4337,10 @@ Load employees.csv into a list of =employee= structs and print the top five by
 salary, with thousands separators.
 You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
 =copy-list=, =~:d=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 =(defstruct employee id first last dept salary hired)= gives you
 =make-employee= and accessors like =employee-salary= for free.
@@ -3788,6 +4375,10 @@ long it took, and still returns the body's value. Then look at what it expands
 into.
 You'll meet: =defmacro=, backquote/comma, =gensym=, =macroexpand-1=,
 =SPC l m=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 A macro returns /code/. Backquote builds a template, =,x= inserts a value,
 =,@body= splices a list of forms. Use =gensym= for the start-time variable so
@@ -3819,6 +4410,10 @@ Make a salary parser that survives bad input two ways: by catching the error,
 and by offering /restarts/ that the caller (or you, in the debugger) chooses.
 You'll meet: =handler-case=, =restart-case=, =handler-bind=,
 =invoke-restart=, the SLIME debugger.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 =handler-case= is try/catch: the stack unwinds to it. =restart-case= declares
 recovery options /at the point of the error/; =handler-bind= can pick one
@@ -3856,6 +4451,10 @@ Few languages can do that.
 Turn a Lisp function into (a) a script you run with =./=, and (b) a
 standalone executable that needs no SBCL installed.
 You'll meet: =sbcl --script=, =sb-ext:*posix-argv*=, =save-lisp-and-die=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data :results output
+
+#+end_src
 *** Hint
 A file starting with =#!/usr/bin/env -S sbcl --script= runs like any script.
 For a binary, load your code into a fresh SBCL and call
@@ -3913,6 +4512,10 @@ for debugging, stop inside =sum=, and find out where the absurd number comes
 from.
 You'll meet: =gcc -g=, =gdb ./prog=, =break=, =run=, =next=, =print=,
 =info args= / =info locals=, =print *ptr@len=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+
+#+end_src
 *** Hint
 =-g= adds line and variable information; =-O0= keeps the code close to the
 source. In gdb: =break sum=, =run=, then =next= (=n=) line by line and =print=
@@ -3934,6 +4537,10 @@ wrong. Use gdb to prove where the precision disappears, without adding a
 single =printf=.
 You'll meet: =watch=, =break FILE:LINE if COND=, =finish=, =display=,
 =continue=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+
+#+end_src
 *** Hint
 =watch total= stops every time =total= changes and shows old and new values.
 =break 6 if i == 4= stops only on the iteration you care about. =finish= runs
@@ -3954,6 +4561,10 @@ value leaving =sum=, which pins the bug to the one line after it.
 only the debugger.
 You'll meet: running until a signal, =bt= (backtrace), =frame N=, =up= /
 =down=, printing structs and pointers.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/c :results output
+
+#+end_src
 *** Hint
 Just =run= it under gdb — it stops at the faulting line. =bt= lists the call
 stack, innermost first. =frame 1= (or =up=) moves into the caller, where =i=
@@ -3999,6 +4610,10 @@ gdb's machine interface in Emacs); it just saves you from typing =print=.
 tickets out of 200. Find the bug by stopping on the /second/ call to =tally=.
 You'll meet: =python3 -m pdb=, =b LINE=, =c=, =s= vs =n=, =p=, =w=,
 =breakpoint()=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/py :results output
+
+#+end_src
 *** Hint
 =b 18= breaks on the line that makes the second call; =c= runs to it; =s=
 steps /into/ =tally=. What does =counts= hold the instant the function starts?
@@ -4017,6 +4632,10 @@ else counts=.
 prints, let it crash /inside/ the debugger and inspect the wreckage.
 You'll meet: =python3 -m pdb -c continue=, post-mortem mode, =w=, =u= / =d=,
 =pp=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/py :results output
+
+#+end_src
 *** Hint
 =-c continue= runs the script immediately; on an uncaught exception pdb stops
 right where it was raised, with every variable intact. Print the key that
@@ -4047,6 +4666,10 @@ plain pdb; the stops, steps and values are identical.
 common. Stop at the end of =topN= and prove which way the slice is sorted.
 You'll meet: =dlv debug=, =break FUNC= / =break FILE:LINE=, =continue=,
 =print=, =locals=, =stepout=.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/go :results output
+
+#+end_src
 *** Hint
 From the =debug/go= directory, =dlv debug= builds and starts the program
 paused. =break main.topN=, =continue=, then =break main.go:32= (the =return=)
@@ -4065,6 +4688,10 @@ sorts ascending. Fix: =out[i].n > out[j].n=.
 Stop inside the counting loop only when the word is "holmes", then look at the
 stack and every goroutine. Finally, debug the same program from Neovim.
 You'll meet: =cond=, =bt=, =goroutines=, nvim-dap-go.
+*** Scratch
+#+begin_src bash :dir /root/workbook-data/debug/go :results output
+
+#+end_src
 *** Hint
 =break main.go:25= then =cond 1 w == "holmes"= (1 is the breakpoint's
 number). Map lookups of missing keys are errors in Delve's =print=, so print
@@ -4085,6 +4712,10 @@ fails. Turn on the debugger for errors, trigger it again, and read the
 =*Backtrace*= buffer to find the bad value.
 You'll meet: =load-file=, =toggle-debug-on-error=, =M-:=, the =*Backtrace*=
 buffer, =e= and =q= in it.
+*** Scratch
+#+begin_src elisp :results value
+
+#+end_src
 *** Hint
 =SPC SPC load-file= the file. =SPC SPC toggle-debug-on-error=. Then =M-:=
 (=ESC := in a terminal) and evaluate the call. In =*Backtrace*= the top frame
@@ -4106,6 +4737,10 @@ one call. You'll find two more bugs: a wrong average for "eng", and a crash for
 "marketing".
 You'll meet: =C-u C-M-x= (=edebug-defun=), =SPC=, =n=, =i=, =o=, =b=, =g=,
 =e=, =q=.
+*** Scratch
+#+begin_src elisp :results value
+
+#+end_src
 *** Hint
 Put the cursor inside the =defun= and press =C-u C-M-x= (or
 =SPC SPC edebug-defun=). The next call stops at the start: =SPC= steps one
@@ -4162,6 +4797,10 @@ Watch =(fact 3)= compute step by step, then trace every call to =fact= for
 =(fact 5)=.
 You'll meet: =step=, the stepper keys =s= / =x= / =o= / =c=, =trace= /
 =untrace=.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
 *** Hint
 With =means.lisp= loaded, evaluate =(step (fact 3))= in the REPL: the debugger
 opens as a stepper. =s= steps into the next call, =x= steps over it, =o= steps
@@ -4202,6 +4841,10 @@ for fields, perl for regex-dense text, python for structure and reuse, elisp for
 living inside the editor, Lisp for growing a program interactively, and Nix for
 making any of it permanent.
 
+** Scratch
+#+begin_src bash :dir /root/corpus :results output
+
+#+end_src
 ** Hint — the shared shape
 Lowercase, split on non-letters, keep tokens with =length > 6=, count in a
 map/hash/array, rank descending, take five. Every language above expresses that

@@ -80,7 +80,12 @@ pkgs: with pkgs; [
   shadow
   sudo
   which
-  man-db
+  (man-db.overrideAttrs (o: {
+    postPatch = (o.postPatch or "") + ''
+      echo "MANPATH_MAP /nix/var/nix/profiles/nixlab/bin /nix/var/nix/profiles/nixlab/share/man" >> src/man_db.conf.in
+      echo "MANDB_MAP /nix/var/nix/profiles/nixlab/share/man /var/cache/man/nixlab" >> src/man_db.conf.in
+    '';
+  }))
 
   # files, archives, and text
   findutils

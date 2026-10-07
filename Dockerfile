@@ -34,7 +34,7 @@ RUN for f in /etc/passwd /etc/group /etc/shadow /etc/gshadow /etc/sudoers /etc/p
     chmod 440 /etc/sudoers && \
     printf 'Port 22\nHostKey /etc/ssh/ssh_host_ed25519_key\nPermitRootLogin yes\nPasswordAuthentication yes\nKbdInteractiveAuthentication no\nUsePAM no\nAllowTcpForwarding yes\nX11Forwarding no\nPrintMotd no\nSubsystem sftp internal-sftp\n' > /etc/ssh/sshd_config && \
     printf 'local_events = yes\nwrite_logs = yes\nlog_file = /var/log/audit/audit.log\nlog_format = ENRICHED\nflush = INCREMENTAL_ASYNC\nfreq = 50\nmax_log_file = 8\nnum_logs = 5\nmax_log_file_action = ROTATE\nspace_left = 75\nspace_left_action = SYSLOG\nadmin_space_left = 50\nadmin_space_left_action = SUSPEND\ndisk_full_action = SUSPEND\ndisk_error_action = SUSPEND\n' > /etc/audit/auditd.conf && \
-    { mandb -q 2>/dev/null || true; }
+    mkdir -p /var/cache/man/nixlab && mandb -q && apropos -l compress | head -3
 RUN setpriv --reuid=alice --regid=alice --init-groups /usr/local/bin/sudo -n id -un 2>&1 | sed 's/^/sudo check (expect root): /' || true
 
 # home skeleton

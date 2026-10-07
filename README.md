@@ -12,7 +12,8 @@ seconds, work offline, and can be thrown away and recreated whenever you like.
 ## Goals
 
 - **Learn by doing.** The workbook is a set of tasks against real data, not a
-  textbook. Every exercise has a folded hint and a runnable solution.
+  textbook. Most exercises have a scratch block for your attempt, and every one
+  has a folded hint and a runnable solution.
 - **Zero setup.** Everything a lab needs is baked into the image: tools, data,
   editor configs, editor packages, language servers. Nothing downloads when a
   lab starts.
@@ -72,7 +73,8 @@ teaches you enough of both editors to do everything else.
 ## The workbook
 
 `workbook.org` is an Org file of 193 exercises. Code blocks run in place
-(`SPC c c` in Emacs), and every exercise has a folded hint and solution.
+(`SPC c c` in Emacs). Most exercises have a scratch block to try your own
+answer in, then a folded hint and solution.
 
 | Track | Topic |
 |---|---|
