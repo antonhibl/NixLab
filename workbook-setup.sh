@@ -4,7 +4,7 @@ d=/root/workbook-data
 [ -d /root/corpus ] || bash /opt/nixlab/provision-corpus.sh /root/corpus
 reset=
 [ "${1:-}" = --reset ] && reset=1
-datasets="$d/debug $d/shell /srv/lab/perms $d/procs $d/toolbox $d/git $d/archive $d/sql"
+datasets="$d/debug $d/shell /srv/lab/perms $d/procs $d/toolbox $d/git $d/archive $d/sql $d/net/mkroute.sh /opt/scenario/.provisioned /opt/binexp/.provisioned"
 complete=1
 for x in $datasets; do [ -e "$x" ] || complete=; done
 if [ -z "$reset" ] && [ -e "$d/.provisioned" ] && [ -n "$complete" ]; then
@@ -441,6 +441,229 @@ mkdir -p "$Q"
 printf 'dept,manager,floor\neng,Grace,3\nfinance,Katherine,2\nops,Linus,1\nresearch,Ada,4\nsales,Radia,1\nsupport,Ken,2\n' > "$Q/depts.csv"
 }
 
+net_files() {
+mkdir -p "$d/net"
+cat > "$d/net/mknet.sh" <<'SH'
+#!/usr/bin/env bash
+www=/root/workbook-data/net/www
+if [ "${1:-}" = --reset ]; then
+    ip netns pids server 2>/dev/null | xargs -r kill 2>/dev/null
+    ip netns del server 2>/dev/null
+    ip link del lab0 2>/dev/null
+    sleep 0.3
+fi
+if ip netns pids server 2>/dev/null | grep -q . && ip link show lab0 >/dev/null 2>&1; then
+    exit 0
+fi
+ip netns pids server 2>/dev/null | xargs -r kill 2>/dev/null
+ip netns del server 2>/dev/null
+ip link del lab0 2>/dev/null
+mkdir -p "$www"
+[ -s "$www/blob.bin" ] || head -c 2000000 /dev/urandom > "$www/blob.bin"
+[ -s "$www/index.html" ] || echo '<h1>hello from the server namespace</h1>' > "$www/index.html"
+ip netns add server
+ip link add lab0 type veth peer name srv0
+ip link set srv0 netns server
+ip addr add 10.10.0.1/24 dev lab0
+ip link set lab0 up
+ip -n server addr add 10.10.0.2/24 dev srv0
+ip -n server link set srv0 up
+ip -n server link set lo up
+ip netns exec server setsid -f python3 -m http.server 8000 --directory "$www" >/dev/null 2>&1
+ip netns exec server setsid -f socat TCP-LISTEN:9000,fork,reuseaddr EXEC:cat >/dev/null 2>&1
+ip netns exec server setsid -f "$(command -v sshd)" -f /etc/ssh/sshd_config -o PidFile=none >/dev/null 2>&1
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    ip netns exec server ss -tln | grep -q ':8000 ' && break
+    sleep 0.2
+done
+SH
+chmod +x "$d/net/mknet.sh"
+cat > "$d/net/mkroute.sh" <<'SH'
+#!/usr/bin/env bash
+nss="client router web mallory"
+www=/root/workbook-data/net/www
+down() {
+    for n in $nss; do
+        ip netns pids "$n" 2>/dev/null | xargs -r kill 2>/dev/null
+        ip netns del "$n" 2>/dev/null
+    done
+    sleep 0.3
+}
+[ "${1:-}" = --reset ] && down
+ok=1
+for n in $nss; do ip netns pids "$n" >/dev/null 2>&1 || ok=; done
+ip netns exec web ss -tln 2>/dev/null | grep -q ':8000 ' || ok=
+[ -n "$ok" ] && exit 0
+down
+mkdir -p "$www"
+[ -s "$www/index.html" ] || echo '<h1>hello from the server namespace</h1>' > "$www/index.html"
+for n in $nss; do
+    ip netns add "$n"
+    ip -n "$n" link set lo up
+done
+ip -n router link add br0 type bridge
+ip -n router link set br0 up
+ip -n router addr add 10.1.0.1/24 dev br0
+for pair in client:10.1.0.2 mallory:10.1.0.66; do
+    n=${pair%%:*}
+    ip link add "$n-eth0" netns "$n" type veth peer name "to-$n" netns router
+    ip -n "$n" link set "$n-eth0" name eth0
+    ip -n "$n" addr add "${pair#*:}/24" dev eth0
+    ip -n "$n" link set eth0 up
+    ip -n router link set "to-$n" master br0 up
+    ip -n "$n" route add default via 10.1.0.1
+done
+ip link add web-eth0 netns web type veth peer name to-web netns router
+ip -n web link set web-eth0 name eth0
+ip -n web addr add 10.2.0.2/24 dev eth0
+ip -n web addr add 10.2.0.3/24 dev eth0
+ip -n web link set eth0 up
+ip -n web route add default via 10.2.0.1
+ip -n router addr add 10.2.0.1/24 dev to-web
+ip -n router link set to-web up
+ip netns exec router sysctl -qw net.ipv4.ip_forward=1
+ip netns exec web setsid -f python3 -m http.server 8000 --directory "$www" >/dev/null 2>&1
+ip netns exec web setsid -f socat -u UDP-RECV:514,bind=10.2.0.3 OPEN:/root/workbook-data/net/syslog.txt,creat,append >/dev/null 2>&1
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    ip netns exec web ss -tln | grep -q ':8000 ' && break
+    sleep 0.2
+done
+SH
+chmod +x "$d/net/mkroute.sh"
+}
+
+sec_files() {
+S=/opt/scenario
+rm -rf "$S"; mkdir -p "$S/bin" "$S/jobs" "$S/backups" "$S/.quiet"
+chmod 755 /opt "$S" "$S/bin"
+
+# --- hole 1: bob may run a "maintenance tool" as root; it is really perl -----
+grep -q '^@includedir /etc/sudoers.d' /etc/sudoers 2>/dev/null || \
+  printf '\n@includedir /etc/sudoers.d\n' >> /etc/sudoers
+mkdir -p /etc/sudoers.d
+ln -sf "$(command -v perl)" "$S/bin/dbmaint"
+printf 'bob ALL=(root) NOPASSWD: /opt/scenario/bin/dbmaint\n' > /etc/sudoers.d/90-scenario
+chmod 440 /etc/sudoers.d/90-scenario
+
+# --- hole 2: a setuid-root helper that trusts PATH and copies argv in -----
+cat > "$S/bin/syscheck.c" <<'EOF'
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+void banner(char *name){ char b[64]; strcpy(b, name); printf("checking %s\n", b); }
+int main(int argc, char **argv){
+    setuid(0); setgid(0);
+    if (argc > 1) banner(argv[1]);
+    system("uptime; free -h | head -2");          /* uptime/free by name: PATH is trusted */
+    return 0;
+}
+EOF
+cc_opts="-w -fno-stack-protector -no-pie -z execstack -g"
+if command -v gcc >/dev/null; then gcc $cc_opts "$S/bin/syscheck.c" -o "$S/bin/syscheck"
+else cc $cc_opts "$S/bin/syscheck.c" -o "$S/bin/syscheck"; fi
+chown root:root "$S/bin/syscheck"; chmod 4755 "$S/bin/syscheck"
+chmod 600 "$S/bin/syscheck.c"
+
+# --- memory-safety target for E25.12/E25.13 (source world-readable) --------
+cat > "$S/bin/echoback.c" <<'EOF'
+#include <stdio.h>
+#include <string.h>
+static void vuln(const char *s){ char buf[64]; strcpy(buf, s); }
+int main(int argc, char **argv){ if (argc > 1) vuln(argv[1]); puts("done"); return 0; }
+EOF
+gcc -w -fno-stack-protector -no-pie -z execstack -g "$S/bin/echoback.c" -o "$S/bin/echoback" 2>/dev/null   || cc -w -g "$S/bin/echoback.c" -o "$S/bin/echoback"
+chmod 755 "$S/bin/echoback" "$S/bin/echoback.c"
+
+# --- hole 3: a capability on a file-reading helper ------------------------
+cp "$(command -v cat)" "$S/bin/readlog"
+setcap cap_dac_read_search+ep "$S/bin/readlog" 2>/dev/null
+
+# --- hole 4: a world-writable "cron" job that root runs -------------------
+cat > "$S/jobs/collect.sh" <<'EOF'
+#!/bin/sh
+# pretend-cron: runs as root every few minutes to collect stats
+date >> /opt/scenario/backups/stats.log
+EOF
+chmod 777 "$S/jobs/collect.sh"
+
+# --- hole 5: secrets left at rest -----------------------------------------
+cat > "$S/backups/db-backup.sql" <<'EOF'
+-- nightly dump
+CREATE USER 'svc'@'%' IDENTIFIED BY 'Pr0d-DB-pw!2026';
+EOF
+chmod 644 "$S/backups/db-backup.sql"
+touch "$S/.provisioned"
+}
+
+binexp_files() {
+B=/opt/binexp
+rm -rf "$B"; mkdir -p "$B/bin"; chmod 755 /opt "$B" "$B/bin"
+echo 'FLAG{lab-only-practice-flag}' > "$B/flag.txt"; chmod 644 "$B/flag.txt"
+V="-w -fno-stack-protector -no-pie -fcf-protection=none -g"
+cat > "$B/bin/ret2win.c" <<'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+void win(void){ puts("WIN: you redirected control to win()"); fflush(stdout); }
+void vuln(void){ char buf[64]; puts("name?"); fflush(stdout); gets(buf); }
+int main(void){ setbuf(stdout,0); vuln(); puts("normal return"); return 0; }
+EOF
+gcc $V "$B/bin/ret2win.c" -o "$B/bin/ret2win" 2>/dev/null
+cat > "$B/bin/leak.c" <<'EOF'
+#include <stdio.h>
+#include <string.h>
+void vuln(void){
+  char buf[64];
+  printf("echo> "); fflush(stdout);
+  read(0, buf, 200);
+  printf("you said: %s\n", buf);
+  fflush(stdout);
+}
+int main(void){ setbuf(stdout,0); vuln(); return 0; }
+EOF
+gcc -w -fstack-protector-all -no-pie -fcf-protection=none -g "$B/bin/leak.c" -o "$B/bin/leak" 2>/dev/null
+cat > "$B/bin/oobw.c" <<'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+void win(void){ puts("WIN: out-of-bounds write flipped the guard"); fflush(stdout); }
+int main(void){
+  long table[8]; long guard = 0;
+  long idx, val;
+  setbuf(stdout,0);
+  puts("idx val?");
+  if (scanf("%ld %ld", &idx, &val)!=2) return 1;
+  table[idx] = val;
+  if (guard == 0xc0ffee) win();
+  else puts("guard intact");
+  return 0;
+}
+EOF
+gcc $V "$B/bin/oobw.c" -o "$B/bin/oobw" 2>/dev/null
+cat > "$B/bin/ropme.c" <<'EOF'
+#include <stdio.h>
+#include <stdlib.h>
+__asm__(".global useful_gadgets\n useful_gadgets:\n pop %rdi\n ret\n pop %rsi\n pop %rdx\n ret\n");
+void print_flag(long key){
+  if (key != 0xc0ffee){ puts("wrong key"); return; }
+  FILE *f=fopen("/opt/binexp/flag.txt","r"); char b[64];
+  if(f){ fgets(b,64,f); printf("FLAG: %s", b); fclose(f); }
+  fflush(stdout);
+}
+void vuln(void){ char buf[64]; read(0,buf,256); }
+int main(void){ setbuf(stdout,0); vuln(); return 0; }
+EOF
+gcc $V "$B/bin/ropme.c" -o "$B/bin/ropme" 2>/dev/null
+cat > "$B/bin/aslr.c" <<'EOF'
+#include <stdio.h>
+__asm__(".global useful_gadgets\n useful_gadgets:\n pop %rdi\n ret\n pop %rsi\n pop %rdx\n ret\n");
+void vuln(void){ char buf[64]; read(0,buf,256); }
+int main(void){ setbuf(stdout,0); puts("go"); vuln(); return 0; }
+EOF
+gcc $V "$B/bin/aslr.c" -o "$B/bin/aslr" 2>/dev/null
+chmod 755 "$B/bin"/* 2>/dev/null
+touch "$B/.provisioned"
+}
+
 want() { [ -n "$reset" ] || [ ! -e "$1" ]; }
 
 if [ -n "$reset" ] || [ ! -e "$d/.provisioned" ]; then
@@ -600,6 +823,9 @@ want "$d/toolbox" && toolbox_files
 want "$d/git" && git_files
 want "$d/archive" && archive_files
 want "$d/sql" && sql_files
+want "$d/net/mkroute.sh" && net_files
+want /opt/scenario/.provisioned && sec_files
+want /opt/binexp/.provisioned && binexp_files
 
 touch "$d/.provisioned"
 echo "corpus:"; ls -1 /root/corpus

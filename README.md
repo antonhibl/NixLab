@@ -72,7 +72,7 @@ teaches you enough of both editors to do everything else.
 
 ## The workbook
 
-`workbook.org` is an Org file of 193 exercises. Code blocks run in place
+`workbook.org` is an Org file of 246 exercises. Code blocks run in place
 (`SPC c c` in Emacs). Most exercises have a scratch block to try your own
 answer in, then a folded hint and solution.
 
@@ -87,21 +87,24 @@ answer in, then a folded hint and solution.
 | 6 | grep & egrep |
 | 7 | sed |
 | 8 | awk |
-| 9 | bash scripting |
+| 9 | bash scripting: tests, case, loops, arrays, mapfile, parameter expansion, getopts, shellcheck |
 | 10 | Git: branches, merge vs rebase, blame, stash, reflog, bisect, remotes |
 | 11 | Archives & integrity: tar, gzip, xz, zstd, zip, sha256sum |
 | 12 | Networking & SSH: ip, dig, curl, ss, nc, SSH keys, tunnels, rsync, tcpdump |
-| 13 | The modern command line: fzf, ripgrep, fd, bat, eza, zoxide, yazi, lazygit |
-| 14 | Observability & performance: time, free, df, du, vmstat, iostat, hyperfine, perf |
-| 15 | Auditing with auditd: auditctl, file watches, syscall rules, ausearch, aureport |
-| 16 | SQLite: importing CSV and logs, GROUP BY, JOIN, indexes, JSON, Python |
-| 17 | perl |
-| 18 | python |
-| 19 | C: warnings, valgrind, sanitizers, make, cmake, clangd |
-| 20 | Emacs & Elisp |
-| 21 | Nix |
-| 22 | Common Lisp |
-| 23 | Debuggers: gdb, pdb, Delve, Edebug, the SLIME debugger |
+| 13 | Firewalls, routing & traffic control: network namespaces, nftables, iptables, NAT, ip route and route, route hijacking and its detection, rp_filter, tc, netem |
+| 14 | The modern command line: fzf, ripgrep, fd, bat, eza, zoxide, yazi, lazygit |
+| 15 | Observability & performance: time, free, df, du, vmstat, iostat, hyperfine, perf |
+| 16 | Auditing with auditd: auditctl, file watches, syscall rules, ausearch, aureport |
+| 17 | SQLite: importing CSV and logs, GROUP BY, JOIN, indexes, JSON, Python |
+| 18 | perl |
+| 19 | python |
+| 20 | C: warnings, valgrind, sanitizers, make, cmake, clangd |
+| 21 | Emacs & Elisp |
+| 22 | Nix |
+| 23 | Common Lisp |
+| 24 | Debuggers: gdb, pdb, Delve, Edebug, the SLIME debugger |
+| 25 | Offence & defence: enumeration, sudo/setuid/capability abuse, PATH hijack, persistence, baselines, auditd, memory-safety & mitigations |
+| 26 | Binary exploitation & defense: stack overflows, out-of-bounds read/write, NX, ROP, ret2libc & ASLR leaks, the mitigation stack, SBCL FFI — scripted with pwntools |
 | Capstone | One question answered with every tool |
 
 Practice data lives in `/root/corpus` (books, CSV, logs, JSON). Exercise inputs
@@ -139,13 +142,15 @@ Settings, as environment variables:
 fd, fzf, bat, eza, zoxide, jq, SQLite, git, lazygit, yazi, tmux, Python 3.13,
 Perl, Go, C (gcc, clang tools, make, cmake, gdb, valgrind), SBCL. System tools:
 strace, ltrace, lsof, htop, sysstat, perf, hyperfine, auditd, and networking
-with OpenSSH, iproute2, dig, curl, netcat, socat, rsync and tcpdump. The full
-list is in `toolchain.nix`.
+with OpenSSH, iproute2 (including tc), dig, curl, netcat, socat, rsync,
+tcpdump, nftables, iptables and net-tools (route, arp, netstat). For the
+binary-exploitation track: pwntools, ROPgadget, checksec. The full list is in
+`toolchain.nix`.
 
 **Users and services:** you work as `root`. Two ordinary users, `alice` (in
 `wheel`, may use `sudo`) and `bob`, exist for the permissions track. Every lab
 runs an SSH server, so two labs can log in to each other for the networking
-track. `auditd` is configured but not started until track 15 asks for it.
+track. `auditd` is configured but not started until track 16 asks for it.
 
 **Capabilities:** labs are created with `--cap-add ALL`, which `strace`,
 `perf`, `auditctl`, `tcpdump` and setuid programs need. That's safe here

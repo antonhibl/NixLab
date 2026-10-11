@@ -26,7 +26,7 @@ pkgs: with pkgs; [
   valgrind
   binutils
   # Python
-  (python313.withPackages (ps: with ps; [ ipython requests debugpy ]))
+  (python313.withPackages (ps: with ps; [ ipython requests debugpy pwntools ropgadget pyyaml ]))
   # Go
   go
   gopls
@@ -112,6 +112,9 @@ pkgs: with pkgs; [
   curl
   rsync
   tcpdump
+  iptables
+  nftables
+  nettools
 
   # common helpers
   jq
