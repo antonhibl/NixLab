@@ -95,8 +95,11 @@
   (global-set-key [remap describe-command]  #'helpful-command))
 (use-package company
   :config
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 2)
+  (setq company-idle-delay 0.3
+        company-minimum-prefix-length 3
+        company-tooltip-align-annotations t
+        company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+                            company-echo-metadata-frontend))
   (global-company-mode 1))
 (use-package bash-completion :config (bash-completion-setup))
 ;;;; Language modes
